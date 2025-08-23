@@ -4,3 +4,11 @@ export interface IResponse<T> {
   message: string;
   data: T;
 }
+
+export type {
+  ILogin,
+  IRegisterData,
+  IRegister,
+  ISendOTP,
+  IVerifyOTP,
+} from "./auth.type";
