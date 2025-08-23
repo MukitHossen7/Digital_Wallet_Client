@@ -7,6 +7,7 @@ import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import UnAuthorized from "@/pages/UnAuthorized";
+import Verify from "@/pages/Verify";
 import { createBrowserRouter } from "react-router";
 
 const router = createBrowserRouter([
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
   {
     path: "/register",
     Component: Register,
+  },
+  {
+    path: "/verify",
+    Component: Verify,
   },
   {
     path: "/unauthorized",

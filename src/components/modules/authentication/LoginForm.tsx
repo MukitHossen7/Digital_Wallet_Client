@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import loginImg from "../../../assets/images/login.jpg";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   Form,
   FormControl,
@@ -18,6 +19,7 @@ import Password from "@/components/ui/Password";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useLoginMutation } from "@/redux/features/auth/auth.api";
 
 const loginSchema = z.object({
   email: z.email(),
@@ -29,6 +31,8 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [login] = useLoginMutation();
+  const navigate = useNavigate();
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -37,16 +41,30 @@ export function LoginForm({
     },
   });
 
-  const handleSubmit = (data: z.infer<typeof loginSchema>) => {
+  const handleSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
+      const toastId = toast.loading("Logging in, please wait...");
       const loginData = {
         email: data.email,
-        Password: data.password,
+        password: data.password,
       };
-      console.log(loginData);
-    } catch (error) {
+      // console.log(loginData);
+      const res = await login(loginData).unwrap();
+      if (res.success) {
+        toast.success("Login Successfully", { id: toastId });
+        navigate("/");
+      }
+    } catch (error: any) {
       console.error(error);
-      toast.error("Invalid credentials");
+      if (error.data.message === "Password is incorrect") {
+        toast.error("Invalid credentials");
+        return;
+      }
+
+      if (error.data.message === "Your account is not Verified") {
+        toast.error("Your account is not Verified");
+        navigate("/verify", { state: data.email });
+      }
     }
   };
   return (
