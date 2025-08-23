@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import registerImg from "../../../assets/images/registration.webp";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   Form,
   FormControl,
@@ -25,6 +26,8 @@ import {
 import { role } from "@/constants/role";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
+import { toast } from "sonner";
+import { useRegisterMutation } from "@/redux/features/auth/auth.api";
 
 const registerSchema = z
   .object({
@@ -51,6 +54,8 @@ export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [register] = useRegisterMutation();
+  const navigate = useNavigate();
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -61,14 +66,25 @@ export function RegisterForm({
       role: undefined,
     },
   });
-  const handleSubmit = (data: z.infer<typeof registerSchema>) => {
-    const userInfo = {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      role: data.role,
-    };
-    console.log(userInfo);
+  const handleSubmit = async (data: z.infer<typeof registerSchema>) => {
+    try {
+      const toastId = toast.loading("Creating your account...");
+      const userInfo = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        role: data.role,
+      };
+      const res = await register(userInfo).unwrap();
+      if (res.success) {
+        toast.success("Your registration was successful", { id: toastId });
+        navigate("/login");
+      }
+      console.log(userInfo);
+    } catch (error: any) {
+      toast.error(error?.data.message);
+      console.error(error);
+    }
   };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>

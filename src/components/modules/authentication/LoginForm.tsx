@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import Password from "@/components/ui/Password";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
 const loginSchema = z.object({
   email: z.email(),
@@ -37,11 +38,16 @@ export function LoginForm({
   });
 
   const handleSubmit = (data: z.infer<typeof loginSchema>) => {
-    const loginData = {
-      email: data.email,
-      Password: data.password,
-    };
-    console.log(loginData);
+    try {
+      const loginData = {
+        email: data.email,
+        Password: data.password,
+      };
+      console.log(loginData);
+    } catch (error) {
+      console.error(error);
+      toast.error("Invalid credentials");
+    }
   };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
