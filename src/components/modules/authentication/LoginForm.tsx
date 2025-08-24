@@ -42,29 +42,37 @@ export function LoginForm({
   });
 
   const handleSubmit = async (data: z.infer<typeof loginSchema>) => {
+    let toastId: string | number | undefined;
     try {
-      const toastId = toast.loading("Logging in, please wait...");
       const loginData = {
         email: data.email,
         password: data.password,
       };
-      // console.log(loginData);
+      toastId = toast.loading("Logging in, please wait...");
       const res = await login(loginData).unwrap();
       if (res.success) {
         toast.success("Login Successfully", { id: toastId });
         navigate("/");
       }
     } catch (error: any) {
-      console.error(error);
-      if (error.data.message === "Password is incorrect") {
+      const message = error?.data?.message || "Something went wrong";
+      if (toastId) {
+        toast.error(message, { id: toastId });
+      } else {
+        toast.error(message);
+      }
+
+      if (message === "Password is incorrect") {
         toast.error("Invalid credentials");
         return;
       }
 
-      if (error.data.message === "Your account is not Verified") {
+      if (message === "Your account is not Verified") {
         toast.error("Your account is not Verified");
         navigate("/verify", { state: data.email });
       }
+
+      console.error(error);
     }
   };
   return (

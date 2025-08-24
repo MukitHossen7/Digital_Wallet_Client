@@ -67,14 +67,15 @@ export function RegisterForm({
     },
   });
   const handleSubmit = async (data: z.infer<typeof registerSchema>) => {
+    let toastId: string | number | undefined;
     try {
-      const toastId = toast.loading("Creating your account...");
       const userInfo = {
         name: data.name,
         email: data.email,
         password: data.password,
         role: data.role,
       };
+      toastId = toast.loading("Creating your account...");
       const res = await register(userInfo).unwrap();
       if (res.success) {
         toast.success("Your registration was successful", { id: toastId });
@@ -82,7 +83,13 @@ export function RegisterForm({
       }
       console.log(userInfo);
     } catch (error: any) {
-      toast.error(error?.data.message);
+      if (toastId) {
+        toast.error(error?.data?.message || "Something went wrong", {
+          id: toastId,
+        });
+      } else {
+        toast.error(error?.data?.message || "Something went wrong");
+      }
       console.error(error);
     }
   };
