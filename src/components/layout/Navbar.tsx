@@ -45,7 +45,7 @@ export default function Navbar() {
   const handleLogOut = async () => {
     let toastId: string | number | undefined;
     try {
-      toastId = toast.loading("Logging out, please wait...");
+      toastId = toast.loading("Logged out, please wait...");
       const result = await logOut(null).unwrap();
       if (result.success) {
         toast.success("Logged out successfully", { id: toastId });
@@ -109,6 +109,12 @@ export default function Navbar() {
                   {navigationLinks
                     .filter((link) => {
                       if (link.role === "PUBLIC") return true;
+                      if (
+                        userData?.data?.role &&
+                        link.role === userData?.data?.role
+                      ) {
+                        return true;
+                      }
                     })
                     .map((link, index) => (
                       <NavigationMenuItem key={index} className="w-full">
@@ -132,6 +138,12 @@ export default function Navbar() {
                 {navigationLinks
                   .filter((link) => {
                     if (link.role === "PUBLIC") return true;
+                    if (
+                      userData?.data?.role &&
+                      link.role === userData?.data?.role
+                    ) {
+                      return true;
+                    }
                   })
                   .map((link, index) => (
                     <NavigationMenuItem key={index}>
@@ -149,7 +161,7 @@ export default function Navbar() {
         </div>
         {/* Right side */}
         <div className="flex items-center gap-2">
-          {userData?.data.email ? (
+          {userData?.data?.email ? (
             <Button
               className="text-sm"
               variant="outline"
