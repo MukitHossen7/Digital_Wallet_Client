@@ -1,14 +1,14 @@
-import { lazy } from "react";
-const DepositMoney = lazy(() => import("@/pages/user/DepositMoney"));
-const MyProfile = lazy(() => import("@/pages/user/MyProfile"));
-const Overview = lazy(() => import("@/pages/user/Overview"));
-// const SendMoney = lazy(() => import("@/pages/user/SendMoney"));
-const TransactionHistory = lazy(
-  () => import("@/pages/user/TransactionHistory")
-);
-// const WithdrawMoney = lazy(() => import("@/pages/user/WithdrawMoney"));
+import { GoHomeFill } from "react-icons/go";
+import { CiWallet } from "react-icons/ci";
+import { AiOutlineTransaction } from "react-icons/ai";
+import { CgProfile } from "react-icons/cg";
+import { ISidebarItem } from "@/types";
+import Overview from "@/pages/user/Overview";
+import DepositMoney from "@/pages/user/DepositMoney";
+import TransactionHistory from "@/pages/user/TransactionHistory";
+import MyProfile from "@/pages/user/MyProfile";
 
-export const userSidebarItems = [
+export const userSidebarItems: ISidebarItem[] = [
   {
     title: "User Dashboard",
     url: "#",
@@ -17,11 +17,13 @@ export const userSidebarItems = [
         title: "Overview",
         url: "/user/overview",
         component: Overview,
+        icon: GoHomeFill,
       },
       {
         title: "Wallet",
         url: "/user/wallet",
         component: DepositMoney,
+        icon: CiWallet,
       },
       // {
       //   title: "Withdraw Money",
@@ -34,14 +36,16 @@ export const userSidebarItems = [
       //   component: SendMoney,
       // },
       {
-        title: "History",
+        title: "Transaction",
         url: "/user/transactions-history",
         component: TransactionHistory,
+        icon: AiOutlineTransaction,
       },
       {
         title: "Profile",
         url: "/user/profile",
         component: MyProfile,
+        icon: CgProfile,
       },
     ],
   },

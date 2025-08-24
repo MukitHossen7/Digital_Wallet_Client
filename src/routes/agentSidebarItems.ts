@@ -1,14 +1,14 @@
-import { lazy } from "react";
+import { GoHomeFill } from "react-icons/go";
+import { CiWallet } from "react-icons/ci";
+import { AiOutlineTransaction } from "react-icons/ai";
+import { CgProfile } from "react-icons/cg";
 
-const AddMoney = lazy(() => import("@/pages/agent/AddMoney"));
-const MyProfile = lazy(() => import("@/pages/agent/MyProfile"));
-const Overview = lazy(() => import("@/pages/agent/Overview"));
-const TransactionsHistory = lazy(
-  () => import("@/pages/agent/TransactionsHistory")
-);
-const WithdrawMoney = lazy(() => import("@/pages/agent/WithdrawMoney"));
-
-export const agentSidebarItems = [
+import AddMoney from "@/pages/agent/AddMoney";
+import MyProfile from "@/pages/agent/MyProfile";
+import Overview from "@/pages/agent/Overview";
+import TransactionsHistory from "@/pages/agent/TransactionsHistory";
+import { ISidebarItem } from "@/types";
+export const agentSidebarItems: ISidebarItem[] = [
   {
     title: "Agent Dashboard",
     url: "#",
@@ -17,27 +17,31 @@ export const agentSidebarItems = [
         title: "Overview",
         url: "/agent/overview",
         component: Overview,
+        icon: GoHomeFill,
       },
       {
-        title: "Add Money",
+        title: "Wallet",
         url: "/agent/add-money",
         component: AddMoney,
+        icon: CiWallet,
       },
-      {
-        title: "Withdraw Money",
-        url: "/agent/withdraw",
-        component: WithdrawMoney,
-      },
+      // {
+      //   title: "Withdraw Money",
+      //   url: "/agent/withdraw",
+      //   component: WithdrawMoney,
+      // },
 
       {
-        title: "History",
+        title: "Transaction",
         url: "/agent/transactions-history",
         component: TransactionsHistory,
+        icon: AiOutlineTransaction,
       },
       {
-        title: "My Profile",
+        title: "Profile",
         url: "/agent/profile",
         component: MyProfile,
+        icon: CgProfile,
       },
     ],
   },

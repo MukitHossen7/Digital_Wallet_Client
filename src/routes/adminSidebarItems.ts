@@ -1,11 +1,14 @@
-import { lazy } from "react";
-const AllTransaction = lazy(() => import("@/pages/admin/AllTransaction"));
-const ManageAgents = lazy(() => import("@/pages/admin/ManageAgents"));
-const ManageUsers = lazy(() => import("@/pages/admin/ManageUsers"));
-const MyProfile = lazy(() => import("@/pages/admin/MyProfile"));
-const Overview = lazy(() => import("@/pages/admin/Overview"));
+import { GoHomeFill } from "react-icons/go";
+import { AiOutlineTransaction } from "react-icons/ai";
+import { CgProfile } from "react-icons/cg";
+import AllTransaction from "@/pages/admin/AllTransaction";
+import ManageAgents from "@/pages/admin/ManageAgents";
+import ManageUsers from "@/pages/admin/ManageUsers";
+import MyProfile from "@/pages/admin/MyProfile";
+import Overview from "@/pages/admin/Overview";
+import { ISidebarItem } from "@/types";
 
-export const adminSidebarItems = [
+export const adminSidebarItems: ISidebarItem[] = [
   {
     title: "Admin Dashboard",
     url: "#",
@@ -14,6 +17,7 @@ export const adminSidebarItems = [
         title: "Overview",
         url: "/admin/overview",
         component: Overview,
+        icon: GoHomeFill,
       },
       {
         title: "Manage Users",
@@ -26,14 +30,16 @@ export const adminSidebarItems = [
         component: ManageAgents,
       },
       {
-        title: "All Transactions",
+        title: "Transaction",
         url: "/admin/all-transactions",
         component: AllTransaction,
+        icon: AiOutlineTransaction,
       },
       {
-        title: "My Profile",
+        title: "Profile",
         url: "/admin/profile",
         component: MyProfile,
+        icon: CgProfile,
       },
     ],
   },

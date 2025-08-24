@@ -39,7 +39,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton className="" asChild>
-                      <Link to={item.url}>{item.title}</Link>
+                      <Link
+                        to={item.url}
+                        className="flex items-center gap-2  font-medium"
+                      >
+                        {"icon" in item && item.icon && <item.icon />}
+
+                        <span>{item.title}</span>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
