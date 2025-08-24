@@ -1,8 +1,9 @@
-import AllTransaction from "@/pages/admin/AllTransaction";
-import ManageAgents from "@/pages/admin/ManageAgents";
-import ManageUsers from "@/pages/admin/ManageUsers";
-import MyProfile from "@/pages/admin/MyProfile";
-import Overview from "@/pages/admin/Overview";
+import { lazy } from "react";
+const AllTransaction = lazy(() => import("@/pages/admin/AllTransaction"));
+const ManageAgents = lazy(() => import("@/pages/admin/ManageAgents"));
+const ManageUsers = lazy(() => import("@/pages/admin/ManageUsers"));
+const MyProfile = lazy(() => import("@/pages/admin/MyProfile"));
+const Overview = lazy(() => import("@/pages/admin/Overview"));
 
 export const adminSidebarItems = [
   {

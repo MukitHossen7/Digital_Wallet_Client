@@ -16,6 +16,8 @@ import { withAuth } from "@/utils/withAuth";
 import React from "react";
 import { createBrowserRouter, Navigate } from "react-router";
 import { adminSidebarItems } from "./adminSidebarItems";
+import { userSidebarItems } from "./userSidebarItems";
+import { agentSidebarItems } from "./agentSidebarItems";
 
 const router = createBrowserRouter([
   {
@@ -56,6 +58,34 @@ const router = createBrowserRouter([
         }),
       },
       ...generateRoutes(adminSidebarItems),
+    ],
+  },
+  {
+    path: "/user",
+    Component: withAuth(DashboardLayout, role.USER as TRole),
+    children: [
+      {
+        index: true,
+        element: React.createElement(Navigate, {
+          to: "/user/overview",
+          replace: true,
+        }),
+      },
+      ...generateRoutes(userSidebarItems),
+    ],
+  },
+  {
+    path: "/agent",
+    Component: withAuth(DashboardLayout, role.AGENT as TRole),
+    children: [
+      {
+        index: true,
+        element: React.createElement(Navigate, {
+          to: "/agent/overview",
+          replace: true,
+        }),
+      },
+      ...generateRoutes(agentSidebarItems),
     ],
   },
   {

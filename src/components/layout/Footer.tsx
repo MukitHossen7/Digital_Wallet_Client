@@ -1,8 +1,8 @@
 const Footer = () => {
   return (
     <div>
-      <footer className="px-4 divide-y dark:bg-gray-100 dark:text-gray-800">
-        <div className="container flex flex-col justify-between py-10 mx-auto space-y-8 lg:flex-row lg:space-y-0">
+      <footer className="divide-y dark:bg-gray-100 dark:text-gray-800 w-11/12 md:w-11/12 lg:w-11/12 xl:container mx-auto">
+        <div className="flex flex-col justify-between py-10 mx-auto space-y-8 lg:flex-row lg:space-y-0">
           <div className="lg:w-1/3">
             <a
               rel="noopener noreferrer"

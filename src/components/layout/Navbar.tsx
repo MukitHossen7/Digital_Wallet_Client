@@ -6,11 +6,12 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import { Link, useNavigate } from "react-router";
 
@@ -64,69 +65,57 @@ export default function Navbar() {
     }
   };
   return (
-    <header className="border-b md:px-10 w-11/12 md:w-11/12 lg:w-11/12 xl:container mx-auto">
-      <div className="flex h-16 items-center justify-between gap-4">
+    <header className="border-b w-11/12 md:w-11/12 lg:w-11/12 xl:container mx-auto">
+      <div className="flex h-16 items-center justify-between gap-4 ">
         {/* Left side */}
         <div className="flex items-center gap-2">
           {/* Mobile menu trigger */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                className="group size-8 md:hidden"
-                variant="ghost"
-                size="icon"
-              >
+          <Sheet>
+            {/* Hamburger button */}
+            <SheetTrigger asChild>
+              <Button className="md:hidden" variant="ghost" size="icon">
                 <svg
-                  className="pointer-events-none"
-                  width={16}
-                  height={16}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
                   xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
                   <path
-                    d="M4 12L20 12"
-                    className="origin-center -translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-x-0 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[315deg]"
-                  />
-                  <path
-                    d="M4 12H20"
-                    className="origin-center transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.8)] group-aria-expanded:rotate-45"
-                  />
-                  <path
-                    d="M4 12H20"
-                    className="origin-center translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[135deg]"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
                   />
                 </svg>
               </Button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-36 p-1 md:hidden">
-              <NavigationMenu className="max-w-none *:w-full">
-                <NavigationMenuList className="flex-col items-start gap-0 md:gap-2">
-                  {navigationLinks
-                    .filter((link) => {
-                      if (link.role === "PUBLIC") return true;
-                      if (
-                        userData?.data?.role &&
-                        link.role === userData?.data?.role
-                      ) {
-                        return true;
-                      }
-                    })
-                    .map((link, index) => (
-                      <NavigationMenuItem key={index} className="w-full">
-                        <NavigationMenuLink asChild className="py-1.5">
-                          <Link to={link?.href as string}>{link?.label}</Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    ))}
-                </NavigationMenuList>
-              </NavigationMenu>
-            </PopoverContent>
-          </Popover>
+            </SheetTrigger>
+
+            {/* Mobile menu drawer */}
+            <SheetContent side="left" className="p-6">
+              <div className="flex flex-col gap-3">
+                {navigationLinks
+                  .filter((link) => {
+                    if (link.role === "PUBLIC") return true;
+                    if (
+                      userData?.data?.role &&
+                      link.role === userData.data.role
+                    ) {
+                      return true;
+                    }
+                  })
+                  .map((link, index) => (
+                    <Link
+                      key={index}
+                      to={link.href}
+                      className="text-sm font-medium"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+              </div>
+            </SheetContent>
+          </Sheet>
           {/* Main nav */}
           <div className="flex items-center gap-6">
             <Link to="/" className="w-8 h-9">
