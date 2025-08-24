@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -11,10 +12,17 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 import { role } from "@/constants/role";
 import Logo from "@/assets/icons/Logo";
+import {
+  authApi,
+  useGetMeQuery,
+  useLogOutMutation,
+} from "@/redux/features/auth/auth.api";
+import { toast } from "sonner";
+import { useAppDispatch } from "@/redux/hook";
 
 // Navigation links array to be used in both desktop and mobile menus
 const navigationLinks = [
@@ -29,8 +37,34 @@ const navigationLinks = [
 ];
 
 export default function Navbar() {
+  const { data: userData } = useGetMeQuery(undefined);
+  const [logOut] = useLogOutMutation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const handleLogOut = async () => {
+    let toastId: string | number | undefined;
+    try {
+      toastId = toast.loading("Logging out, please wait...");
+      const result = await logOut(null).unwrap();
+      if (result.success) {
+        toast.success("Logged out successfully", { id: toastId });
+        dispatch(authApi.util.resetApiState());
+        navigate("/");
+      }
+    } catch (error: any) {
+      if (toastId) {
+        toast.error(error?.data?.message || "Something went wrong", {
+          id: toastId,
+        });
+      } else {
+        toast.error("Logout failed");
+      }
+      console.error("Logout failed:", error);
+    }
+  };
   return (
-    <header className="border-b px-4 md:px-10 w-11/12 md:w-11/12 lg:w-11/12 xl:container mx-auto">
+    <header className="border-b md:px-10 w-11/12 md:w-11/12 lg:w-11/12 xl:container mx-auto">
       <div className="flex h-16 items-center justify-between gap-4">
         {/* Left side */}
         <div className="flex items-center gap-2">
@@ -115,13 +149,19 @@ export default function Navbar() {
         </div>
         {/* Right side */}
         <div className="flex items-center gap-2">
-          <Button className="text-sm" variant="outline">
-            LogOut
-          </Button>
-
-          <Button asChild className="text-sm">
-            <Link to="/login">Sign In</Link>
-          </Button>
+          {userData?.data.email ? (
+            <Button
+              className="text-sm"
+              variant="outline"
+              onClick={handleLogOut}
+            >
+              LogOut
+            </Button>
+          ) : (
+            <Button asChild className="text-sm">
+              <Link to="/login">Sign In</Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>
