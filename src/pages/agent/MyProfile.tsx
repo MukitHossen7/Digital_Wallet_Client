@@ -184,7 +184,7 @@ const MOCK_AGENT = {
   avatarUrl: "",
 };
 
-export default function AgentProfilePage() {
+export default function AgentProfile() {
   const [loading, setLoading] = useState(true);
   const [agent, setAgent] = useState<typeof MOCK_AGENT | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);

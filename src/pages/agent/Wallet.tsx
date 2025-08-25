@@ -92,7 +92,7 @@ const MOCK_USERS = [
 ];
 
 // -------------------- Component --------------------
-export default function AgentCashInOutPage() {
+export default function AgentWallet() {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState(MOCK_USERS);
   const [selectedUser, setSelectedUser] = useState<

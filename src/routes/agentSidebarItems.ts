@@ -1,14 +1,13 @@
 import { GoHomeFill } from "react-icons/go";
 import { CiWallet } from "react-icons/ci";
-import { AiOutlineTransaction } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
-
-import MyProfile from "@/pages/agent/MyProfile";
-import Overview from "@/pages/agent/Overview";
-// import TransactionsHistory from "@/pages/agent/TransactionsHistory";
 import { ISidebarItem } from "@/types";
-import AgentCashInOutPage from "@/pages/agent/AddMoney";
 import TransactionsPage from "@/pages/agent/TransactionsHistory";
+import AgentOverview from "@/pages/agent/Overview";
+import AgentWallet from "@/pages/agent/Wallet";
+import AgentProfile from "@/pages/agent/MyProfile";
+import { ListFilter } from "lucide-react";
+
 export const agentSidebarItems: ISidebarItem[] = [
   {
     title: "Agent Dashboard",
@@ -17,31 +16,25 @@ export const agentSidebarItems: ISidebarItem[] = [
       {
         title: "Overview",
         url: "/agent/overview",
-        component: Overview,
+        component: AgentOverview,
         icon: GoHomeFill,
       },
       {
         title: "Wallet",
-        url: "/agent/add-money",
-        component: AgentCashInOutPage,
+        url: "/agent/wallet",
+        component: AgentWallet,
         icon: CiWallet,
       },
-      // {
-      //   title: "Withdraw Money",
-      //   url: "/agent/withdraw",
-      //   component: WithdrawMoney,
-      // },
-
       {
         title: "Transaction",
         url: "/agent/transactions-history",
         component: TransactionsPage,
-        icon: AiOutlineTransaction,
+        icon: ListFilter,
       },
       {
         title: "Profile",
         url: "/agent/profile",
-        component: MyProfile,
+        component: AgentProfile,
         icon: CgProfile,
       },
     ],

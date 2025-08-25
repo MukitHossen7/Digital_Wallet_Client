@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as React from "react";
+
 import { useEffect, useMemo, useState } from "react";
 import {
   Card,
@@ -32,6 +32,7 @@ import {
   Legend,
 } from "recharts";
 import { useTheme } from "next-themes";
+import StatCard from "@/components/modules/agent/overview/StatCard";
 
 // -------------------- Types --------------------
 type TxType = "deposit" | "withdraw" | "send";
@@ -116,7 +117,7 @@ const fmt = (n: number) => {
 const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
 
 // -------------------- Component --------------------
-export default function OverviewCashInOutPage() {
+export default function AgentOverview() {
   const [loading, setLoading] = useState(true);
   const [daily, setDaily] = useState(MOCK_DAILY);
   const [recent, setRecent] = useState<TxItem[]>([]);
@@ -147,12 +148,11 @@ export default function OverviewCashInOutPage() {
             <Wallet className="h-7 w-7 text-primary" /> Overview
           </h1>
           <p className="text-muted-foreground">
-            Cash-in / Cash-out summary & recent activity — বিকাশ অনুরূপ দ্রুত ও
-            পরিষ্কার দৃশ্য।
+            Cash-in / Cash-out summary & recent activity
           </p>
         </div>
         <Badge variant="secondary" className="rounded-xl">
-          Live
+          Active
         </Badge>
       </div>
 
@@ -302,58 +302,6 @@ export default function OverviewCashInOutPage() {
           </CardContent>
         </Card>
       </div>
-
-      <div className="text-sm text-muted-foreground">
-        Tip: Click any transaction to see details or export the activity report
-        from Reports.
-      </div>
     </div>
-  );
-}
-
-// -------------------- Subcomponents --------------------
-function StatCard({
-  title,
-  value,
-  icon,
-  hint,
-  color = "primary",
-  loading = false,
-}: {
-  title: string;
-  value: string | null;
-  icon: React.ReactNode;
-  hint?: string;
-  color?: "emerald" | "rose" | "primary";
-  loading?: boolean;
-}) {
-  const colors: Record<string, string> = {
-    emerald: "bg-emerald-50 text-emerald-700",
-    rose: "bg-rose-50 text-rose-700",
-    primary: "bg-primary/5 text-primary",
-  };
-  return (
-    <Card className="p-4">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <div
-              className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${colors[color]} shadow-sm`}
-            >
-              {icon}
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">{title}</div>
-              <div className="text-xl font-semibold mt-1">
-                {loading ? <Skeleton className="h-6 w-36" /> : value}
-              </div>
-            </div>
-          </div>
-          {hint && (
-            <div className="text-xs text-muted-foreground mt-2">{hint}</div>
-          )}
-        </div>
-      </div>
-    </Card>
   );
 }
