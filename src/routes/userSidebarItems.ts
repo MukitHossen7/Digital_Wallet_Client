@@ -6,7 +6,7 @@ import { ISidebarItem } from "@/types";
 import Overview from "@/pages/user/Overview";
 import TransactionHistory from "@/pages/user/TransactionHistory";
 import MyProfile from "@/pages/user/MyProfile";
-import WalletActionsPage from "@/pages/user/Wallet";
+import WalletPage from "@/pages/user/Wallet";
 
 export const userSidebarItems: ISidebarItem[] = [
   {
@@ -22,7 +22,7 @@ export const userSidebarItems: ISidebarItem[] = [
       {
         title: "Wallet",
         url: "/user/wallet",
-        component: WalletActionsPage,
+        component: WalletPage,
         icon: CiWallet,
       },
       // {

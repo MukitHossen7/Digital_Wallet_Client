@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,222 +23,54 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
-// shadcn toast hook
-import {
-  Wallet,
   ArrowDownToLine,
   ArrowUpFromLine,
   Send as SendIcon,
-  Info,
-  ShieldCheck,
   ReceiptText,
-  Sparkles,
-  CircleHelp,
 } from "lucide-react";
 import { toast } from "sonner";
-
-// -------------------- Utils --------------------
-const BDT = new Intl.NumberFormat("en-BD", {
-  style: "currency",
-  currency: "BDT",
-  maximumFractionDigits: 0,
-});
-
-function formatBDT(n: number) {
-  try {
-    return BDT.format(n);
-  } catch {
-    return `৳${Math.round(n).toLocaleString("en-BD")}`;
-  }
-}
-
-function clamp(n: number, min: number, max: number) {
-  return Math.min(Math.max(n, min), max);
-}
-
-function calcFee(amount: number, percent = 0.009, min = 10, max = 200) {
-  const fee = clamp(Math.round(amount * percent), min, max);
-  return { fee, totalDebit: amount + fee };
-}
+import WalletHeader from "@/components/modules/user/wallet/WalletHeader";
+import BalanceCard from "@/components/modules/user/wallet/BalanceCard";
+import QuickAmounts from "@/components/modules/user/wallet/QuickAmounts";
+import FeeSummary from "@/components/modules/user/wallet/FeeSummary";
+import { txType } from "@/constants/txType";
+import { calculateFee } from "@/utils/claculateFee";
 
 // -------------------- Validation --------------------
-const baseSchema = z.object({
-  amount: z
-    .number({ error: "Amount is required" })
-    .positive("Enter a positive amount")
-    .max(200000, "Maximum limit is ৳200,000"),
-  note: z.string().max(120, "Note is too long").optional().or(z.literal("")),
-});
 
-const depositSchema = baseSchema.extend({
-  method: z.enum(["agent", "bank", "card"], {
-    required_error: "Select a method",
+const depositSchema = z.object({
+  amount: z.number().min(50, { error: "Minimum amount 50" }),
+  type: z.enum(["ADD_MONEY", "WITHDRAW", "SEND_MONEY"], {
+    error: "Type is Required",
   }),
+  agentId: z.string().min(1, { error: "Agent Email is Required" }),
 });
 
-const withdrawSchema = baseSchema.extend({
-  method: z.enum(["agent", "bank"], { required_error: "Select a method" }),
-});
-
-const sendSchema = baseSchema.extend({
-  recipientType: z.enum(["phone", "email"], {
-    required_error: "Choose phone or email",
+const withdrawSchema = z.object({
+  amount: z.number().min(50, { error: "Minimum amount 50" }),
+  type: z.enum(["ADD_MONEY", "WITHDRAW", "SEND_MONEY"], {
+    error: "Type is Required",
   }),
-  recipient: z
-    .string({ error: "Recipient is required" })
-    .min(5, "Recipient is too short"),
+  agentId: z.string().min(1, { error: "Agent Email is Required" }),
 });
 
-// -------------------- Mock data (replace with RTK Query) --------------------
-const MOCK_CONTACTS = [
-  { name: "Ayesha Khan", phone: "01711-223344", email: "ayesha@example.com" },
-  { name: "Rahim Uddin", phone: "01822-556677", email: "rahim@inbox.com" },
-  { name: "Nusrat Jahan", phone: "01633-889900", email: "nusrat@mail.me" },
-  { name: "Sakib Hasan", phone: "01944-112233", email: "sakib@work.co" },
-];
+const sendSchema = z.object({
+  amount: z.number().min(50, { error: "Minimum amount 50" }),
+  type: z.enum(["ADD_MONEY", "WITHDRAW", "SEND_MONEY"], {
+    error: "Type is Required",
+  }),
+  email: z.email(),
+});
 
 // -------------------- Reusable UI --------------------
-function Header() {
-  return (
-    <div className="flex items-start justify-between gap-4">
-      <div className="space-y-2" data-tour="title">
-        <div className="inline-flex items-center gap-2 rounded-2xl bg-primary/10 px-3 py-1 text-sm">
-          <Sparkles className="h-4 w-4" />
-          <span>Fast • Secure • Reliable</span>
-        </div>
-        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight flex items-center gap-3">
-          <Wallet className="h-7 w-7 text-primary" /> Wallet Actions
-        </h1>
-        <p className="text-muted-foreground max-w-prose">
-          Deposit, Withdraw & Send — all in one place. Seamless like bKash,
-          crafted for speed and clarity.{" "}
-          <span className="font-medium">বাংলাতেও সহজ।</span>
-        </p>
-      </div>
-      <div className="hidden md:flex items-center gap-2">
-        <Badge variant="secondary" className="rounded-xl">
-          Live
-        </Badge>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-xl"
-                aria-label="Limits & fees"
-              >
-                <Info className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="left" className="max-w-xs">
-              <p className="text-sm">
-                Typical fee {"<"}1% (min ৳10, max ৳200). Real-time fraud checks
-                & encryption in transit.
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-    </div>
-  );
-}
-
-function BalanceTile({
-  balance,
-  loading,
-}: {
-  balance: number;
-  loading?: boolean;
-}) {
-  return (
-    <Card className="border-dashed" data-tour="balance">
-      <CardHeader className="pb-2">
-        <CardDescription>Current Balance</CardDescription>
-        <CardTitle className="text-3xl">
-          {loading ? (
-            <Skeleton className="h-9 w-40" />
-          ) : (
-            <span>{formatBDT(balance)}</span>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <ShieldCheck className="h-4 w-4" />
-          <span>Protected by device binding & OTP</span>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function QuickAmounts({ onPick }: { onPick: (n: number) => void }) {
-  const presets = [500, 1000, 2000, 5000, 10000];
-  return (
-    <div className="flex flex-wrap gap-2" data-tour="quick-amounts">
-      {presets.map((p) => (
-        <Button
-          key={p}
-          type="button"
-          variant="secondary"
-          className="rounded-xl"
-          onClick={() => onPick(p)}
-        >
-          {formatBDT(p)}
-        </Button>
-      ))}
-    </div>
-  );
-}
-
-function FeeSummary({ amount, balance }: { amount: number; balance: number }) {
-  const { fee, totalDebit } = useMemo(() => calcFee(amount), [amount]);
-  const canAfford = totalDebit <= balance;
-  return (
-    <div className="space-y-2 text-sm" data-tour="fee-summary">
-      <div className="flex justify-between">
-        <span>Amount</span>
-        <span>{formatBDT(amount || 0)}</span>
-      </div>
-      <div className="flex justify-between">
-        <span>Fee</span>
-        <span>{formatBDT(amount ? fee : 0)}</span>
-      </div>
-      <Separator />
-      <div className="flex justify-between font-medium">
-        <span>Total</span>
-        <span>{formatBDT(amount ? totalDebit : 0)}</span>
-      </div>
-      <div className="flex justify-between text-muted-foreground">
-        <span>New balance</span>
-        <span>{formatBDT(amount ? balance - totalDebit : balance)}</span>
-      </div>
-      {!canAfford && amount > 0 && (
-        <p className="text-destructive text-xs">
-          Insufficient balance for this amount including fee.
-        </p>
-      )}
-    </div>
-  );
-}
 
 function FieldHint({ children }: { children: React.ReactNode }) {
   return <p className="text-xs text-muted-foreground mt-1">{children}</p>;
 }
 
 // -------------------- Main Component --------------------
-export default function WalletActionsPage() {
+export default function WalletPage() {
   // Simulate fetching balance
   const [loading, setLoading] = useState(true);
   const [balance, setBalance] = useState(12500);
@@ -249,15 +82,21 @@ export default function WalletActionsPage() {
   // ---- Deposit form ----
   const depositForm = useForm<z.infer<typeof depositSchema>>({
     resolver: zodResolver(depositSchema),
-    defaultValues: { amount: 0, method: "agent", note: "" },
-    mode: "onChange",
+    defaultValues: {
+      amount: 0,
+      agentId: "",
+      type: "ADD_MONEY",
+    },
   });
 
   // ---- Withdraw form ----
   const withdrawForm = useForm<z.infer<typeof withdrawSchema>>({
     resolver: zodResolver(withdrawSchema),
-    defaultValues: { amount: 0, method: "agent", note: "" },
-    mode: "onChange",
+    defaultValues: {
+      amount: 0,
+      agentId: "",
+      type: "WITHDRAW",
+    },
   });
 
   // ---- Send form ----
@@ -265,95 +104,58 @@ export default function WalletActionsPage() {
     resolver: zodResolver(sendSchema),
     defaultValues: {
       amount: 0,
-      recipient: "",
-      recipientType: "phone",
-      note: "",
+      email: "",
+      type: "SEND_MONEY",
     },
-    mode: "onChange",
   });
-
-  // Mock recipient search
-  const [suggestions, setSuggestions] = useState<typeof MOCK_CONTACTS>([]);
-  useEffect(() => {
-    const sub = sendForm.watch((values, { name }) => {
-      if (name === "recipient" || name === "recipientType") {
-        const q = values.recipient?.toLowerCase() || "";
-        if (q.length < 2) return setSuggestions([]);
-        const list = MOCK_CONTACTS.filter((c) =>
-          values.recipientType === "phone"
-            ? c.phone.replace(/[^0-9]/g, "").includes(q.replace(/[^0-9]/g, ""))
-            : c.email.toLowerCase().includes(q)
-        ).slice(0, 5);
-        setSuggestions(list);
-      }
-    });
-    return () => sub.unsubscribe();
-  }, [sendForm]);
 
   // ---- Handlers (replace with RTK Query mutations) ----
   async function onDeposit(values: z.infer<typeof depositSchema>) {
     // TODO: replace with rtk-query: const [deposit] = useDepositMutation(); await deposit(values)
     await new Promise((r) => setTimeout(r, 600));
+
     setBalance((b) => b + values.amount);
-    toast.success({
-      title: "Deposit successful",
-      description: `${formatBDT(values.amount)} added via ${values.method}.`,
-    });
-    depositForm.reset({ ...values, amount: 0, note: "" });
+    console.log(values);
+    toast.success("Deposit successfully");
+    depositForm.reset({ ...values, amount: 0 });
   }
 
   async function onWithdraw(values: z.infer<typeof withdrawSchema>) {
-    const { fee, totalDebit } = calcFee(values.amount);
-    if (totalDebit > balance) {
-      toast({
-        title: "Insufficient balance",
-        description: "Try a lower amount.",
-        variant: "destructive",
-      });
+    const { totalAmount } = calculateFee(values.amount, "WITHDRAW");
+    if (totalAmount > balance) {
+      toast.error("Insufficient balance");
       return;
     }
     await new Promise((r) => setTimeout(r, 600));
-    setBalance((b) => b - totalDebit);
-    toast({
-      title: "Withdraw requested",
-      description: `${formatBDT(values.amount)} to ${
-        values.method
-      } (fee ${formatBDT(fee)}).`,
-    });
-    withdrawForm.reset({ ...values, amount: 0, note: "" });
+    setBalance((b) => b - totalAmount);
+    toast.success("With draw successfully");
+    console.log(values);
+    withdrawForm.reset({ ...values, amount: 0 });
   }
 
   async function onSend(values: z.infer<typeof sendSchema>) {
-    const { fee, totalDebit } = calcFee(values.amount);
-    if (totalDebit > balance) {
-      toast({
-        title: "Insufficient balance",
-        description: "Try a lower amount.",
-        variant: "destructive",
-      });
+    const { totalAmount } = calculateFee(values.amount, "SEND_MONEY");
+    if (totalAmount > balance) {
+      toast.error("Insufficient balance");
       return;
     }
     await new Promise((r) => setTimeout(r, 600));
-    setBalance((b) => b - totalDebit);
-    toast({
-      title: "Money sent",
-      description: `${formatBDT(values.amount)} sent to ${values.recipient} (${
-        values.recipientType
-      }). Fee ${formatBDT(fee)}.`,
-    });
-    sendForm.reset({ ...values, amount: 0, note: "" });
+    setBalance((b) => b - totalAmount);
+    toast("Sent Money Successfully");
+    console.log(values);
+    sendForm.reset({ ...values, amount: 0 });
   }
 
   // -------------------- UI --------------------
   return (
     <div className="container mx-auto max-w-6xl px-3 md:px-6 py-6 md:py-8 space-y-6">
-      <Header />
+      <WalletHeader />
 
       <div
         className="grid grid-cols-1 md:grid-cols-3 gap-4"
         data-tour="overview"
       >
-        <BalanceTile balance={balance} loading={loading} />
+        <BalanceCard balance={balance} loading={loading} />
 
         <Card className="md:col-span-2">
           <CardHeader className="pb-2">
@@ -362,7 +164,6 @@ export default function WalletActionsPage() {
             </CardTitle>
             <CardDescription>
               Pick a preset, then finalize in the form below.{" "}
-              <span className="font-medium">রিচার্জ / উইথড্র / সেন্ড</span>
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -464,27 +265,30 @@ export default function WalletActionsPage() {
             <CardContent className="grid md:grid-cols-3 gap-6">
               <div className="md:col-span-2 space-y-4">
                 <div>
-                  <Label htmlFor="deposit-method">Method</Label>
+                  <Label htmlFor="deposit-method">Payment Type</Label>
                   <Select
                     onValueChange={(v) =>
-                      depositForm.setValue("method", v as any, {
+                      depositForm.setValue("type", v as any, {
                         shouldValidate: true,
                       })
                     }
-                    defaultValue={depositForm.getValues("method")}
+                    defaultValue={depositForm.getValues("type")}
                   >
-                    <SelectTrigger id="deposit-method" className="rounded-xl">
-                      <SelectValue placeholder="Select method" />
+                    <SelectTrigger
+                      id="deposit-method"
+                      className="rounded-md w-full"
+                    >
+                      <SelectValue placeholder="Select Payment Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="agent">Agent (Cash-in)</SelectItem>
-                      <SelectItem value="bank">Bank Transfer</SelectItem>
-                      <SelectItem value="card">Debit/Credit Card</SelectItem>
+                      <SelectItem value="ADD_MONEY">Deposit Money</SelectItem>
+                      <SelectItem value="WITHDRAW">Withdraw</SelectItem>
+                      <SelectItem value="SEND_MONEY">Send Money</SelectItem>
                     </SelectContent>
                   </Select>
-                  {depositForm.formState.errors.method && (
+                  {depositForm.formState.errors.type && (
                     <p className="text-destructive text-xs mt-1">
-                      {depositForm.formState.errors.method.message}
+                      {depositForm.formState.errors.type.message?.toString()}
                     </p>
                   )}
                 </div>
@@ -495,8 +299,8 @@ export default function WalletActionsPage() {
                     id="deposit-amount"
                     type="number"
                     inputMode="numeric"
-                    placeholder="e.g. 1000"
-                    className="rounded-xl"
+                    placeholder="e.g. 50"
+                    className="rounded-md w-full"
                     value={depositForm.watch("amount") || ""}
                     onChange={(e) =>
                       depositForm.setValue(
@@ -517,16 +321,32 @@ export default function WalletActionsPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="deposit-note">
-                    Note{" "}
-                    <span className="text-muted-foreground">(optional)</span>
-                  </Label>
-                  <Input
-                    id="deposit-note"
-                    placeholder="Reference e.g. Cash-in from agent #1234"
-                    className="rounded-xl"
-                    {...depositForm.register("note")}
-                  />
+                  <Label htmlFor="deposit-method">Agent Email</Label>
+                  <Select
+                    onValueChange={(v) =>
+                      depositForm.setValue("agentId", v as any, {
+                        shouldValidate: true,
+                      })
+                    }
+                    defaultValue={depositForm.getValues("agentId")}
+                  >
+                    <SelectTrigger
+                      id="deposit-method"
+                      className="rounded-md w-full"
+                    >
+                      <SelectValue placeholder="Select Agent Email" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">mukit@gmil.com</SelectItem>
+                      <SelectItem value="2">mim@gmil.com</SelectItem>
+                      <SelectItem value="3">mou@gmil.com</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {depositForm.formState.errors.agentId && (
+                    <p className="text-destructive text-xs mt-1">
+                      {depositForm.formState.errors.agentId.message?.toString()}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -540,18 +360,10 @@ export default function WalletActionsPage() {
                     <FeeSummary
                       amount={depositForm.watch("amount") || 0}
                       balance={balance}
+                      type={txType.ADD_MONEY as "ADD_MONEY"}
                     />
                   </CardContent>
                 </Card>
-
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertTitle>Tip</AlertTitle>
-                  <AlertDescription>
-                    Agent cash-in may require a confirmation code. Keep your
-                    phone nearby.
-                  </AlertDescription>
-                </Alert>
               </div>
             </CardContent>
             <CardFooter className="flex items-center gap-2 justify-end">
@@ -588,26 +400,30 @@ export default function WalletActionsPage() {
             <CardContent className="grid md:grid-cols-3 gap-6">
               <div className="md:col-span-2 space-y-4">
                 <div>
-                  <Label htmlFor="withdraw-method">Method</Label>
+                  <Label htmlFor="deposit-method">Payment Type</Label>
                   <Select
                     onValueChange={(v) =>
-                      withdrawForm.setValue("method", v as any, {
+                      withdrawForm.setValue("type", v as any, {
                         shouldValidate: true,
                       })
                     }
-                    defaultValue={withdrawForm.getValues("method")}
+                    defaultValue={withdrawForm.getValues("type")}
                   >
-                    <SelectTrigger id="withdraw-method" className="rounded-xl">
-                      <SelectValue placeholder="Select method" />
+                    <SelectTrigger
+                      id="deposit-method"
+                      className="rounded-md w-full"
+                    >
+                      <SelectValue placeholder="Select Payment Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="agent">Agent Cash-out</SelectItem>
-                      <SelectItem value="bank">Bank Transfer</SelectItem>
+                      <SelectItem value="ADD_MONEY">Deposit Money</SelectItem>
+                      <SelectItem value="WITHDRAW">Withdraw</SelectItem>
+                      <SelectItem value="SEND_MONEY">Send Money</SelectItem>
                     </SelectContent>
                   </Select>
-                  {withdrawForm.formState.errors.method && (
+                  {withdrawForm.formState.errors.type && (
                     <p className="text-destructive text-xs mt-1">
-                      {withdrawForm.formState.errors.method.message}
+                      {withdrawForm.formState.errors.type.message?.toString()}
                     </p>
                   )}
                 </div>
@@ -618,7 +434,7 @@ export default function WalletActionsPage() {
                     id="withdraw-amount"
                     type="number"
                     inputMode="numeric"
-                    placeholder="e.g. 5000"
+                    placeholder="e.g. 50"
                     className="rounded-xl"
                     value={withdrawForm.watch("amount") || ""}
                     onChange={(e) =>
@@ -640,16 +456,32 @@ export default function WalletActionsPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="withdraw-note">
-                    Note{" "}
-                    <span className="text-muted-foreground">(optional)</span>
-                  </Label>
-                  <Input
-                    id="withdraw-note"
-                    placeholder="Purpose or reference"
-                    className="rounded-xl"
-                    {...withdrawForm.register("note")}
-                  />
+                  <Label htmlFor="deposit-method">Agent Email</Label>
+                  <Select
+                    onValueChange={(v) =>
+                      withdrawForm.setValue("agentId", v as any, {
+                        shouldValidate: true,
+                      })
+                    }
+                    defaultValue={withdrawForm.getValues("agentId")}
+                  >
+                    <SelectTrigger
+                      id="deposit-method"
+                      className="rounded-md w-full"
+                    >
+                      <SelectValue placeholder="Select Agent Email" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">mukit@gmil.com</SelectItem>
+                      <SelectItem value="2">mim@gmil.com</SelectItem>
+                      <SelectItem value="3">mou@gmil.com</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {withdrawForm.formState.errors.agentId && (
+                    <p className="text-destructive text-xs mt-1">
+                      {withdrawForm.formState.errors.agentId.message?.toString()}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -663,18 +495,10 @@ export default function WalletActionsPage() {
                     <FeeSummary
                       amount={withdrawForm.watch("amount") || 0}
                       balance={balance}
+                      type={txType.WITHDRAW as "WITHDRAW"}
                     />
                   </CardContent>
                 </Card>
-
-                <Alert>
-                  <CircleHelp className="h-4 w-4" />
-                  <AlertTitle>Heads up</AlertTitle>
-                  <AlertDescription>
-                    Daily cash-out limit applies. NID verification may be
-                    required.
-                  </AlertDescription>
-                </Alert>
               </div>
             </CardContent>
             <CardFooter className="flex items-center gap-2 justify-end">
@@ -709,79 +533,33 @@ export default function WalletActionsPage() {
             </CardHeader>
             <CardContent className="grid md:grid-cols-3 gap-6">
               <div className="md:col-span-2 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="md:col-span-1">
-                    <Label>Send via</Label>
-                    <Select
-                      defaultValue={sendForm.getValues("recipientType")}
-                      onValueChange={(v) =>
-                        sendForm.setValue("recipientType", v as any, {
-                          shouldValidate: true,
-                        })
-                      }
+                <div>
+                  <Label htmlFor="deposit-method">Payment Type</Label>
+                  <Select
+                    onValueChange={(v) =>
+                      sendForm.setValue("type", v as any, {
+                        shouldValidate: true,
+                      })
+                    }
+                    defaultValue={sendForm.getValues("type")}
+                  >
+                    <SelectTrigger
+                      id="deposit-method"
+                      className="rounded-md w-full"
                     >
-                      <SelectTrigger className="rounded-xl">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="phone">Phone</SelectItem>
-                        <SelectItem value="email">Email</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="send-recipient">
-                      Recipient{" "}
-                      {sendForm.watch("recipientType") === "phone"
-                        ? "(Phone)"
-                        : "(Email)"}
-                    </Label>
-                    <Input
-                      id="send-recipient"
-                      placeholder={
-                        sendForm.watch("recipientType") === "phone"
-                          ? "e.g. 017XXXXXXXX"
-                          : "e.g. user@mail.com"
-                      }
-                      className="rounded-xl"
-                      {...sendForm.register("recipient")}
-                    />
-                    {sendForm.formState.errors.recipient && (
-                      <p className="text-destructive text-xs mt-1">
-                        {sendForm.formState.errors.recipient.message}
-                      </p>
-                    )}
-                    {suggestions.length > 0 && (
-                      <div className="mt-2 rounded-xl border p-2 text-sm divide-y">
-                        {suggestions.map((c) => (
-                          <button
-                            type="button"
-                            key={c.email}
-                            className="flex w-full items-center justify-between gap-3 p-2 hover:bg-muted/60 rounded-lg"
-                            onClick={() =>
-                              sendForm.setValue(
-                                "recipient",
-                                sendForm.getValues("recipientType") === "phone"
-                                  ? c.phone
-                                  : c.email,
-                                { shouldValidate: true }
-                              )
-                            }
-                          >
-                            <span className="font-medium">{c.name}</span>
-                            <span className="text-muted-foreground">
-                              {sendForm.getValues("recipientType") === "phone"
-                                ? c.phone
-                                : c.email}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    <FieldHint>
-                      Type at least 2 characters to search recent contacts.
-                    </FieldHint>
-                  </div>
+                      <SelectValue placeholder="Select Payment Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ADD_MONEY">Deposit Money</SelectItem>
+                      <SelectItem value="WITHDRAW">Withdraw</SelectItem>
+                      <SelectItem value="SEND_MONEY">Send Money</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {sendForm.formState.errors.type && (
+                    <p className="text-destructive text-xs mt-1">
+                      {sendForm.formState.errors.type.message?.toString()}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -791,7 +569,7 @@ export default function WalletActionsPage() {
                     type="number"
                     inputMode="numeric"
                     placeholder="e.g. 750"
-                    className="rounded-xl"
+                    className="rounded-md"
                     value={sendForm.watch("amount") || ""}
                     onChange={(e) =>
                       sendForm.setValue("amount", Number(e.target.value || 0), {
@@ -807,16 +585,25 @@ export default function WalletActionsPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="send-note">
-                    Note{" "}
-                    <span className="text-muted-foreground">(optional)</span>
-                  </Label>
+                  <Label htmlFor="send-email">Receiver Email</Label>
                   <Input
-                    id="send-note"
-                    placeholder="Reason, invoice or memo"
-                    className="rounded-xl"
-                    {...sendForm.register("note")}
+                    id="send-email"
+                    type="email"
+                    inputMode="email"
+                    placeholder="jon@gmail.com"
+                    className="rounded-md"
+                    value={sendForm.watch("email") || ""}
+                    onChange={(e) =>
+                      sendForm.setValue("email", e.target.value || "", {
+                        shouldValidate: true,
+                      })
+                    }
                   />
+                  {sendForm.formState.errors.email && (
+                    <p className="text-destructive text-xs mt-1">
+                      {sendForm.formState.errors.email.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -830,17 +617,10 @@ export default function WalletActionsPage() {
                     <FeeSummary
                       amount={sendForm.watch("amount") || 0}
                       balance={balance}
+                      type={txType.SEND_MONEY as "SEND_MONEY"}
                     />
                   </CardContent>
                 </Card>
-
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertTitle>Recipient name will be shown</AlertTitle>
-                  <AlertDescription>
-                    Double-check the number/email before confirming.
-                  </AlertDescription>
-                </Alert>
               </div>
             </CardContent>
             <CardFooter className="flex items-center gap-2 justify-end">
