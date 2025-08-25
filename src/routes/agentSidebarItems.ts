@@ -3,11 +3,11 @@ import { CiWallet } from "react-icons/ci";
 import { AiOutlineTransaction } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
 
-import AddMoney from "@/pages/agent/AddMoney";
 import MyProfile from "@/pages/agent/MyProfile";
 import Overview from "@/pages/agent/Overview";
 import TransactionsHistory from "@/pages/agent/TransactionsHistory";
 import { ISidebarItem } from "@/types";
+import AgentCashInOutPage from "@/pages/agent/AddMoney";
 export const agentSidebarItems: ISidebarItem[] = [
   {
     title: "Agent Dashboard",
@@ -22,7 +22,7 @@ export const agentSidebarItems: ISidebarItem[] = [
       {
         title: "Wallet",
         url: "/agent/add-money",
-        component: AddMoney,
+        component: AgentCashInOutPage,
         icon: CiWallet,
       },
       // {
