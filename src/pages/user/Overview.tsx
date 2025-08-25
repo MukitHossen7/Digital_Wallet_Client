@@ -180,7 +180,7 @@ export default function Overview() {
   );
 
   function goAction(tab: "deposit" | "withdraw" | "send") {
-    navigate(`/dashboard/wallet/actions?tab=${tab}`);
+    navigate(`/user/wallet/?tab=${tab}`);
   }
 
   return (
@@ -271,7 +271,7 @@ export default function Overview() {
             </div>
             <div className="flex items-center gap-2">
               <Info className="h-4 w-4" />
-              <span>Daily cash-out limit applies based on KYC.</span>
+              <span>Keep your credentials secure</span>
             </div>
           </CardContent>
         </Card>
