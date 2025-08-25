@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -40,14 +39,14 @@ import {
   Info,
   TrendingUp,
   ShieldCheck,
-  CheckCircle2,
-  Timer,
-  XCircle,
 } from "lucide-react";
+import ActionCard from "@/components/modules/user/overview/ActionCard";
+import StatusBadge from "@/components/modules/user/overview/StatusBadge";
+import EmptyState from "@/components/modules/user/overview/EmptyState";
 
 // -------------------- Types --------------------
-export type TxType = "deposit" | "withdraw" | "send";
-export type TxStatus = "success" | "pending" | "failed";
+export type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
+export type TxStatus = "COMPLETED" | "PENDING" | "FAILED" | "REVERSED";
 
 export interface RecentTx {
   id: string;
@@ -90,30 +89,21 @@ const typeMeta: Record<
   TxType,
   { label: string; color: string; icon: React.ReactNode }
 > = {
-  deposit: {
+  ADD_MONEY: {
     label: "Deposit",
     color: "text-emerald-600",
     icon: <ArrowDownToLine className="h-4 w-4" />,
   },
-  withdraw: {
+  WITHDRAW: {
     label: "Withdraw",
     color: "text-rose-600",
     icon: <ArrowUpFromLine className="h-4 w-4" />,
   },
-  send: {
+  SEND_MONEY: {
     label: "Send Money",
     color: "text-blue-600",
     icon: <Send className="h-4 w-4" />,
   },
-};
-
-const statusMeta: Record<
-  TxStatus,
-  { label: string; variant: "default" | "secondary" | "destructive" }
-> = {
-  success: { label: "Success", variant: "default" },
-  pending: { label: "Pending", variant: "secondary" },
-  failed: { label: "Failed", variant: "destructive" },
 };
 
 // -------------------- Mock (replace with RTK Query) --------------------
@@ -122,57 +112,55 @@ const MOCK: OverviewData = {
   recent: [
     {
       id: "tx_1001",
-      type: "deposit",
+      type: "ADD_MONEY",
       title: "Deposit from Agent #1033",
       counterparty: "Agent 1033",
       amount: 2500,
-      status: "success",
+      status: "COMPLETED",
       createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2h ago
     },
     {
       id: "tx_1002",
-      type: "withdraw",
+      type: "WITHDRAW",
       title: "Cash-out to Agent #204",
       counterparty: "Agent 204",
       amount: -1000,
-      status: "pending",
+      status: "PENDING",
       createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5h ago
     },
     {
       id: "tx_1003",
-      type: "send",
+      type: "SEND_MONEY",
       title: "Send to Ayesha Khan",
       counterparty: "+8801711223344",
       amount: -1500,
-      status: "success",
+      status: "COMPLETED",
       createdAt: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(), // 1d ago
     },
     {
       id: "tx_1004",
-      type: "send",
+      type: "SEND_MONEY",
       title: "Send to Rahim Uddin",
       counterparty: "rahim@inbox.com",
       amount: -750,
-      status: "failed",
+      status: "FAILED",
       createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3d ago
     },
     {
       id: "tx_1005",
-      type: "deposit",
+      type: "ADD_MONEY",
       title: "Deposit from Bank",
       counterparty: "DBBL",
       amount: 5000,
-      status: "success",
+      status: "COMPLETED",
       createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), // 6d ago
     },
   ],
 };
 
 // -------------------- Component --------------------
-export default function WalletOverviewPage() {
+export default function Overview() {
   const navigate = useNavigate();
-
-  // Simulate loading while integrating later with RTK Query
   const [loading, setLoading] = useState(true);
   const [hidden, setHidden] = useState(false);
   const [data, setData] = useState<OverviewData | null>(null);
@@ -204,7 +192,7 @@ export default function WalletOverviewPage() {
             <Wallet className="h-7 w-7 text-primary" /> Wallet Overview
           </h1>
           <p className="text-muted-foreground">
-            A fast, secure wallet experience — বিকাশের মতো সহজ।
+            A fast, secure wallet experience
           </p>
         </div>
         <Badge variant="secondary" className="rounded-xl">
@@ -415,84 +403,5 @@ export default function WalletOverviewPage() {
         )}
       </section>
     </div>
-  );
-}
-
-// -------------------- Sub-components --------------------
-function ActionCard({
-  title,
-  description,
-  icon,
-  onClick,
-}: {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  onClick?: () => void;
-}) {
-  return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={(e) => e.key === "Enter" && onClick?.()}
-      className="transition-all hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary/50 rounded-2xl"
-    >
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            {icon}
-          </span>
-          {title}
-        </CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-    </Card>
-  );
-}
-
-function StatusBadge({ status }: { status: TxStatus }) {
-  const meta = statusMeta[status];
-  return (
-    <Badge variant={meta.variant} className="gap-1 rounded-xl">
-      {status === "success" && <CheckCircle2 className="h-3.5 w-3.5" />}
-      {status === "pending" && <Timer className="h-3.5 w-3.5" />}
-      {status === "failed" && <XCircle className="h-3.5 w-3.5" />}
-      {meta.label}
-    </Badge>
-  );
-}
-
-function EmptyState() {
-  return (
-    <Card className="bg-muted/40">
-      <CardHeader>
-        <CardTitle className="text-base">No recent transactions</CardTitle>
-        <CardDescription>
-          Start by depositing money or sending to a contact.
-        </CardDescription>
-      </CardHeader>
-      <CardFooter>
-        <div className="flex gap-2">
-          <Button
-            className="rounded-xl"
-            onClick={() =>
-              location.assign("/dashboard/wallet/actions?tab=deposit")
-            }
-          >
-            Deposit
-          </Button>
-          <Button
-            variant="outline"
-            className="rounded-xl"
-            onClick={() =>
-              location.assign("/dashboard/wallet/actions?tab=send")
-            }
-          >
-            Send Money
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
   );
 }

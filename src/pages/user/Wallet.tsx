@@ -36,6 +36,7 @@ import QuickAmounts from "@/components/modules/user/wallet/QuickAmounts";
 import FeeSummary from "@/components/modules/user/wallet/FeeSummary";
 import { txType } from "@/constants/txType";
 import { calculateFee } from "@/utils/claculateFee";
+import { useSearchParams } from "react-router";
 
 // -------------------- Validation --------------------
 
@@ -71,7 +72,9 @@ function FieldHint({ children }: { children: React.ReactNode }) {
 
 // -------------------- Main Component --------------------
 export default function WalletPage() {
-  // Simulate fetching balance
+  const [searchParams] = useSearchParams();
+  const tabFromQuery = searchParams.get("tab") || "deposit";
+  const [activeTab, setActiveTab] = useState(tabFromQuery);
   const [loading, setLoading] = useState(true);
   const [balance, setBalance] = useState(12500);
   useEffect(() => {
@@ -79,6 +82,9 @@ export default function WalletPage() {
     return () => clearTimeout(t);
   }, []);
 
+  useEffect(() => {
+    setActiveTab(tabFromQuery);
+  }, [tabFromQuery]);
   // ---- Deposit form ----
   const depositForm = useForm<z.infer<typeof depositSchema>>({
     resolver: zodResolver(depositSchema),
@@ -196,7 +202,12 @@ export default function WalletPage() {
         </Card>
       </div>
 
-      <Tabs defaultValue="deposit" className="w-full" data-tour="tabs">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full"
+        data-tour="tabs"
+      >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger
             value="deposit"
@@ -369,16 +380,12 @@ export default function WalletPage() {
             <CardFooter className="flex items-center gap-2 justify-end">
               <Button
                 variant="outline"
-                className="rounded-xl"
                 type="button"
                 onClick={() => depositForm.reset()}
               >
                 Reset
               </Button>
-              <Button
-                className="rounded-xl"
-                onClick={depositForm.handleSubmit(onDeposit)}
-              >
+              <Button onClick={depositForm.handleSubmit(onDeposit)}>
                 Deposit Now
               </Button>
             </CardFooter>
@@ -504,16 +511,12 @@ export default function WalletPage() {
             <CardFooter className="flex items-center gap-2 justify-end">
               <Button
                 variant="outline"
-                className="rounded-xl"
                 type="button"
                 onClick={() => withdrawForm.reset()}
               >
                 Reset
               </Button>
-              <Button
-                className="rounded-xl"
-                onClick={withdrawForm.handleSubmit(onWithdraw)}
-              >
+              <Button onClick={withdrawForm.handleSubmit(onWithdraw)}>
                 Withdraw
               </Button>
             </CardFooter>
@@ -626,16 +629,12 @@ export default function WalletPage() {
             <CardFooter className="flex items-center gap-2 justify-end">
               <Button
                 variant="outline"
-                className="rounded-xl"
                 type="button"
                 onClick={() => sendForm.reset()}
               >
                 Reset
               </Button>
-              <Button
-                className="rounded-xl"
-                onClick={sendForm.handleSubmit(onSend)}
-              >
+              <Button onClick={sendForm.handleSubmit(onSend)}>
                 Send Money
               </Button>
             </CardFooter>
