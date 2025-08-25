@@ -3,3 +3,10 @@ export const txType = {
   WITHDRAW: "WITHDRAW",
   SEND_MONEY: "SEND_MONEY",
 };
+
+export const TxStatus = {
+  PENDING: "PENDING",
+  COMPLETED: "COMPLETED",
+  FAILED: "FAILED",
+  REVERSED: "REVERSED",
+};

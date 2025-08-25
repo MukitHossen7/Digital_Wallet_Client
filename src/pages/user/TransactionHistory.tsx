@@ -40,14 +40,13 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  CheckCircle2,
-  Timer,
-  XCircle,
 } from "lucide-react";
+import EmptyState from "@/components/modules/user/transaction/EmptyState";
+import StatusBadge from "@/components/modules/user/transaction/StatusBadge";
 
 // -------------------- Types --------------------
-export type TxType = "deposit" | "withdraw" | "send";
-export type TxStatus = "success" | "pending" | "failed";
+export type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
+export type TxStatus = "COMPLETED" | "PENDING" | "FAILED";
 export interface TxItem {
   id: string;
   type: TxType;
@@ -75,56 +74,47 @@ const typeMeta: Record<
   TxType,
   { label: string; color: string; icon: React.ReactNode }
 > = {
-  deposit: {
+  ADD_MONEY: {
     label: "Deposit",
     color: "text-emerald-600",
     icon: <ArrowDownToLine className="h-4 w-4" />,
   },
-  withdraw: {
+  WITHDRAW: {
     label: "Withdraw",
     color: "text-rose-600",
     icon: <ArrowUpFromLine className="h-4 w-4" />,
   },
-  send: {
+  SEND_MONEY: {
     label: "Send Money",
     color: "text-blue-600",
     icon: <Send className="h-4 w-4" />,
   },
 };
 
-const statusMeta: Record<
-  TxStatus,
-  { label: string; variant: "default" | "secondary" | "destructive" }
-> = {
-  success: { label: "Success", variant: "default" },
-  pending: { label: "Pending", variant: "secondary" },
-  failed: { label: "Failed", variant: "destructive" },
-};
-
 // -------------------- Mock data (replace with RTK Query later) --------------------
 const MOCK_TX: TxItem[] = Array.from({ length: 58 }).map((_, i) => {
   const now = Date.now();
   const dayOffset = Math.floor(Math.random() * 60);
-  const type: TxType = (["deposit", "withdraw", "send"] as TxType[])[
+  const type: TxType = (["ADD_MONEY", "WITHDRAW", "SEND_MONEY"] as TxType[])[
     Math.floor(Math.random() * 3)
   ];
-  const status: TxStatus = (["success", "pending", "failed"] as TxStatus[])[
+  const status: TxStatus = (["COMPLETED", "PENDING", "FAILED"] as TxStatus[])[
     Math.floor(Math.random() * 3)
   ];
-  const base = type === "deposit" ? 1000 : 500;
-  const sign = type === "deposit" ? 1 : -1;
+  const base = type === "ADD_MONEY" ? 1000 : 500;
+  const sign = type === "ADD_MONEY" ? 1 : -1;
   const amount = sign * (base + Math.floor(Math.random() * 4500));
   return {
     id: `TX-${1000 + i}`,
     type,
     title:
-      type === "deposit"
+      type === "ADD_MONEY"
         ? "Deposit from Agent"
-        : type === "withdraw"
+        : type === "WITHDRAW"
         ? "Cash-out to Agent"
         : "Send to Contact",
     counterparty:
-      type === "send"
+      type === "SEND_MONEY"
         ? ["+8801711****44", "ayesha@example.com", "rahim@inbox.com"][i % 3]
         : `Agent #${100 + (i % 50)}`,
     amount,
@@ -195,7 +185,7 @@ export default function TransactionHistory() {
             <ListFilter className="h-7 w-7 text-primary" /> Transaction History
           </h1>
           <p className="text-muted-foreground">
-            Filter by type & date range. Built for speed, বিকাশের মতো সহজ।
+            Filter by type & date range. Built for speed
           </p>
         </div>
         <Badge variant="secondary" className="rounded-xl">
@@ -221,7 +211,7 @@ export default function TransactionHistory() {
                 defaultValue={type}
                 onValueChange={(v) => setType(v as any)}
               >
-                <SelectTrigger className="rounded-xl mt-1">
+                <SelectTrigger className="rounded-md mt-1 w-full">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
@@ -242,7 +232,7 @@ export default function TransactionHistory() {
                   type="date"
                   value={from}
                   onChange={(e) => setFrom(e.target.value)}
-                  className="pl-9 rounded-xl"
+                  className="pl-9 rounded-md w-full"
                 />
               </div>
             </div>
@@ -256,7 +246,7 @@ export default function TransactionHistory() {
                   type="date"
                   value={to}
                   onChange={(e) => setTo(e.target.value)}
-                  className="pl-9 rounded-xl"
+                  className="pl-9 rounded-md w-full"
                 />
               </div>
             </div>
@@ -265,7 +255,7 @@ export default function TransactionHistory() {
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
-              className="rounded-xl"
+              className=""
               onClick={() => {
                 setType("all");
                 setFrom("");
@@ -442,31 +432,5 @@ export default function TransactionHistory() {
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-// -------------------- Sub-components --------------------
-function StatusBadge({ status }: { status: TxStatus }) {
-  const meta = statusMeta[status];
-  return (
-    <Badge variant={meta.variant} className="gap-1 rounded-xl">
-      {status === "success" && <CheckCircle2 className="h-3.5 w-3.5" />}
-      {status === "pending" && <Timer className="h-3.5 w-3.5" />}
-      {status === "failed" && <XCircle className="h-3.5 w-3.5" />}
-      {meta.label}
-    </Badge>
-  );
-}
-
-function EmptyState() {
-  return (
-    <Card className="bg-muted/40">
-      <CardHeader>
-        <CardTitle className="text-base">No transactions found</CardTitle>
-        <CardDescription>
-          Try adjusting filters or extend the date range.
-        </CardDescription>
-      </CardHeader>
-    </Card>
   );
 }

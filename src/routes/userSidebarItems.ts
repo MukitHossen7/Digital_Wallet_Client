@@ -1,12 +1,12 @@
 import { GoHomeFill } from "react-icons/go";
 import { CiWallet } from "react-icons/ci";
-import { AiOutlineTransaction } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
 import { ISidebarItem } from "@/types";
 import Overview from "@/pages/user/Overview";
 import TransactionHistory from "@/pages/user/TransactionHistory";
 import MyProfile from "@/pages/user/MyProfile";
 import WalletPage from "@/pages/user/Wallet";
+import { ListFilter } from "lucide-react";
 
 export const userSidebarItems: ISidebarItem[] = [
   {
@@ -39,7 +39,7 @@ export const userSidebarItems: ISidebarItem[] = [
         title: "Transaction",
         url: "/user/transactions-history",
         component: TransactionHistory,
-        icon: AiOutlineTransaction,
+        icon: ListFilter,
       },
       {
         title: "Profile",
