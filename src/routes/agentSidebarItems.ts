@@ -5,9 +5,10 @@ import { CgProfile } from "react-icons/cg";
 
 import MyProfile from "@/pages/agent/MyProfile";
 import Overview from "@/pages/agent/Overview";
-import TransactionsHistory from "@/pages/agent/TransactionsHistory";
+// import TransactionsHistory from "@/pages/agent/TransactionsHistory";
 import { ISidebarItem } from "@/types";
 import AgentCashInOutPage from "@/pages/agent/AddMoney";
+import TransactionsPage from "@/pages/agent/TransactionsHistory";
 export const agentSidebarItems: ISidebarItem[] = [
   {
     title: "Agent Dashboard",
@@ -34,7 +35,7 @@ export const agentSidebarItems: ISidebarItem[] = [
       {
         title: "Transaction",
         url: "/agent/transactions-history",
-        component: TransactionsHistory,
+        component: TransactionsPage,
         icon: AiOutlineTransaction,
       },
       {
