@@ -289,7 +289,7 @@ export default function AgentProfile() {
                     <Label htmlFor="newPassword">New password</Label>
                     <Input
                       id="newPassword"
-                      type={agentPasswordForm ? "text" : "password"}
+                      type={showPassword ? "text" : "password"}
                       placeholder="At least 8 chars, 1 uppercase, 1 digit"
                       {...agentPasswordForm.register("newPassword")}
                       className="rounded-md mt-1"
@@ -305,7 +305,7 @@ export default function AgentProfile() {
                     <Label htmlFor="confirmPassword">Confirm password</Label>
                     <Input
                       id="confirmPassword"
-                      type={agentPasswordForm ? "text" : "password"}
+                      type={showPassword ? "text" : "password"}
                       placeholder="Repeat new password"
                       {...agentPasswordForm.register("confirmPassword")}
                       className="rounded-md mt-1"
