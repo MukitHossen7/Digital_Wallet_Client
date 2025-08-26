@@ -10,8 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Filter, FileText, RefreshCw } from "lucide-react";
 
-type TxType = "deposit" | "withdraw" | "send";
-type TxStatus = "success" | "pending" | "failed";
+type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
+type TxStatus = "COMPLETED" | "PENDING" | "FAILED";
 
 interface Transaction {
   id: string;
@@ -25,26 +25,26 @@ interface Transaction {
 const MOCK_TRANSACTIONS: Transaction[] = [
   {
     id: "tx_001",
-    type: "deposit",
+    type: "ADD_MONEY",
     title: "Cash-in via Agent #101",
     amount: 2500,
-    status: "success",
+    status: "COMPLETED",
     createdAt: new Date().toISOString(),
   },
   {
     id: "tx_002",
-    type: "withdraw",
+    type: "WITHDRAW",
     title: "Cash-out to User #202",
     amount: -1500,
-    status: "pending",
+    status: "PENDING",
     createdAt: new Date().toISOString(),
   },
   {
     id: "tx_003",
-    type: "send",
+    type: "SEND_MONEY",
     title: "Sent to Rahim",
     amount: -1200,
-    status: "failed",
+    status: "FAILED",
     createdAt: new Date().toISOString(),
   },
   // ...add more mock data
@@ -69,11 +69,11 @@ export default function TransactionsPage() {
 
   const getStatusColor = (status: TxStatus) => {
     switch (status) {
-      case "success":
+      case "COMPLETED":
         return "bg-emerald-100 text-emerald-700";
-      case "pending":
+      case "PENDING":
         return "bg-yellow-100 text-yellow-700";
-      case "failed":
+      case "FAILED":
         return "bg-rose-100 text-rose-700";
     }
   };
