@@ -18,6 +18,7 @@ export interface ISidebarItem {
     icon?: IconType;
   }[];
 }
+
 export type {
   ILogin,
   IRegisterData,
@@ -25,3 +26,5 @@ export type {
   ISendOTP,
   IVerifyOTP,
 } from "./auth.type";
+
+export type { IAddMoney, IWithdrawMoney, ISendMoney } from "./transaction.type";

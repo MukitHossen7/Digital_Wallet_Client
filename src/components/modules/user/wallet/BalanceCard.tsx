@@ -9,17 +9,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ShieldCheck } from "lucide-react";
 
 interface IProps {
-  balance: number;
-  loading?: boolean;
+  balance: number | undefined;
+  walletLoading?: boolean;
 }
 
-const BalanceCard = ({ balance, loading }: IProps) => {
+const BalanceCard = ({ balance, walletLoading }: IProps) => {
   return (
     <Card className="border-dashed" data-tour="balance">
       <CardHeader className="pb-2">
         <CardDescription>Current Balance</CardDescription>
         <CardTitle className="text-3xl">
-          {loading ? (
+          {walletLoading ? (
             <Skeleton className="h-9 w-40" />
           ) : (
             <span>BDT {balance}</span>

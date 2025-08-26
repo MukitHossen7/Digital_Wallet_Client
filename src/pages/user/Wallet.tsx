@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { useState, useEffect } from "react";
@@ -33,10 +34,18 @@ import { toast } from "sonner";
 import WalletHeader from "@/components/modules/user/wallet/WalletHeader";
 import BalanceCard from "@/components/modules/user/wallet/BalanceCard";
 import QuickAmounts from "@/components/modules/user/wallet/QuickAmounts";
-import FeeSummary from "@/components/modules/user/wallet/FeeSummary";
 import { txType } from "@/constants/txType";
 import { calculateFee } from "@/utils/claculateFee";
 import { useSearchParams } from "react-router";
+import {
+  useAddMoneyMutation,
+  useSendMoneyMutation,
+  useWithdrawMoneyMutation,
+} from "@/redux/features/transaction/transaction.api";
+import { useGetMeWalletQuery } from "@/redux/features/wallet/wallet.api";
+import DepositFeeSummary from "@/components/modules/user/wallet/DepositFeeSummary";
+import WithdrawFeeSummary from "@/components/modules/user/wallet/WithdrawFeeSummary";
+import SendMoneyFeeSummary from "@/components/modules/user/wallet/SendMoneyFeeSummary";
 
 // -------------------- Validation --------------------
 
@@ -45,7 +54,7 @@ const depositSchema = z.object({
   type: z.enum(["ADD_MONEY", "WITHDRAW", "SEND_MONEY"], {
     error: "Type is Required",
   }),
-  agentId: z.string().min(1, { error: "Agent Email is Required" }),
+  email: z.email(),
 });
 
 const withdrawSchema = z.object({
@@ -53,7 +62,7 @@ const withdrawSchema = z.object({
   type: z.enum(["ADD_MONEY", "WITHDRAW", "SEND_MONEY"], {
     error: "Type is Required",
   }),
-  agentId: z.string().min(1, { error: "Agent Email is Required" }),
+  email: z.email(),
 });
 
 const sendSchema = z.object({
@@ -72,25 +81,38 @@ function FieldHint({ children }: { children: React.ReactNode }) {
 
 // -------------------- Main Component --------------------
 export default function WalletPage() {
+  const [addMoney] = useAddMoneyMutation();
+  const [withdrawMoney] = useWithdrawMoneyMutation();
+  const [sendMoney] = useSendMoneyMutation();
+  const { data: walletData, isLoading: walletLoading } =
+    useGetMeWalletQuery(undefined);
   const [searchParams] = useSearchParams();
   const tabFromQuery = searchParams.get("tab") || "deposit";
   const [activeTab, setActiveTab] = useState(tabFromQuery);
   const [loading, setLoading] = useState(true);
-  const [balance, setBalance] = useState(12500);
+  const [balance, setBalance] = useState<number | undefined>(undefined);
+
+  // skeleton effect
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 600); // skeleton effect
+    const t = setTimeout(() => setLoading(false), 600);
     return () => clearTimeout(t);
   }, []);
 
   useEffect(() => {
     setActiveTab(tabFromQuery);
   }, [tabFromQuery]);
+
+  useEffect(() => {
+    if (walletData?.data?.balance !== undefined) {
+      setBalance(walletData?.data?.balance);
+    }
+  }, [walletData]);
   // ---- Deposit form ----
   const depositForm = useForm<z.infer<typeof depositSchema>>({
     resolver: zodResolver(depositSchema),
     defaultValues: {
       amount: 0,
-      agentId: "",
+      email: "",
       type: "ADD_MONEY",
     },
   });
@@ -100,7 +122,7 @@ export default function WalletPage() {
     resolver: zodResolver(withdrawSchema),
     defaultValues: {
       amount: 0,
-      agentId: "",
+      email: "",
       type: "WITHDRAW",
     },
   });
@@ -117,39 +139,87 @@ export default function WalletPage() {
 
   // ---- Handlers (replace with RTK Query mutations) ----
   async function onDeposit(values: z.infer<typeof depositSchema>) {
-    // TODO: replace with rtk-query: const [deposit] = useDepositMutation(); await deposit(values)
-    await new Promise((r) => setTimeout(r, 600));
-
-    setBalance((b) => b + values.amount);
-    console.log(values);
-    toast.success("Deposit successfully");
-    depositForm.reset({ ...values, amount: 0 });
+    let toastId: string | number | undefined;
+    try {
+      toastId = toast.loading("Processing your deposit...");
+      const res = await addMoney(values);
+      if (res?.data?.success) {
+        toast.success("Deposit successfully", { id: toastId });
+        depositForm.reset({ amount: 0, email: "" });
+        setBalance((prev) => (prev ?? 0) + values.amount);
+      } else {
+        toast.error(res?.data?.message || "Deposit failed", { id: toastId });
+      }
+    } catch (error: any) {
+      console.log(error);
+      const message =
+        error?.data?.message || error?.message || "Something went wrong";
+      toast.error(message, { id: toastId });
+      console.log(error);
+    }
   }
 
   async function onWithdraw(values: z.infer<typeof withdrawSchema>) {
-    const { totalAmount } = calculateFee(values.amount, "WITHDRAW");
-    if (totalAmount > balance) {
+    const { fee, totalAmount } = calculateFee(values.amount, "WITHDRAW");
+    if (totalAmount > (balance ?? 0)) {
       toast.error("Insufficient balance");
       return;
     }
-    await new Promise((r) => setTimeout(r, 600));
-    setBalance((b) => b - totalAmount);
-    toast.success("With draw successfully");
-    console.log(values);
-    withdrawForm.reset({ ...values, amount: 0 });
+    let toastId: string | number | undefined;
+    try {
+      toastId = toast.loading("Processing your withdraw...");
+      const withdrawData = {
+        type: values.type,
+        amount: totalAmount,
+        email: values.email,
+        fee: fee,
+      };
+      const res = await withdrawMoney(withdrawData);
+      if (res?.data?.success) {
+        toast.success("Withdraw successfully", { id: toastId });
+        withdrawForm.reset({ amount: 0, email: "" });
+        setBalance((prev) => (prev ?? 0) - totalAmount);
+      } else {
+        toast.error(res?.data?.message || "Withdraw failed", { id: toastId });
+      }
+    } catch (error: any) {
+      console.log(error);
+      const message =
+        error?.data?.message || error?.message || "Something went wrong";
+      toast.error(message, { id: toastId });
+      console.log(error);
+    }
   }
 
   async function onSend(values: z.infer<typeof sendSchema>) {
-    const { totalAmount } = calculateFee(values.amount, "SEND_MONEY");
-    if (totalAmount > balance) {
+    const { fee, totalAmount } = calculateFee(values.amount, "SEND_MONEY");
+    if (totalAmount > (balance ?? 0)) {
       toast.error("Insufficient balance");
       return;
     }
-    await new Promise((r) => setTimeout(r, 600));
-    setBalance((b) => b - totalAmount);
-    toast("Sent Money Successfully");
-    console.log(values);
-    sendForm.reset({ ...values, amount: 0 });
+    let toastId: string | number | undefined;
+    try {
+      const sendData = {
+        type: values.type,
+        amount: totalAmount,
+        email: values.email,
+        fee: fee,
+      };
+      toastId = toast.loading("Processing your sendMoney...");
+      const res = await sendMoney(sendData);
+      if (res.data?.success) {
+        toast.success("Sent Money Successfully", { id: toastId });
+        setBalance((amount) => (amount ?? 0) - totalAmount);
+        sendForm.reset({ amount: 0, email: "" });
+      } else {
+        toast.error(res?.data?.message || "Send Money failed", { id: toastId });
+      }
+    } catch (error: any) {
+      const message =
+        error?.data?.message || error?.message || "Something went wrong";
+      toast.error(message, { id: toastId });
+      console.log(error);
+    }
   }
 
   // -------------------- UI --------------------
@@ -161,7 +231,7 @@ export default function WalletPage() {
         className="grid grid-cols-1 md:grid-cols-3 gap-4"
         data-tour="overview"
       >
-        <BalanceCard balance={balance} loading={loading} />
+        <BalanceCard balance={balance} walletLoading={walletLoading} />
 
         <Card className="md:col-span-2">
           <CardHeader className="pb-2">
@@ -330,32 +400,23 @@ export default function WalletPage() {
                     Use quick buttons above for common amounts.
                   </FieldHint>
                 </div>
-
                 <div>
-                  <Label htmlFor="deposit-method">Agent Email</Label>
-                  <Select
-                    onValueChange={(v) =>
-                      depositForm.setValue("agentId", v as any, {
+                  <Label htmlFor="email">Agent Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter Agent Email"
+                    className="rounded-md w-full"
+                    value={depositForm.watch("email") || ""}
+                    onChange={(e) =>
+                      depositForm.setValue("email", e.target.value || "", {
                         shouldValidate: true,
                       })
                     }
-                    defaultValue={depositForm.getValues("agentId")}
-                  >
-                    <SelectTrigger
-                      id="deposit-method"
-                      className="rounded-md w-full"
-                    >
-                      <SelectValue placeholder="Select Agent Email" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">mukit@gmil.com</SelectItem>
-                      <SelectItem value="2">mim@gmil.com</SelectItem>
-                      <SelectItem value="3">mou@gmil.com</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {depositForm.formState.errors.agentId && (
+                  />
+                  {depositForm.formState.errors.email && (
                     <p className="text-destructive text-xs mt-1">
-                      {depositForm.formState.errors.agentId.message?.toString()}
+                      {depositForm.formState.errors.email.message}
                     </p>
                   )}
                 </div>
@@ -368,7 +429,7 @@ export default function WalletPage() {
                     <CardDescription>Estimated fees & totals</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <FeeSummary
+                    <DepositFeeSummary
                       amount={depositForm.watch("amount") || 0}
                       balance={balance}
                       type={txType.ADD_MONEY as "ADD_MONEY"}
@@ -442,7 +503,7 @@ export default function WalletPage() {
                     type="number"
                     inputMode="numeric"
                     placeholder="e.g. 50"
-                    className="rounded-xl"
+                    className="rounded-md"
                     value={withdrawForm.watch("amount") || ""}
                     onChange={(e) =>
                       withdrawForm.setValue(
@@ -462,7 +523,7 @@ export default function WalletPage() {
                   </FieldHint>
                 </div>
 
-                <div>
+                {/* <div>
                   <Label htmlFor="deposit-method">Agent Email</Label>
                   <Select
                     onValueChange={(v) =>
@@ -489,6 +550,27 @@ export default function WalletPage() {
                       {withdrawForm.formState.errors.agentId.message?.toString()}
                     </p>
                   )}
+                </div> */}
+
+                <div>
+                  <Label htmlFor="email">Agent Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter Agent Email"
+                    className="rounded-md w-full"
+                    value={withdrawForm.watch("email") || ""}
+                    onChange={(e) =>
+                      withdrawForm.setValue("email", e.target.value || "", {
+                        shouldValidate: true,
+                      })
+                    }
+                  />
+                  {withdrawForm.formState.errors.email && (
+                    <p className="text-destructive text-xs mt-1">
+                      {withdrawForm.formState.errors.email.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -499,7 +581,7 @@ export default function WalletPage() {
                     <CardDescription>Total including fee</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <FeeSummary
+                    <WithdrawFeeSummary
                       amount={withdrawForm.watch("amount") || 0}
                       balance={balance}
                       type={txType.WITHDRAW as "WITHDRAW"}
@@ -588,7 +670,7 @@ export default function WalletPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="send-email">Receiver Email</Label>
+                  <Label htmlFor="send-email">User Email</Label>
                   <Input
                     id="send-email"
                     type="email"
@@ -617,7 +699,7 @@ export default function WalletPage() {
                     <CardDescription>Includes network fee</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <FeeSummary
+                    <SendMoneyFeeSummary
                       amount={sendForm.watch("amount") || 0}
                       balance={balance}
                       type={txType.SEND_MONEY as "SEND_MONEY"}

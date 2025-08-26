@@ -4,11 +4,11 @@ import { useMemo } from "react";
 
 interface IProps {
   amount: number;
-  balance: number;
+  balance: number | undefined;
   type: "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
 }
 
-const FeeSummary = ({ amount, balance, type }: IProps) => {
+const WithdrawFeeSummary = ({ amount, balance = 0, type }: IProps) => {
   const { fee, totalAmount } = useMemo(
     () => calculateFee(amount, type),
     [amount, type]
@@ -47,4 +47,4 @@ const FeeSummary = ({ amount, balance, type }: IProps) => {
   );
 };
 
-export default FeeSummary;
+export default WithdrawFeeSummary;
