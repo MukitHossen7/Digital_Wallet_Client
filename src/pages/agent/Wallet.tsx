@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -22,30 +23,25 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
-  UserPlus2,
   Search,
   Sparkles,
-  ShieldCheck,
 } from "lucide-react";
+import { MdOutlineAccountBalanceWallet } from "react-icons/md";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { calculateFee } from "@/utils/claculateFee";
 
 // -------------------- Types & Utils --------------------
-const BDT = new Intl.NumberFormat("en-BD", {
-  style: "currency",
-  currency: "BDT",
-  maximumFractionDigits: 0,
-});
-const formatBDT = (n: number) => {
-  try {
-    return BDT.format(Math.round(n));
-  } catch {
-    return `৳${Math.round(n).toLocaleString()}`;
-  }
-};
 
-function calcFee(amount: number, percent = 0.009, min = 10, max = 200) {
-  const fee = Math.min(Math.max(Math.round(amount * percent), min), max);
-  return { fee, totalDebit: amount + fee };
-}
+// function calcFee(amount: number, percent = 0.009, min = 10, max = 200) {
+//   const fee = Math.min(Math.max(Math.round(amount * percent), min), max);
+//   return { fee, totalDebit: amount + fee };
+// }
 
 // -------------------- Validation --------------------
 const baseSchema = z.object({
@@ -54,7 +50,9 @@ const baseSchema = z.object({
     .number({ error: "Amount is required" })
     .positive("Enter a positive amount")
     .max(200000, "Maximum ৳200,000"),
-  note: z.string().max(120, "Note too long").optional(),
+  type: z.enum(["ADD_MONEY", "WITHDRAW"], {
+    error: "Type is Required",
+  }),
 });
 
 type ActionForm = z.infer<typeof baseSchema>;
@@ -94,21 +92,23 @@ const MOCK_USERS = [
 // -------------------- Component --------------------
 export default function AgentWallet() {
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState(MOCK_USERS);
+  const [users] = useState(MOCK_USERS);
   const [selectedUser, setSelectedUser] = useState<
     (typeof MOCK_USERS)[0] | null
   >(null);
+  const [agentBalance, setAgentBalance] = useState(100000);
+  // console.log(selectedUser);
 
   // forms
   const depositForm = useForm<ActionForm>({
     resolver: zodResolver(baseSchema),
-    defaultValues: { identifier: "", amount: 0, note: "" },
+    defaultValues: { identifier: "", amount: 0, type: "ADD_MONEY" },
     mode: "onChange",
   });
 
   const withdrawForm = useForm<ActionForm>({
     resolver: zodResolver(baseSchema),
-    defaultValues: { identifier: "", amount: 0, note: "" },
+    defaultValues: { identifier: "", amount: 0, type: "WITHDRAW" },
     mode: "onChange",
   });
 
@@ -151,42 +151,30 @@ export default function AgentWallet() {
   function pickUser(u: (typeof users)[0]) {
     setSelectedUser(u);
     // populate identifier fields in both forms so agent can switch tabs seamlessly
-    depositForm.setValue("identifier", u.phone);
-    withdrawForm.setValue("identifier", u.phone);
+    depositForm.setValue("identifier", u.email);
+    withdrawForm.setValue("identifier", u.email);
     setSuggestions([]);
   }
 
   // ---- Handlers ----
   async function handleDeposit(values: ActionForm) {
-    if (!selectedUser) {
-      toast.error("Select a user first");
+    // if (!selectedUser) {
+    //   toast.error("Select a user first");
+    //   return;
+    // }
+    if (values.amount > agentBalance) {
+      toast.error("Agent has insufficient balance");
       return;
     }
-    await toast.promise(
-      () =>
-        new Promise<void>((resolve) => {
-          setTimeout(() => {
-            // simulate server: update user's balance
-            setUsers((prev) =>
-              prev.map((u) =>
-                u.id === selectedUser.id
-                  ? { ...u, balance: u.balance + values.amount }
-                  : u
-              )
-            );
-            setSelectedUser((prev) =>
-              prev ? { ...prev, balance: prev.balance + values.amount } : prev
-            );
-            resolve();
-          }, 700);
-        }),
-      {
-        loading: "Adding money...",
-        success: "Money added successfully",
-        error: "Failed to add money",
-      }
+    setSelectedUser((prev) =>
+      prev ? { ...prev, balance: prev.balance + values.amount } : prev
     );
-    depositForm.reset({ identifier: selectedUser.phone, amount: 0, note: "" });
+    setAgentBalance((prev) => prev - values.amount);
+
+    toast.success(`৳${values.amount} added to ${selectedUser?.name}'s wallet`);
+    console.log(values);
+
+    depositForm.reset({ identifier: "", amount: 0 });
   }
 
   async function handleWithdraw(values: ActionForm) {
@@ -194,37 +182,18 @@ export default function AgentWallet() {
       toast.error("Select a user first");
       return;
     }
-    const { fee, totalDebit } = calcFee(values.amount);
-    if (totalDebit > selectedUser.balance) {
+    const { totalAmount } = calculateFee(values.amount, "WITHDRAW");
+    if (totalAmount > selectedUser.balance) {
       toast.error("Insufficient balance for this user");
       return;
     }
-
-    await toast.promise(
-      () =>
-        new Promise<void>((resolve) => {
-          setTimeout(() => {
-            setUsers((prev) =>
-              prev.map((u) =>
-                u.id === selectedUser.id
-                  ? { ...u, balance: u.balance - totalDebit }
-                  : u
-              )
-            );
-            setSelectedUser((prev) =>
-              prev ? { ...prev, balance: prev.balance - totalDebit } : prev
-            );
-            resolve();
-          }, 800);
-        }),
-      {
-        loading: "Processing withdraw...",
-        success: `Withdraw successful (fee ${formatBDT(fee)})`,
-        error: "Withdraw failed",
-      }
-    );
-
-    withdrawForm.reset({ identifier: selectedUser.phone, amount: 0, note: "" });
+    setSelectedUser({
+      ...selectedUser,
+      balance: selectedUser.balance - totalAmount,
+    });
+    setAgentBalance((prev) => prev + values.amount);
+    console.log(values);
+    withdrawForm.reset({ identifier: "", amount: 0 });
   }
 
   // Quick amounts
@@ -237,19 +206,17 @@ export default function AgentWallet() {
 
   return (
     <div className="container mx-auto max-w-6xl px-3 md:px-6 py-6 md:py-8">
-      <Toaster />
-
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-3">
-            <UserPlus2 className="h-6 w-6 text-primary" /> Agent — Cash In /
-            Cash Out
+            <MdOutlineAccountBalanceWallet className="h-6 w-6 text-primary" />{" "}
+            Agent: {agentBalance} BDT
           </h1>
           <p className="text-sm text-muted-foreground">
-            Add or withdraw money from a user's wallet — বিকাশ-স্টাইল একটি এক
-            পেজে অভিজ্ঞতা।
+            Add or withdraw money from a user's wallet
           </p>
         </div>
+
         <Badge variant="secondary" className="rounded-xl">
           Agent Mode
         </Badge>
@@ -273,7 +240,7 @@ export default function AgentWallet() {
                   <Input
                     id="globalSearch"
                     placeholder="017..., name or email"
-                    className="pl-10 rounded-xl"
+                    className="pl-10 rounded-md"
                     onChange={(e) => onIdentifierChange(e.target.value)}
                   />
                 </div>
@@ -332,18 +299,6 @@ export default function AgentWallet() {
                       </div>
                     </div>
                   </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground">
-                      Current balance
-                    </div>
-                    <div className="text-2xl font-semibold">
-                      {formatBDT(selectedUser.balance)}
-                    </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4" /> Transaction logs &
-                    receipts available.
-                  </div>
                 </div>
               ) : (
                 <div className="text-sm text-muted-foreground">
@@ -359,14 +314,15 @@ export default function AgentWallet() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {presets.map((p) => (
+                {presets.map((money) => (
                   <Button
-                    key={p}
+                    key={money}
                     variant="ghost"
-                    className="rounded-xl"
-                    onClick={() => applyPreset(p, "deposit")}
+                    size="sm"
+                    className="rounded-full"
+                    onClick={() => applyPreset(money, "deposit")}
                   >
-                    {formatBDT(p)}
+                    BDT {money}
                   </Button>
                 ))}
               </div>
@@ -393,123 +349,82 @@ export default function AgentWallet() {
             <TabsContent value="add">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    Add money to user's wallet
-                  </CardTitle>
-                  <CardDescription>
-                    Agent cash-in — provide cash to user and record transaction
-                    here.
-                  </CardDescription>
+                  <CardTitle>Add money</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <form
-                    className="grid grid-cols-1 md:grid-cols-3 gap-4"
                     onSubmit={depositForm.handleSubmit(handleDeposit)}
+                    className="grid grid-cols-1 md:grid-cols-3 gap-4"
                   >
                     <div className="md:col-span-2 space-y-2">
-                      <Label htmlFor="identifierDep">
-                        User (phone or email)
-                      </Label>
+                      <Label>User (email or phone)</Label>
                       <Input
-                        id="identifierDep"
-                        placeholder="e.g. +88017... or user@mail.com"
-                        className="rounded-xl"
+                        placeholder="e.g. user@mail.com"
                         {...depositForm.register("identifier")}
                       />
+                      {depositForm.formState.errors.identifier && (
+                        <p className="text-xs text-red-500">
+                          {depositForm.formState.errors.identifier.message}
+                        </p>
+                      )}
 
-                      <Label htmlFor="amountDep" className="mt-2">
-                        Amount
-                      </Label>
+                      <Label>Amount</Label>
                       <Input
-                        id="amountDep"
                         type="number"
-                        inputMode="numeric"
-                        placeholder="e.g. 1000"
-                        className="rounded-xl"
-                        value={depositForm.watch("amount") || ""}
-                        onChange={(e) =>
-                          depositForm.setValue(
-                            "amount",
-                            Number(e.target.value || 0),
-                            { shouldValidate: true }
-                          )
+                        {...depositForm.register("amount", {
+                          valueAsNumber: true,
+                        })}
+                      />
+                      {depositForm.formState.errors.amount && (
+                        <p className="text-xs text-red-500">
+                          {depositForm.formState.errors.amount.message}
+                        </p>
+                      )}
+
+                      <Label>Payment Type</Label>
+                      <Select
+                        onValueChange={(v) =>
+                          depositForm.setValue("type", v as any, {
+                            shouldValidate: true,
+                          })
                         }
-                      />
-
-                      <Label htmlFor="noteDep" className="mt-2">
-                        Note (optional)
-                      </Label>
-                      <Input
-                        id="noteDep"
-                        placeholder="e.g. Cash-in at agent #1033"
-                        className="rounded-xl"
-                        {...depositForm.register("note")}
-                      />
-
-                      <div className="text-xs text-muted-foreground mt-2">
-                        Tip: Confirm cash received from user before marking as
-                        added.
-                      </div>
+                        defaultValue={depositForm.getValues("type")}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select Payment Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="ADD_MONEY">Add Money</SelectItem>
+                          <SelectItem value="WITHDRAW">Withdraw</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div className="space-y-4">
+                      {/* summary */}
                       <Card className="bg-muted/40">
                         <CardHeader>
                           <CardTitle className="text-sm">Summary</CardTitle>
-                          <CardDescription>
-                            Estimated effect on balance
-                          </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <div className="text-sm space-y-2">
-                            <div className="flex justify-between">
-                              <span>Amount</span>
-                              <strong>
-                                {formatBDT(depositForm.watch("amount") || 0)}
-                              </strong>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Fee</span>
-                              <strong>{formatBDT(0)}</strong>
-                            </div>
-                            <Separator />
-                            <div className="flex justify-between">
-                              <span>New balance</span>
-                              <strong>
-                                {selectedUser
-                                  ? formatBDT(
-                                      (selectedUser.balance || 0) +
-                                        (depositForm.watch("amount") || 0)
-                                    )
-                                  : "—"}
-                              </strong>
-                            </div>
+                          <div className="flex justify-between">
+                            <span>Amount</span>
+                            <strong>
+                              BDT {depositForm.watch("amount") || 0}
+                            </strong>
                           </div>
                         </CardContent>
                       </Card>
 
                       <div className="flex gap-2 justify-end">
                         <Button
-                          variant="outline"
                           type="button"
-                          className="rounded-xl"
-                          onClick={() =>
-                            depositForm.reset({
-                              identifier: selectedUser?.phone || "",
-                              amount: 0,
-                              note: "",
-                            })
-                          }
+                          variant="outline"
+                          onClick={() => depositForm.reset()}
                         >
                           Reset
                         </Button>
-                        <Button
-                          type="submit"
-                          className="rounded-xl"
-                          disabled={!depositForm.formState.isValid}
-                        >
-                          Add money
-                        </Button>
+                        <Button type="submit">Add money</Button>
                       </div>
                     </div>
                   </form>
@@ -535,13 +450,11 @@ export default function AgentWallet() {
                     onSubmit={withdrawForm.handleSubmit(handleWithdraw)}
                   >
                     <div className="md:col-span-2 space-y-2">
-                      <Label htmlFor="identifierWith">
-                        User (phone or email)
-                      </Label>
+                      <Label htmlFor="identifierWith">User ( email)</Label>
                       <Input
                         id="identifierWith"
-                        placeholder="e.g. +88017... or user@mail.com"
-                        className="rounded-xl"
+                        placeholder="e.g. user@mail.com"
+                        className="rounded-md"
                         {...withdrawForm.register("identifier")}
                       />
 
@@ -553,7 +466,7 @@ export default function AgentWallet() {
                         type="number"
                         inputMode="numeric"
                         placeholder="e.g. 500"
-                        className="rounded-xl"
+                        className="rounded-md"
                         value={withdrawForm.watch("amount") || ""}
                         onChange={(e) =>
                           withdrawForm.setValue(
@@ -564,19 +477,34 @@ export default function AgentWallet() {
                         }
                       />
 
-                      <Label htmlFor="noteWith" className="mt-2">
-                        Note (optional)
-                      </Label>
-                      <Input
-                        id="noteWith"
-                        placeholder="e.g. Cash-out at agent #204"
-                        className="rounded-xl"
-                        {...withdrawForm.register("note")}
-                      />
-
-                      <div className="text-xs text-muted-foreground mt-2">
-                        Fee applies: ~0.9% (min ৳10, max ৳200). New balance will
-                        reflect fee deduction.
+                      <div>
+                        <Label htmlFor="withdraw-method">Payment Type</Label>
+                        <Select
+                          onValueChange={(v) =>
+                            withdrawForm.setValue("type", v as any, {
+                              shouldValidate: true,
+                            })
+                          }
+                          defaultValue={withdrawForm.getValues("type")}
+                        >
+                          <SelectTrigger
+                            id="withdraw-method"
+                            className="rounded-md w-full"
+                          >
+                            <SelectValue placeholder="Select Payment Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ADD_MONEY">
+                              Deposit Money
+                            </SelectItem>
+                            <SelectItem value="WITHDRAW">Withdraw</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {withdrawForm.formState.errors.type && (
+                          <p className="text-destructive text-xs mt-1">
+                            {withdrawForm.formState.errors.type.message?.toString()}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -593,38 +521,32 @@ export default function AgentWallet() {
                             <div className="flex justify-between">
                               <span>Amount</span>
                               <strong>
-                                {formatBDT(withdrawForm.watch("amount") || 0)}
+                                BDT {withdrawForm.watch("amount") || 0}
                               </strong>
                             </div>
                             <div className="flex justify-between">
                               <span>Fee</span>
                               <strong>
-                                {formatBDT(
-                                  calcFee(withdrawForm.watch("amount") || 0).fee
-                                )}
+                                BDT{" "}
+                                {
+                                  calculateFee(
+                                    withdrawForm.watch("amount") || 0,
+                                    "WITHDRAW"
+                                  ).fee
+                                }
                               </strong>
                             </div>
                             <Separator />
                             <div className="flex justify-between">
-                              <span>Total debit</span>
+                              <span>Total Amount</span>
                               <strong>
-                                {formatBDT(
-                                  calcFee(withdrawForm.watch("amount") || 0)
-                                    .totalDebit
-                                )}
-                              </strong>
-                            </div>
-                            <div className="flex justify-between text-muted-foreground">
-                              <span>New balance</span>
-                              <strong>
-                                {selectedUser
-                                  ? formatBDT(
-                                      (selectedUser.balance || 0) -
-                                        calcFee(
-                                          withdrawForm.watch("amount") || 0
-                                        ).totalDebit
-                                    )
-                                  : "—"}
+                                BDT{" "}
+                                {
+                                  calculateFee(
+                                    withdrawForm.watch("amount") || 0,
+                                    "WITHDRAW"
+                                  ).totalAmount
+                                }
                               </strong>
                             </div>
                           </div>
@@ -635,24 +557,16 @@ export default function AgentWallet() {
                         <Button
                           variant="outline"
                           type="button"
-                          className="rounded-xl"
                           onClick={() =>
                             withdrawForm.reset({
-                              identifier: selectedUser?.phone || "",
+                              identifier: "",
                               amount: 0,
-                              note: "",
                             })
                           }
                         >
                           Reset
                         </Button>
-                        <Button
-                          type="submit"
-                          className="rounded-xl"
-                          disabled={!withdrawForm.formState.isValid}
-                        >
-                          Withdraw
-                        </Button>
+                        <Button type="submit">Withdraw</Button>
                       </div>
                     </div>
                   </form>
