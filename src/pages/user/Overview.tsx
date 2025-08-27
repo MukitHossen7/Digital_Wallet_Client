@@ -105,7 +105,11 @@ export default function Overview() {
   const { data: walletData, isLoading: walletLoading } =
     useGetMeWalletQuery(undefined);
   const { data: transactionData, isLoading: transactionLoading } =
-    useGetMeTransactionQuery(undefined);
+    useGetMeTransactionQuery({
+      page: 1,
+      limit: 10,
+      type: "all",
+    });
   const navigate = useNavigate();
 
   const [hidden, setHidden] = useState(false);
@@ -288,8 +292,8 @@ export default function Overview() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentTransactions?.map((tx) => (
-                    <TableRow key={tx.id} className="hover:bg-muted/50">
+                  {recentTransactions?.map((tx, idx: any) => (
+                    <TableRow key={idx} className="hover:bg-muted/50">
                       <TableCell>
                         <div
                           className={`inline-flex items-center gap-2 ${

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -24,7 +25,6 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -43,21 +43,19 @@ import {
 } from "lucide-react";
 import EmptyState from "@/components/modules/user/transaction/EmptyState";
 import StatusBadge from "@/components/modules/user/transaction/StatusBadge";
+import { useGetMeTransactionQuery } from "@/redux/features/transaction/transaction.api";
 
-// -------------------- Types --------------------
 export type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
 export type TxStatus = "COMPLETED" | "PENDING" | "FAILED";
 export interface TxItem {
   id: string;
   type: TxType;
-  title: string;
-  counterparty?: string;
-  amount: number; // positive = inflow, negative = outflow
+  initiatedBy?: string;
+  amount: number;
   status: TxStatus;
-  createdAt: string; // ISO
+  createdAt: string;
 }
 
-// -------------------- Utils --------------------
 const BDT = new Intl.NumberFormat("en-BD", {
   style: "currency",
   currency: "BDT",
@@ -91,91 +89,34 @@ const typeMeta: Record<
   },
 };
 
-// -------------------- Mock data (replace with RTK Query later) --------------------
-const MOCK_TX: TxItem[] = Array.from({ length: 58 }).map((_, i) => {
-  const now = Date.now();
-  const dayOffset = Math.floor(Math.random() * 60);
-  const type: TxType = (["ADD_MONEY", "WITHDRAW", "SEND_MONEY"] as TxType[])[
-    Math.floor(Math.random() * 3)
-  ];
-  const status: TxStatus = (["COMPLETED", "PENDING", "FAILED"] as TxStatus[])[
-    Math.floor(Math.random() * 3)
-  ];
-  const base = type === "ADD_MONEY" ? 1000 : 500;
-  const sign = type === "ADD_MONEY" ? 1 : -1;
-  const amount = sign * (base + Math.floor(Math.random() * 4500));
-  return {
-    id: `TX-${1000 + i}`,
-    type,
-    title:
-      type === "ADD_MONEY"
-        ? "Deposit from Agent"
-        : type === "WITHDRAW"
-        ? "Cash-out to Agent"
-        : "Send to Contact",
-    counterparty:
-      type === "SEND_MONEY"
-        ? ["+8801711****44", "ayesha@example.com", "rahim@inbox.com"][i % 3]
-        : `Agent #${100 + (i % 50)}`,
-    amount,
-    status,
-    createdAt: new Date(
-      now - dayOffset * 24 * 60 * 60 * 1000 - (i % 24) * 60 * 60 * 1000
-    ).toISOString(),
-  } as TxItem;
-});
-
-// -------------------- Component --------------------
 export default function TransactionHistory() {
-  // TODO: Replace with RTK Query
-  // const { data, isLoading } = useGetTransactionsQuery({ page, pageSize, type, from, to })
-
-  const [loading, setLoading] = useState(true);
-  const [tx, setTx] = useState<TxItem[]>([]);
-
   // filters
   const [type, setType] = useState<"all" | TxType>("all");
   const [from, setFrom] = useState<string>(""); // YYYY-MM-DD
   const [to, setTo] = useState<string>("");
-
-  // pagination
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  useEffect(() => {
-    const t = setTimeout(() => {
-      setTx(MOCK_TX);
-      setLoading(false);
-    }, 700);
-    return () => clearTimeout(t);
-  }, []);
+  const { data: transactionData, isLoading } = useGetMeTransactionQuery({
+    page: page,
+    limit: pageSize,
+    type: type,
+    fromDate: from,
+    toDate: to,
+  });
 
   useEffect(() => {
     setPage(1);
   }, [type, from, to, pageSize]);
 
-  const filtered = useMemo(() => {
-    let list = [...tx];
-    if (type !== "all") list = list.filter((x) => x.type === type);
-    if (from)
-      list = list.filter(
-        (x) => new Date(x.createdAt) >= new Date(from + "T00:00:00")
-      );
-    if (to)
-      list = list.filter(
-        (x) => new Date(x.createdAt) <= new Date(to + "T23:59:59")
-      );
-    // newest first
-    list.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
-    return list;
-  }, [tx, type, from, to]);
+  // backend  data
+  const tx = useMemo(() => transactionData?.data ?? [], [transactionData]);
 
-  const total = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const total = transactionData?.meta.total ?? 0;
+  const totalPages = transactionData?.meta.totalPage ?? 1;
   const start = (page - 1) * pageSize;
   const end = Math.min(start + pageSize, total);
-  const pageItems = filtered.slice(start, end);
-
+  const pageItems = tx;
   return (
     <div className="container mx-auto max-w-6xl px-3 md:px-6 py-6 md:py-8 space-y-6">
       {/* Header */}
@@ -216,9 +157,9 @@ export default function TransactionHistory() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="deposit">Deposit</SelectItem>
-                  <SelectItem value="withdraw">Withdraw</SelectItem>
-                  <SelectItem value="send">Send</SelectItem>
+                  <SelectItem value="ADD_MONEY">Deposit</SelectItem>
+                  <SelectItem value="WITHDRAW">Withdraw</SelectItem>
+                  <SelectItem value="SEND_MONEY">Send Money</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -279,7 +220,7 @@ export default function TransactionHistory() {
           <CardDescription>All activities in your wallet</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
-          {loading ? (
+          {isLoading ? (
             <div className="space-y-2 py-4">
               {Array.from({ length: 8 }).map((_, i) => (
                 <Card key={i} className="p-3">
@@ -293,33 +234,31 @@ export default function TransactionHistory() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Type</TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Counterparty</TableHead>
+                    <TableHead>InitiatedBy</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">
+                      Transaction Date
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pageItems.map((t) => (
-                    <TableRow key={t.id} className="hover:bg-muted/50">
+                  {pageItems.map((t: any, idx: any) => (
+                    <TableRow key={idx} className="hover:bg-muted/50">
                       <TableCell>
                         <div
                           className={`inline-flex items-center gap-2 ${
-                            typeMeta[t.type].color
+                            typeMeta[t.type as TxType].color
                           }`}
                         >
-                          {typeMeta[t.type].icon}
+                          {typeMeta[t.type as TxType].icon}
                           <span className="font-medium">
-                            {typeMeta[t.type].label}
+                            {typeMeta[t.type as TxType].label}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="max-w-[280px] truncate">
-                        {t.title}
-                      </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {t.counterparty ?? "—"}
+                        {t.initiatedBy ?? "—"}
                       </TableCell>
                       <TableCell
                         className={`text-right font-semibold ${
@@ -333,15 +272,12 @@ export default function TransactionHistory() {
                       <TableCell>
                         <StatusBadge status={t.status} />
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="text-muted-foreground text-right">
                         {new Date(t.createdAt).toLocaleString()}
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
-                <TableCaption className="text-left">
-                  Use filters above to narrow down the list.
-                </TableCaption>
               </Table>
 
               <Separator className="my-4" />
@@ -354,45 +290,22 @@ export default function TransactionHistory() {
                   <span className="font-medium">{total}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="pageSize" className="text-sm">
-                    Rows
-                  </Label>
-                  <Select
-                    value={String(pageSize)}
-                    onValueChange={(v) => setPageSize(Number(v))}
-                  >
-                    <SelectTrigger
-                      id="pageSize"
-                      className="h-8 w-[90px] rounded-xl"
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                    </SelectContent>
-                  </Select>
-
                   <div className="flex items-center gap-1">
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-8 w-8 rounded-xl"
+                      className="h-8 w-8 rounded-full"
                       onClick={() => setPage(1)}
                       disabled={page === 1}
-                      aria-label="First page"
                     >
                       <ChevronsLeft className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-8 w-8 rounded-xl"
+                      className="h-8 w-8 rounded-full"
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      aria-label="Previous page"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
@@ -403,22 +316,20 @@ export default function TransactionHistory() {
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-8 w-8 rounded-xl"
+                      className="h-8 w-8 rounded-full"
                       onClick={() =>
                         setPage((p) => Math.min(totalPages, p + 1))
                       }
                       disabled={page === totalPages}
-                      aria-label="Next page"
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-8 w-8 rounded-xl"
+                      className="h-8 w-8 rounded-full"
                       onClick={() => setPage(totalPages)}
                       disabled={page === totalPages}
-                      aria-label="Last page"
                     >
                       <ChevronsRight className="h-4 w-4" />
                     </Button>
