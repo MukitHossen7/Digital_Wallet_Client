@@ -15,3 +15,13 @@ export interface ISendMoney {
   type: string;
   email: string;
 }
+export interface ICashIn {
+  amount: number;
+  type: string;
+  email: string;
+}
+export interface ICashOut {
+  amount: number;
+  type: string;
+  email: string;
+}

@@ -1,5 +1,12 @@
 import { baseApi } from "@/redux/baseApi";
-import { IAddMoney, IResponse, ISendMoney, IWithdrawMoney } from "@/types";
+import {
+  IAddMoney,
+  ICashIn,
+  ICashOut,
+  IResponse,
+  ISendMoney,
+  IWithdrawMoney,
+} from "@/types";
 
 export const transactionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -30,6 +37,24 @@ export const transactionApi = baseApi.injectEndpoints({
       invalidatesTags: ["TRANSACTION"],
     }),
 
+    agentCashIn: builder.mutation<IResponse<null>, ICashIn>({
+      query: (transactionData) => ({
+        url: "/transactions/cash-in",
+        method: "POST",
+        data: transactionData,
+      }),
+      invalidatesTags: ["TRANSACTION"],
+    }),
+
+    agentCashOut: builder.mutation<IResponse<null>, ICashOut>({
+      query: (transactionData) => ({
+        url: "/transactions/cash-out",
+        method: "POST",
+        data: transactionData,
+      }),
+      invalidatesTags: ["TRANSACTION"],
+    }),
+
     getMeTransaction: builder.query({
       query: ({ page, limit, type, fromDate, toDate }) => {
         const params = new URLSearchParams();
@@ -53,4 +78,6 @@ export const {
   useWithdrawMoneyMutation,
   useSendMoneyMutation,
   useGetMeTransactionQuery,
+  useAgentCashInMutation,
+  useAgentCashOutMutation,
 } = transactionApi;

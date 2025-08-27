@@ -35,6 +35,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { calculateFee } from "@/utils/claculateFee";
+import { useGetAllUserAndAgentQuery } from "@/redux/features/user/user.api";
+import { useGetMeWalletQuery } from "@/redux/features/wallet/wallet.api";
 
 // -------------------- Types & Utils --------------------
 
@@ -56,48 +58,23 @@ const baseSchema = z.object({
 });
 
 type ActionForm = z.infer<typeof baseSchema>;
-
-// -------------------- Mocked users (replace with API) --------------------
-const MOCK_USERS = [
-  {
-    id: "u_101",
-    name: "Ayesha Khan",
-    phone: "+8801711223344",
-    email: "ayesha@example.com",
-    balance: 5200,
-  },
-  {
-    id: "u_102",
-    name: "Rahim Uddin",
-    phone: "+8801822556677",
-    email: "rahim@inbox.com",
-    balance: 250,
-  },
-  {
-    id: "u_103",
-    name: "Nusrat Jahan",
-    phone: "+8801633889900",
-    email: "nusrat@mail.me",
-    balance: 12000,
-  },
-  {
-    id: "u_104",
-    name: "Sakib Hasan",
-    phone: "+8801944112233",
-    email: "sakib@work.co",
-    balance: 800,
-  },
-];
+type UserType = {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  balance: number;
+};
 
 // -------------------- Component --------------------
 export default function AgentWallet() {
-  const [loading, setLoading] = useState(true);
-  const [users] = useState(MOCK_USERS);
-  const [selectedUser, setSelectedUser] = useState<
-    (typeof MOCK_USERS)[0] | null
-  >(null);
-  const [agentBalance, setAgentBalance] = useState(100000);
-  // console.log(selectedUser);
+  const { data: userData, isLoading: userLoading } = useGetAllUserAndAgentQuery(
+    { user: "user" }
+  );
+  const { data: walletData } = useGetMeWalletQuery(undefined);
+  const [users, setUsers] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
+  const [agentBalance, setAgentBalance] = useState<number>(0);
 
   // forms
   const depositForm = useForm<ActionForm>({
@@ -116,11 +93,16 @@ export default function AgentWallet() {
   const [suggestions, setSuggestions] = useState<typeof users>([]);
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      setLoading(false);
-    }, 500);
-    return () => clearTimeout(t);
-  }, []);
+    if (userData?.data) {
+      setUsers(userData.data);
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    if (walletData?.data?.balance !== undefined) {
+      setAgentBalance(walletData?.data?.balance);
+    }
+  }, [walletData]);
 
   // watch identifier from both forms and update suggestions
   useEffect(() => {
@@ -139,12 +121,14 @@ export default function AgentWallet() {
   function onIdentifierChange(q: string) {
     const s = q.trim().toLowerCase();
     if (!s || s.length < 2) return setSuggestions([]);
-    const list = users.filter(
-      (u) =>
-        u.phone.toLowerCase().includes(s) ||
-        u.email.toLowerCase().includes(s) ||
-        u.name.toLowerCase().includes(s)
-    );
+
+    const list = users.filter((u) => {
+      const phone = u?.phone?.toLowerCase() || "";
+      const email = u?.email?.toLowerCase() || "";
+      const name = u?.name?.toLowerCase() || "";
+      return phone.includes(s) || email.includes(s) || name.includes(s);
+    });
+
     setSuggestions(list.slice(0, 6));
   }
 
@@ -246,9 +230,9 @@ export default function AgentWallet() {
                 </div>
                 {suggestions.length > 0 && (
                   <div className="mt-2 rounded-xl border bg-popover p-2 text-sm divide-y">
-                    {suggestions.map((s) => (
+                    {suggestions.map((s, idx: any) => (
                       <button
-                        key={s.id}
+                        key={idx}
                         className="w-full text-left p-2 hover:bg-muted/60 rounded-md"
                         onClick={() => pickUser(s)}
                       >
@@ -257,7 +241,7 @@ export default function AgentWallet() {
                             <AvatarFallback>
                               {s.name
                                 .split(" ")
-                                .map((n) => n[0])
+                                .map((n: any) => n[0])
                                 .slice(0, 2)
                                 .join("")}
                             </AvatarFallback>
@@ -275,7 +259,7 @@ export default function AgentWallet() {
                 )}
               </div>
 
-              {loading ? (
+              {userLoading ? (
                 <div className="space-y-2">
                   <Skeleton className="h-8 w-full" />
                   <Skeleton className="h-6 w-1/2" />
@@ -357,7 +341,7 @@ export default function AgentWallet() {
                     className="grid grid-cols-1 md:grid-cols-3 gap-4"
                   >
                     <div className="md:col-span-2 space-y-2">
-                      <Label>User (email or phone)</Label>
+                      <Label>User (email)</Label>
                       <Input
                         placeholder="e.g. user@mail.com"
                         {...depositForm.register("identifier")}
@@ -407,11 +391,32 @@ export default function AgentWallet() {
                           <CardTitle className="text-sm">Summary</CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="flex justify-between">
-                            <span>Amount</span>
-                            <strong>
-                              BDT {depositForm.watch("amount") || 0}
-                            </strong>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between items-center">
+                              <span>Amount</span>
+                              <strong className="text-sm">
+                                BDT {depositForm.watch("amount") || 0}
+                              </strong>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span>Fee</span>
+                              <strong className="text-sm">
+                                BDT{" "}
+                                {
+                                  calculateFee(
+                                    depositForm.watch("amount") || 0,
+                                    "WITHDRAW"
+                                  ).fee
+                                }
+                              </strong>
+                            </div>
+                            <Separator />
+                            <div className="flex justify-between items-center">
+                              <span>Total Amount</span>
+                              <strong className="text-sm">
+                                BDT {depositForm.watch("amount") || 0}
+                              </strong>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>

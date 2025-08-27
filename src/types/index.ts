@@ -27,4 +27,10 @@ export type {
   IVerifyOTP,
 } from "./auth.type";
 
-export type { IAddMoney, IWithdrawMoney, ISendMoney } from "./transaction.type";
+export type {
+  IAddMoney,
+  IWithdrawMoney,
+  ISendMoney,
+  ICashIn,
+  ICashOut,
+} from "./transaction.type";
