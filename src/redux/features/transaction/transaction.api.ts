@@ -70,6 +70,14 @@ export const transactionApi = baseApi.injectEndpoints({
       },
       providesTags: ["TRANSACTION"],
     }),
+
+    getTransactionSummery: builder.query({
+      query: () => ({
+        url: "/transactions/summary",
+        method: "GET",
+      }),
+      providesTags: ["TRANSACTION"],
+    }),
   }),
 });
 
@@ -80,4 +88,5 @@ export const {
   useGetMeTransactionQuery,
   useAgentCashInMutation,
   useAgentCashOutMutation,
+  useGetTransactionSummeryQuery,
 } = transactionApi;

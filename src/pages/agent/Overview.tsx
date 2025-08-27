@@ -33,17 +33,18 @@ import {
 } from "recharts";
 import { useTheme } from "next-themes";
 import StatCard from "@/components/modules/agent/overview/StatCard";
+import { useGetTransactionSummeryQuery } from "@/redux/features/transaction/transaction.api";
 
 // -------------------- Types --------------------
-type TxType = "deposit" | "withdraw" | "send";
-type TxStatus = "success" | "pending" | "failed";
+type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
+type TxStatus = "COMPLETED" | "PENDING" | "FAILED";
 interface TxItem {
   id: string;
   type: TxType;
   title: string;
-  amount: number; // +ve for inflow, -ve for outflow
+  amount: number;
   status: TxStatus;
-  createdAt: string; // ISO
+  createdAt: string;
 }
 
 // -------------------- Mock Data --------------------
@@ -60,42 +61,42 @@ const MOCK_DAILY = [
 const MOCK_RECENT: TxItem[] = [
   {
     id: "tx_2001",
-    type: "deposit",
+    type: "ADD_MONEY",
     title: "Agent cash-in #1033",
     amount: 2500,
-    status: "success",
+    status: "COMPLETED",
     createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: "tx_2002",
-    type: "withdraw",
+    type: "WITHDRAW",
     title: "Cash-out to Agent #204",
     amount: -1000,
-    status: "pending",
+    status: "PENDING",
     createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: "tx_2003",
-    type: "send",
+    type: "SEND_MONEY",
     title: "Sent to Ayesha Khan",
     amount: -1500,
-    status: "success",
+    status: "COMPLETED",
     createdAt: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: "tx_2004",
-    type: "deposit",
+    type: "ADD_MONEY",
     title: "Bank deposit (DBBL)",
     amount: 5000,
-    status: "success",
+    status: "COMPLETED",
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: "tx_2005",
-    type: "send",
+    type: "SEND_MONEY",
     title: "Failed transfer to Rahim",
     amount: -750,
-    status: "failed",
+    status: "FAILED",
     createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
   },
 ];
@@ -118,10 +119,16 @@ const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
 
 // -------------------- Component --------------------
 export default function AgentOverview() {
+  const { data: getTransactionSummery } =
+    useGetTransactionSummeryQuery(undefined);
+
   const [loading, setLoading] = useState(true);
   const [daily, setDaily] = useState(MOCK_DAILY);
   const [recent, setRecent] = useState<TxItem[]>([]);
   const theme = useTheme();
+
+  console.log(getTransactionSummery?.data);
+
   useEffect(() => {
     const t = setTimeout(() => {
       setDaily(MOCK_DAILY);
@@ -131,8 +138,16 @@ export default function AgentOverview() {
     return () => clearTimeout(t);
   }, []);
 
-  const totalInWeek = useMemo(() => sum(daily.map((d) => d.cashIn)), [daily]);
-  const totalOutWeek = useMemo(() => sum(daily.map((d) => d.cashOut)), [daily]);
+  const totalInWeek =
+    getTransactionSummery?.data?.last7DaysSummary.find(
+      (d: any) => d._id === "ADD_MONEY"
+    )?.totalAmount || 0;
+
+  const totalOutWeek =
+    getTransactionSummery?.data?.last7DaysSummary.find(
+      (d: any) => d._id === "WITHDRAW"
+    )?.totalAmount || 0;
+
   const netWeek = totalInWeek - totalOutWeek;
 
   const today = daily[daily.length - 1];
