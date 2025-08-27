@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -35,73 +35,6 @@ import { useTheme } from "next-themes";
 import StatCard from "@/components/modules/agent/overview/StatCard";
 import { useGetTransactionSummeryQuery } from "@/redux/features/transaction/transaction.api";
 
-// -------------------- Types --------------------
-type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
-type TxStatus = "COMPLETED" | "PENDING" | "FAILED";
-interface TxItem {
-  id: string;
-  type: TxType;
-  title: string;
-  amount: number;
-  status: TxStatus;
-  createdAt: string;
-}
-
-// -------------------- Mock Data --------------------
-const MOCK_DAILY = [
-  { day: "Mon", cashIn: 5200, cashOut: 2300 },
-  { day: "Tue", cashIn: 4100, cashOut: 1800 },
-  { day: "Wed", cashIn: 7600, cashOut: 3200 },
-  { day: "Thu", cashIn: 3000, cashOut: 1200 },
-  { day: "Fri", cashIn: 9200, cashOut: 4400 },
-  { day: "Sat", cashIn: 6800, cashOut: 2700 },
-  { day: "Sun", cashIn: 5400, cashOut: 2100 },
-];
-
-const MOCK_RECENT: TxItem[] = [
-  {
-    id: "tx_2001",
-    type: "ADD_MONEY",
-    title: "Agent cash-in #1033",
-    amount: 2500,
-    status: "COMPLETED",
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: "tx_2002",
-    type: "WITHDRAW",
-    title: "Cash-out to Agent #204",
-    amount: -1000,
-    status: "PENDING",
-    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: "tx_2003",
-    type: "SEND_MONEY",
-    title: "Sent to Ayesha Khan",
-    amount: -1500,
-    status: "COMPLETED",
-    createdAt: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: "tx_2004",
-    type: "ADD_MONEY",
-    title: "Bank deposit (DBBL)",
-    amount: 5000,
-    status: "COMPLETED",
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: "tx_2005",
-    type: "SEND_MONEY",
-    title: "Failed transfer to Rahim",
-    amount: -750,
-    status: "FAILED",
-    createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-];
-
-// -------------------- Helpers --------------------
 const BDT = new Intl.NumberFormat("en-BD", {
   style: "currency",
   currency: "BDT",
@@ -115,42 +48,52 @@ const fmt = (n: number) => {
   }
 };
 
-const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
-
 // -------------------- Component --------------------
 export default function AgentOverview() {
   const { data: getTransactionSummery } =
     useGetTransactionSummeryQuery(undefined);
-
+  const { last7DaysSummary, weeklyGraph, recentActivity } =
+    getTransactionSummery?.data || {};
   const [loading, setLoading] = useState(true);
-  const [daily, setDaily] = useState(MOCK_DAILY);
-  const [recent, setRecent] = useState<TxItem[]>([]);
+  const [daily, setDaily] = useState<any[]>([]);
+  const [recent, setRecent] = useState<any[]>([]);
   const theme = useTheme();
-
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   console.log(getTransactionSummery?.data);
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      setDaily(MOCK_DAILY);
-      setRecent(MOCK_RECENT);
-      setLoading(false);
-    }, 700);
-    return () => clearTimeout(t);
-  }, []);
+    const graphData = dayNames?.map((day) => ({ day, cashIn: 0, cashOut: 0 }));
+    weeklyGraph?.forEach((item: any) => {
+      const dayName = dayNames[item._id.day - 1];
+      if (item._id.type === "ADD_MONEY")
+        graphData[dayNames.indexOf(dayName)].cashIn = item.total;
+      else if (item._id.type === "WITHDRAW")
+        graphData[dayNames.indexOf(dayName)].cashOut = item.total;
+    });
+    setDaily(graphData);
+
+    // Format recent activity
+    const recentTx = recentActivity?.map((tx: any) => ({
+      id: tx._id,
+      type: tx.type,
+      title: tx.type === "ADD_MONEY" ? "Agent cash-in" : "Cash-out",
+      amount: tx.amount,
+      status: tx.status,
+      createdAt: tx.createdAt,
+    }));
+    setRecent(recentTx);
+    setLoading(false);
+  }, [last7DaysSummary, weeklyGraph, recentActivity]);
 
   const totalInWeek =
-    getTransactionSummery?.data?.last7DaysSummary.find(
-      (d: any) => d._id === "ADD_MONEY"
-    )?.totalAmount || 0;
+    last7DaysSummary?.find((d: any) => d._id === "ADD_MONEY")?.totalAmount || 0;
 
   const totalOutWeek =
-    getTransactionSummery?.data?.last7DaysSummary.find(
-      (d: any) => d._id === "WITHDRAW"
-    )?.totalAmount || 0;
+    last7DaysSummary?.find((d: any) => d._id === "WITHDRAW")?.totalAmount || 0;
 
   const netWeek = totalInWeek - totalOutWeek;
-
   const today = daily[daily.length - 1];
+
   const barColors =
     theme.theme === "dark"
       ? { cashIn: "#22c55e", cashOut: "#f87171" }
@@ -278,7 +221,7 @@ export default function AgentOverview() {
               </div>
             ) : (
               <div className="space-y-2">
-                {recent.map((r) => (
+                {recent?.map((r) => (
                   <div
                     key={r.id}
                     className="flex items-center justify-between gap-3 p-2 hover:bg-muted/20 rounded-md"
