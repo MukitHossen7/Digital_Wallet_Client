@@ -37,17 +37,13 @@ import {
 import { calculateFee } from "@/utils/claculateFee";
 import { useGetAllUserAndAgentQuery } from "@/redux/features/user/user.api";
 import { useGetMeWalletQuery } from "@/redux/features/wallet/wallet.api";
+import {
+  useAgentCashInMutation,
+  useAgentCashOutMutation,
+} from "@/redux/features/transaction/transaction.api";
 
-// -------------------- Types & Utils --------------------
-
-// function calcFee(amount: number, percent = 0.009, min = 10, max = 200) {
-//   const fee = Math.min(Math.max(Math.round(amount * percent), min), max);
-//   return { fee, totalDebit: amount + fee };
-// }
-
-// -------------------- Validation --------------------
 const baseSchema = z.object({
-  identifier: z.string().min(5, "Enter phone or email of the user"),
+  identifier: z.string().min(5, "Enter email of the user"),
   amount: z
     .number({ error: "Amount is required" })
     .positive("Enter a positive amount")
@@ -66,12 +62,13 @@ type UserType = {
   balance: number;
 };
 
-// -------------------- Component --------------------
 export default function AgentWallet() {
   const { data: userData, isLoading: userLoading } = useGetAllUserAndAgentQuery(
     { user: "user" }
   );
   const { data: walletData } = useGetMeWalletQuery(undefined);
+  const [agentCashIn] = useAgentCashInMutation();
+  const [agentCashOut] = useAgentCashOutMutation();
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [agentBalance, setAgentBalance] = useState<number>(0);
@@ -146,38 +143,69 @@ export default function AgentWallet() {
     //   toast.error("Select a user first");
     //   return;
     // }
-    if (values.amount > agentBalance) {
+    if (Number(values.amount) > Number(agentBalance)) {
       toast.error("Agent has insufficient balance");
       return;
     }
-    setSelectedUser((prev) =>
-      prev ? { ...prev, balance: prev.balance + values.amount } : prev
-    );
-    setAgentBalance((prev) => prev - values.amount);
-
-    toast.success(`৳${values.amount} added to ${selectedUser?.name}'s wallet`);
-    console.log(values);
-
-    depositForm.reset({ identifier: "", amount: 0 });
+    let toastId: string | number | undefined;
+    try {
+      toastId = toast.loading("Processing your CashIn...");
+      const depositData = {
+        email: values.identifier,
+        type: values.type,
+        amount: values.amount,
+      };
+      const res = await agentCashIn(depositData).unwrap();
+      if (res.success) {
+        toast.success(`৳${values.amount} added successfully!`, { id: toastId });
+        setAgentBalance((prev) => prev - values.amount);
+        depositForm.reset({ identifier: "", amount: 0 });
+      } else {
+        toast.error("Cash In failed", { id: toastId });
+      }
+    } catch (error: any) {
+      if (toastId) {
+        toast.error(error?.data?.message, { id: toastId });
+      } else {
+        toast.error(error?.data?.message || "Something went wrong");
+      }
+      console.log(error);
+    }
   }
 
   async function handleWithdraw(values: ActionForm) {
-    if (!selectedUser) {
-      toast.error("Select a user first");
-      return;
+    // if (!selectedUser) {
+    //   toast.error("Select a user first");
+    //   return;
+    // }
+    const { fee, totalAmount } = calculateFee(values.amount, "WITHDRAW");
+    let toastId: string | number | undefined;
+    try {
+      toastId = toast.loading("Processing your Withdraw...");
+      const withdrawData = {
+        email: values.identifier,
+        type: values.type,
+        amount: totalAmount,
+        fee: fee,
+      };
+      const res = await agentCashOut(withdrawData).unwrap();
+      if (res.success) {
+        toast.success(`৳${totalAmount} cash out successfully!`, {
+          id: toastId,
+        });
+        setAgentBalance((prev) => prev + values.amount);
+        withdrawForm.reset({ identifier: "", amount: 0 });
+      } else {
+        toast.error("Cash Out failed", { id: toastId });
+      }
+    } catch (error: any) {
+      if (toastId) {
+        toast.error(error?.data?.message, { id: toastId });
+      } else {
+        toast.error(error?.data?.message || "Something went wrong");
+      }
+      console.log(error);
     }
-    const { totalAmount } = calculateFee(values.amount, "WITHDRAW");
-    if (totalAmount > selectedUser.balance) {
-      toast.error("Insufficient balance for this user");
-      return;
-    }
-    setSelectedUser({
-      ...selectedUser,
-      balance: selectedUser.balance - totalAmount,
-    });
-    setAgentBalance((prev) => prev + values.amount);
-    console.log(values);
-    withdrawForm.reset({ identifier: "", amount: 0 });
   }
 
   // Quick amounts
@@ -405,7 +433,7 @@ export default function AgentWallet() {
                                 {
                                   calculateFee(
                                     depositForm.watch("amount") || 0,
-                                    "WITHDRAW"
+                                    "ADD_MONEY"
                                   ).fee
                                 }
                               </strong>
@@ -502,7 +530,9 @@ export default function AgentWallet() {
                             <SelectItem value="ADD_MONEY">
                               Deposit Money
                             </SelectItem>
-                            <SelectItem value="WITHDRAW">Withdraw</SelectItem>
+                            <SelectItem value="WITHDRAW">
+                              Withdraw Money
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                         {withdrawForm.formState.errors.type && (

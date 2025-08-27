@@ -24,4 +24,5 @@ export interface ICashOut {
   amount: number;
   type: string;
   email: string;
+  fee: number;
 }
