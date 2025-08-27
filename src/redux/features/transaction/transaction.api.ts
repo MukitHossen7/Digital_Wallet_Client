@@ -30,11 +30,12 @@ export const transactionApi = baseApi.injectEndpoints({
       invalidatesTags: ["TRANSACTION"],
     }),
 
-    getMe: builder.query({
+    getMeTransaction: builder.query({
       query: () => ({
-        url: "/users/me",
+        url: "/transactions/me",
         method: "GET",
       }),
+      providesTags: ["TRANSACTION"],
     }),
   }),
 });
@@ -43,4 +44,5 @@ export const {
   useAddMoneyMutation,
   useWithdrawMoneyMutation,
   useSendMoneyMutation,
+  useGetMeTransactionQuery,
 } = transactionApi;

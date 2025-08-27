@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -27,7 +28,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 import {
   Wallet,
@@ -43,6 +43,8 @@ import {
 import ActionCard from "@/components/modules/user/overview/ActionCard";
 import StatusBadge from "@/components/modules/user/overview/StatusBadge";
 import EmptyState from "@/components/modules/user/overview/EmptyState";
+import { useGetMeWalletQuery } from "@/redux/features/wallet/wallet.api";
+import { useGetMeTransactionQuery } from "@/redux/features/transaction/transaction.api";
 
 // -------------------- Types --------------------
 export type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
@@ -51,19 +53,12 @@ export type TxStatus = "COMPLETED" | "PENDING" | "FAILED" | "REVERSED";
 export interface RecentTx {
   id: string;
   type: TxType;
-  title: string; // e.g. Deposit from Agent 1033
-  counterparty?: string; // e.g. +88017...
-  amount: number; // positive for inflow, negative for outflow
+  initiatedBy: string;
+  amount: number;
   status: TxStatus;
-  createdAt: string; // ISO
+  createdAt: string;
 }
 
-export interface OverviewData {
-  balance: number;
-  recent: RecentTx[];
-}
-
-// -------------------- Utils --------------------
 const BDT = new Intl.NumberFormat("en-BD", {
   style: "currency",
   currency: "BDT",
@@ -106,83 +101,31 @@ const typeMeta: Record<
   },
 };
 
-// -------------------- Mock (replace with RTK Query) --------------------
-const MOCK: OverviewData = {
-  balance: 12540.5,
-  recent: [
-    {
-      id: "tx_1001",
-      type: "ADD_MONEY",
-      title: "Deposit from Agent #1033",
-      counterparty: "Agent 1033",
-      amount: 2500,
-      status: "COMPLETED",
-      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2h ago
-    },
-    {
-      id: "tx_1002",
-      type: "WITHDRAW",
-      title: "Cash-out to Agent #204",
-      counterparty: "Agent 204",
-      amount: -1000,
-      status: "PENDING",
-      createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5h ago
-    },
-    {
-      id: "tx_1003",
-      type: "SEND_MONEY",
-      title: "Send to Ayesha Khan",
-      counterparty: "+8801711223344",
-      amount: -1500,
-      status: "COMPLETED",
-      createdAt: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(), // 1d ago
-    },
-    {
-      id: "tx_1004",
-      type: "SEND_MONEY",
-      title: "Send to Rahim Uddin",
-      counterparty: "rahim@inbox.com",
-      amount: -750,
-      status: "FAILED",
-      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3d ago
-    },
-    {
-      id: "tx_1005",
-      type: "ADD_MONEY",
-      title: "Deposit from Bank",
-      counterparty: "DBBL",
-      amount: 5000,
-      status: "COMPLETED",
-      createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), // 6d ago
-    },
-  ],
-};
-
-// -------------------- Component --------------------
 export default function Overview() {
+  const { data: walletData, isLoading: walletLoading } =
+    useGetMeWalletQuery(undefined);
+  const { data: transactionData, isLoading: transactionLoading } =
+    useGetMeTransactionQuery(undefined);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [hidden, setHidden] = useState(false);
-  const [data, setData] = useState<OverviewData | null>(null);
 
-  useEffect(() => {
-    // TODO: Replace with RTK Query: const { data, isLoading } = useGetOverviewQuery()
-    const t = setTimeout(() => {
-      setData(MOCK);
-      setLoading(false);
-    }, 700);
-    return () => clearTimeout(t);
-  }, []);
+  const [hidden, setHidden] = useState(false);
 
   const balanceText = useMemo(
-    () => (hidden ? "••••••" : formatBDT(data?.balance ?? 0)),
-    [hidden, data]
+    () => (hidden ? "••••••" : walletData?.data?.balance ?? 0),
+    [hidden, walletData?.data?.balance]
   );
 
   function goAction(tab: "deposit" | "withdraw" | "send") {
     navigate(`/user/wallet/?tab=${tab}`);
   }
 
+  const recentTransactions: RecentTx[] = transactionData?.data
+    ?.slice()
+    ?.sort(
+      (a: any, b: any) =>
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+    )
+    ?.slice(0, 5);
   return (
     <div className="container mx-auto max-w-6xl px-3 md:px-6 py-6 md:py-8 space-y-6">
       {/* Header */}
@@ -213,7 +156,8 @@ export default function Overview() {
                 Available Balance
               </CardDescription>
               <CardTitle className="text-4xl mt-1">
-                {loading ? (
+                BDT{" "}
+                {walletLoading ? (
                   <Skeleton className="h-10 w-52 bg-white/30" />
                 ) : (
                   balanceText
@@ -313,13 +257,14 @@ export default function Overview() {
           <h2 className="text-lg font-semibold">Recent Transactions</h2>
           <Button
             variant="ghost"
-            className="rounded-xl"
-            onClick={() => navigate("/dashboard/transactions")}
+            className="rounded-full"
+            size="sm"
+            onClick={() => navigate("/user/transactions-history")}
           >
             View all
           </Button>
         </div>
-        {loading ? (
+        {transactionLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
               <Card key={i} className="p-4">
@@ -327,22 +272,23 @@ export default function Overview() {
               </Card>
             ))}
           </div>
-        ) : data && data.recent.length > 0 ? (
+        ) : transactionData?.data && recentTransactions?.length > 0 ? (
           <Card>
             <CardContent className="pt-4">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Type</TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Counterparty</TableHead>
+                    <TableHead>InitiatedBy</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">
+                      Transaction Date
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.recent.map((tx) => (
+                  {recentTransactions?.map((tx) => (
                     <TableRow key={tx.id} className="hover:bg-muted/50">
                       <TableCell>
                         <div
@@ -356,23 +302,9 @@ export default function Overview() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="max-w-[260px] truncate">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>
-                              {tx.type.slice(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="leading-tight">
-                            <div className="font-medium">{tx.title}</div>
-                            <div className="text-xs text-muted-foreground">
-                              ID: {tx.id}
-                            </div>
-                          </div>
-                        </div>
-                      </TableCell>
+
                       <TableCell className="text-muted-foreground">
-                        {tx.counterparty ?? "—"}
+                        {tx.initiatedBy ?? "_"}
                       </TableCell>
                       <TableCell
                         className={`text-right font-semibold ${
@@ -386,7 +318,7 @@ export default function Overview() {
                       <TableCell>
                         <StatusBadge status={tx.status} />
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="text-muted-foreground text-right">
                         {formatTime(tx.createdAt)}
                       </TableCell>
                     </TableRow>

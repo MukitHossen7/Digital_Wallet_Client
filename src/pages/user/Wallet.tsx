@@ -142,13 +142,13 @@ export default function WalletPage() {
     let toastId: string | number | undefined;
     try {
       toastId = toast.loading("Processing your deposit...");
-      const res = await addMoney(values);
-      if (res?.data?.success) {
+      const res = await addMoney(values).unwrap();
+      if (res?.success) {
         toast.success("Deposit successfully", { id: toastId });
         depositForm.reset({ amount: 0, email: "" });
         setBalance((prev) => (prev ?? 0) + values.amount);
       } else {
-        toast.error(res?.data?.message || "Deposit failed", { id: toastId });
+        toast.error("Deposit failed", { id: toastId });
       }
     } catch (error: any) {
       console.log(error);
@@ -174,16 +174,15 @@ export default function WalletPage() {
         email: values.email,
         fee: fee,
       };
-      const res = await withdrawMoney(withdrawData);
-      if (res?.data?.success) {
+      const res = await withdrawMoney(withdrawData).unwrap();
+      if (res?.success) {
         toast.success("Withdraw successfully", { id: toastId });
         withdrawForm.reset({ amount: 0, email: "" });
         setBalance((prev) => (prev ?? 0) - totalAmount);
       } else {
-        toast.error(res?.data?.message || "Withdraw failed", { id: toastId });
+        toast.error("Withdraw failed", { id: toastId });
       }
     } catch (error: any) {
-      console.log(error);
       const message =
         error?.data?.message || error?.message || "Something went wrong";
       toast.error(message, { id: toastId });
@@ -206,13 +205,13 @@ export default function WalletPage() {
         fee: fee,
       };
       toastId = toast.loading("Processing your sendMoney...");
-      const res = await sendMoney(sendData);
-      if (res.data?.success) {
+      const res = await sendMoney(sendData).unwrap();
+      if (res?.success) {
         toast.success("Sent Money Successfully", { id: toastId });
         setBalance((amount) => (amount ?? 0) - totalAmount);
         sendForm.reset({ amount: 0, email: "" });
       } else {
-        toast.error(res?.data?.message || "Send Money failed", { id: toastId });
+        toast.error("Send Money failed", { id: toastId });
       }
     } catch (error: any) {
       const message =
