@@ -1,6 +1,9 @@
 import { GoHomeFill } from "react-icons/go";
-import { AiOutlineTransaction } from "react-icons/ai";
+import { ListFilter } from "lucide-react";
 import { CgProfile } from "react-icons/cg";
+import { FaUserCheck } from "react-icons/fa";
+import { FaUserSecret } from "react-icons/fa";
+
 import AllTransaction from "@/pages/admin/AllTransaction";
 import ManageAgents from "@/pages/admin/ManageAgents";
 import ManageUsers from "@/pages/admin/ManageUsers";
@@ -20,20 +23,22 @@ export const adminSidebarItems: ISidebarItem[] = [
         icon: GoHomeFill,
       },
       {
-        title: "Manage Users",
+        title: "Users",
         url: "/admin/manage-users",
         component: ManageUsers,
+        icon: FaUserCheck,
       },
       {
-        title: "Manage Agents",
+        title: "Agents",
         url: "/admin/manage-agents",
         component: ManageAgents,
+        icon: FaUserSecret,
       },
       {
         title: "Transaction",
         url: "/admin/all-transactions",
         component: AllTransaction,
-        icon: AiOutlineTransaction,
+        icon: ListFilter,
       },
       {
         title: "Profile",
