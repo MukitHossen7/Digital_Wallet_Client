@@ -33,8 +33,6 @@ export default function ManageUsers() {
   const { data: userData, isLoading } = useGetAllUserAndAgentQuery({
     user: "user",
   });
-
-  // console.log(userData?.data);
   const handleBlockUser = async (id: string) => {
     let toastId: string | number | undefined;
     try {
@@ -87,68 +85,81 @@ export default function ManageUsers() {
       <CardContent className="overflow-x-auto">
         {isLoading ? (
           <Skeleton className="h-96 w-full" />
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Profile</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {userData?.data?.map((user: any) => (
-                <TableRow className="" key={user._id}>
-                  <TableCell className="flex items-center gap-2">
-                    <img
-                      src={user?.picture ?? demoImg}
-                      alt={user?.name}
-                      className="h-10 w-10 rounded-full object-cover ring-1"
-                    />
-                    <span>{user?.name}</span>
-                  </TableCell>
-                  <TableCell>{user?.email}</TableCell>
-                  <TableCell>{user?.role}</TableCell>
-                  <TableCell>
-                    <span
-                      className={`px-2 py-1 rounded-full text-white font-medium text-sm ${
-                        user?.isActive === "ACTIVE"
-                          ? "bg-green-500"
-                          : "bg-red-500"
-                      }`}
-                    >
-                      {user?.isActive}
-                    </span>
-                  </TableCell>
-                  <TableCell className="flex gap-2">
-                    {user?.isActive === "ACTIVE" ? (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleBlockUser(user?._id)}
-                        title="Block User"
-                        className="cursor-pointer"
-                      >
-                        <MdBlockFlipped className="h-4 w-4" />
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleUnblockUser(user?._id)}
-                        title="Unblock User"
-                        className="cursor-pointer"
-                      >
-                        <ShieldMinus className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </TableCell>
+        ) : userData.data.length > 0 ? (
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Profile</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {userData?.data?.map((user: any) => (
+                  <TableRow className="" key={user._id}>
+                    <TableCell className="flex items-center gap-2">
+                      <img
+                        src={user?.picture ?? demoImg}
+                        alt={user?.name}
+                        className="h-10 w-10 rounded-full object-cover ring-1"
+                      />
+                      <span>{user?.name}</span>
+                    </TableCell>
+                    <TableCell>{user?.email}</TableCell>
+                    <TableCell>{user?.role}</TableCell>
+                    <TableCell>
+                      <span
+                        className={`px-2 py-1 rounded-full text-white font-medium text-sm ${
+                          user?.isActive === "ACTIVE"
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                        }`}
+                      >
+                        {user?.isActive}
+                      </span>
+                    </TableCell>
+                    <TableCell className="flex gap-2">
+                      {user?.isActive === "ACTIVE" ? (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleBlockUser(user?._id)}
+                          title="Block User"
+                          className="cursor-pointer"
+                        >
+                          <MdBlockFlipped className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUnblockUser(user?._id)}
+                          title="Unblock User"
+                          className="cursor-pointer"
+                        >
+                          <ShieldMinus className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </>
+        ) : (
+          <div>
+            <Card className="bg-muted/40">
+              <CardHeader>
+                <CardTitle className="text-base">No user found</CardTitle>
+                <CardDescription>
+                  No users match your criteria. Try adjusting filters.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
         )}
       </CardContent>
     </Card>
