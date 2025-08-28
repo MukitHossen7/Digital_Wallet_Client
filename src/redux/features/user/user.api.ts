@@ -26,6 +26,22 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["USER"],
     }),
+
+    approveAgent: builder.mutation<IResponse<null>, { id: string }>({
+      query: ({ id }) => ({
+        url: `/users/approve/${id}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["USER"],
+    }),
+
+    suspendAgent: builder.mutation<IResponse<null>, { id: string }>({
+      query: ({ id }) => ({
+        url: `/users/suspend/${id}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["USER"],
+    }),
   }),
 });
 
@@ -33,4 +49,6 @@ export const {
   useGetAllUserAndAgentQuery,
   useHandleBlockMutation,
   useUnBlockUserMutation,
+  useApproveAgentMutation,
+  useSuspendAgentMutation,
 } = userApi;
