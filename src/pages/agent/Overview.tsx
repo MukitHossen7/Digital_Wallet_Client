@@ -22,16 +22,15 @@ import {
   TrendingUp,
   Sparkles,
 } from "lucide-react";
+
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-} from "recharts";
-import { useTheme } from "next-themes";
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+
 import StatCard from "@/components/modules/agent/overview/StatCard";
 import { useGetTransactionSummeryQuery } from "@/redux/features/transaction/transaction.api";
 
@@ -48,18 +47,14 @@ const fmt = (n: number) => {
   }
 };
 
-// -------------------- Component --------------------
 export default function AgentOverview() {
-  const { data: getTransactionSummery } =
+  const { data: getTransactionSummery, isLoading } =
     useGetTransactionSummeryQuery(undefined);
   const { last7DaysSummary, weeklyGraph, recentActivity } =
     getTransactionSummery?.data || {};
-  const [loading, setLoading] = useState(true);
   const [daily, setDaily] = useState<any[]>([]);
   const [recent, setRecent] = useState<any[]>([]);
-  const theme = useTheme();
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  console.log(getTransactionSummery?.data);
 
   useEffect(() => {
     const graphData = dayNames?.map((day) => ({ day, cashIn: 0, cashOut: 0 }));
@@ -82,8 +77,18 @@ export default function AgentOverview() {
       createdAt: tx.createdAt,
     }));
     setRecent(recentTx);
-    setLoading(false);
   }, [last7DaysSummary, weeklyGraph, recentActivity]);
+
+  const chartConfig = {
+    cashIn: {
+      label: "Cash In",
+      color: "var(--chart-1)",
+    },
+    cashOut: {
+      label: "Cash Out",
+      color: "var(--chart-2)",
+    },
+  } satisfies ChartConfig;
 
   const totalInWeek =
     last7DaysSummary?.find((d: any) => d._id === "ADD_MONEY")?.totalAmount || 0;
@@ -94,10 +99,6 @@ export default function AgentOverview() {
   const netWeek = totalInWeek - totalOutWeek;
   const today = daily[daily.length - 1];
 
-  const barColors =
-    theme.theme === "dark"
-      ? { cashIn: "#22c55e", cashOut: "#f87171" }
-      : { cashIn: "#10B981", cashOut: "#EF4444" };
   return (
     <div className="container mx-auto max-w-6xl px-3 md:px-6 py-6 md:py-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -118,27 +119,27 @@ export default function AgentOverview() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
           title="Cash In (7d)"
-          value={loading ? null : fmt(totalInWeek)}
+          value={isLoading ? null : fmt(totalInWeek)}
           icon={<ArrowDownToLine className="h-5 w-5" />}
           hint="Total cash-in in last 7 days"
           color="emerald"
-          loading={loading}
+          loading={isLoading}
         />
         <StatCard
           title="Cash Out (7d)"
-          value={loading ? null : fmt(totalOutWeek)}
+          value={isLoading ? null : fmt(totalOutWeek)}
           icon={<ArrowUpFromLine className="h-5 w-5" />}
           hint="Total cash-out in last 7 days"
           color="rose"
-          loading={loading}
+          loading={isLoading}
         />
         <StatCard
           title="Net flow"
-          value={loading ? null : fmt(netWeek)}
+          value={isLoading ? null : fmt(netWeek)}
           icon={<TrendingUp className="h-5 w-5" />}
           hint="Net inflow this week"
           color="primary"
-          loading={loading}
+          loading={isLoading}
         />
       </div>
 
@@ -152,38 +153,90 @@ export default function AgentOverview() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div className="h-48 flex items-center justify-center">
-                <Skeleton className="h-40 w-full" />
+            {isLoading ? (
+              <div className="h-72 flex items-center justify-center">
+                <Skeleton className="h-72 w-full" />
               </div>
             ) : (
-              <div style={{ width: "100%", height: 240 }}>
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart
-                    data={daily}
-                    margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
-                  >
-                    <XAxis dataKey="day" />
-                    <YAxis />
-                    <Tooltip formatter={(value: any) => fmt(Number(value))} />
-                    <Legend />
-                    <Bar
-                      dataKey="cashIn"
-                      name="Cash In"
-                      stackId="a"
-                      barSize={18}
-                      fill={barColors.cashIn}
-                    />
-                    <Bar
-                      dataKey="cashOut"
-                      name="Cash Out"
-                      stackId="a"
-                      barSize={18}
-                      fill={barColors.cashOut}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              <ChartContainer config={chartConfig}>
+                <AreaChart
+                  accessibilityLayer
+                  data={daily}
+                  margin={{
+                    left: -20,
+                    right: 12,
+                  }}
+                >
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="day"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    tickFormatter={(value) => fmt(value)}
+                    width={80}
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent />}
+                  />
+
+                  <defs>
+                    <linearGradient id="fillCashIn" x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset="5%"
+                        stopColor="var(--color-cashIn)"
+                        stopOpacity={0.8}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="var(--color-cashIn)"
+                        stopOpacity={0.1}
+                      />
+                    </linearGradient>
+                    <linearGradient
+                      id="fillCashOut"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="var(--color-cashOut)"
+                        stopOpacity={0.8}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="var(--color-cashOut)"
+                        stopOpacity={0.1}
+                      />
+                    </linearGradient>
+                  </defs>
+
+                  <Area
+                    dataKey="cashIn"
+                    type="natural"
+                    fill="url(#fillCashIn)"
+                    fillOpacity={0.4}
+                    stroke="var(--color-cashIn)"
+                    stackId="a"
+                  />
+                  <Area
+                    dataKey="cashOut"
+                    type="natural"
+                    fill="url(#fillCashOut)"
+                    fillOpacity={0.4}
+                    stroke="var(--color-cashOut)"
+                    stackId="a"
+                  />
+                </AreaChart>
+              </ChartContainer>
             )}
           </CardContent>
           <CardFooter>
@@ -191,10 +244,10 @@ export default function AgentOverview() {
               <div>
                 Today:{" "}
                 <strong className="text-primary">
-                  {loading ? (
+                  {isLoading ? (
                     <Skeleton className="h-4 w-20" />
                   ) : (
-                    fmt(today.cashIn - today.cashOut)
+                    fmt(today?.cashIn - today?.cashOut)
                   )}
                 </strong>
               </div>
@@ -213,7 +266,7 @@ export default function AgentOverview() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {isLoading ? (
               <div className="space-y-2">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Skeleton key={i} className="h-10 w-full" />
