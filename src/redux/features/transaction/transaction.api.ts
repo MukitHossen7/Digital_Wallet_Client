@@ -71,9 +71,30 @@ export const transactionApi = baseApi.injectEndpoints({
       providesTags: ["TRANSACTION"],
     }),
 
+    getALLTransaction: builder.query({
+      query: ({ page, limit, type }) => {
+        const params = new URLSearchParams();
+        if (page) params.append("page", page.toString());
+        if (limit) params.append("limit", limit.toString());
+        if (type) params.append("type", type);
+        return {
+          url: `/transactions?${params.toString()}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["TRANSACTION"],
+    }),
     getTransactionSummery: builder.query({
       query: () => ({
         url: "/transactions/summary",
+        method: "GET",
+      }),
+      providesTags: ["TRANSACTION"],
+    }),
+
+    getAllTransactionVolume: builder.query({
+      query: () => ({
+        url: "/transactions/volume",
         method: "GET",
       }),
       providesTags: ["TRANSACTION"],
@@ -89,4 +110,6 @@ export const {
   useAgentCashInMutation,
   useAgentCashOutMutation,
   useGetTransactionSummeryQuery,
+  useGetALLTransactionQuery,
+  useGetAllTransactionVolumeQuery,
 } = transactionApi;
