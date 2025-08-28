@@ -19,21 +19,60 @@ import { Button } from "@/components/ui/button";
 import { ShieldMinus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MdBlockFlipped } from "react-icons/md";
-import { useGetAllUserAndAgentQuery } from "@/redux/features/user/user.api";
+import {
+  useGetAllUserAndAgentQuery,
+  useHandleBlockMutation,
+  useUnBlockUserMutation,
+} from "@/redux/features/user/user.api";
 import demoImg from "../../assets/images/panda.jpg";
+import { toast } from "sonner";
 
 export default function ManageUsers() {
+  const [handleBlock] = useHandleBlockMutation();
+  const [unBlockUser] = useUnBlockUserMutation();
   const { data: userData, isLoading } = useGetAllUserAndAgentQuery({
     user: "user",
   });
 
-  console.log(userData?.data);
-  const handleBlock = (id: string) => {
-    console.log(id);
+  // console.log(userData?.data);
+  const handleBlockUser = async (id: string) => {
+    let toastId: string | number | undefined;
+    try {
+      toastId = toast.loading("Processing user block...");
+      const res = await handleBlock({ id: id }).unwrap();
+      if (res.success) {
+        toast.success("User blocked Successfully", { id: toastId });
+      } else {
+        toast.error("User blocked Failed", { id: toastId });
+      }
+    } catch (error: any) {
+      if (toastId) {
+        toast.error(error?.data?.message, { id: toastId });
+      } else {
+        toast.error("Something went wrong");
+      }
+      console.log(error);
+    }
   };
 
-  const handleUnblock = (id: string) => {
-    console.log(id);
+  const handleUnblockUser = async (id: string) => {
+    let toastId: string | number | undefined;
+    try {
+      toastId = toast.loading("Processing user unblock...");
+      const res = await unBlockUser({ id: id }).unwrap();
+      if (res.success) {
+        toast.success("User unblocked Successfully", { id: toastId });
+      } else {
+        toast.error("User unblocked Failed", { id: toastId });
+      }
+    } catch (error: any) {
+      if (toastId) {
+        toast.error(error?.data?.message, { id: toastId });
+      } else {
+        toast.error("Something went wrong");
+      }
+      console.log(error);
+    }
   };
 
   return (
@@ -88,8 +127,9 @@ export default function ManageUsers() {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => handleBlock(user.id)}
+                        onClick={() => handleBlockUser(user?._id)}
                         title="Block User"
+                        className="cursor-pointer"
                       >
                         <MdBlockFlipped className="h-4 w-4" />
                       </Button>
@@ -97,8 +137,9 @@ export default function ManageUsers() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleUnblock(user.id)}
+                        onClick={() => handleUnblockUser(user?._id)}
                         title="Unblock User"
+                        className="cursor-pointer"
                       >
                         <ShieldMinus className="h-4 w-4" />
                       </Button>
