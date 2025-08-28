@@ -222,7 +222,7 @@ export default function TransactionHistory() {
         <CardContent className="pt-0">
           {isLoading ? (
             <div className="space-y-2 py-4">
-              {Array.from({ length: 8 }).map((_, i) => (
+              {Array.from({ length: 10 }).map((_, i) => (
                 <Card key={i} className="p-3">
                   <Skeleton className="h-6 w-full" />
                 </Card>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Card,
   CardContent,
@@ -6,77 +6,94 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 import { Skeleton } from "@/components/ui/skeleton";
-import { Filter, FileText, RefreshCw } from "lucide-react";
+import {
+  Filter,
+  FileText,
+  RefreshCw,
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  Send,
+  ChevronsLeft,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsRight,
+} from "lucide-react";
+import { useGetMeTransactionQuery } from "@/redux/features/transaction/transaction.api";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import StatusBadge from "@/components/modules/user/transaction/StatusBadge";
+import { Separator } from "@/components/ui/separator";
+import EmptyState from "@/components/modules/user/transaction/EmptyState";
+import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
 type TxStatus = "COMPLETED" | "PENDING" | "FAILED";
 
 interface Transaction {
-  id: string;
+  _id: string;
   type: TxType;
   title: string;
   amount: number;
   status: TxStatus;
+  initiatedBy: string;
   createdAt: string;
 }
-
-const MOCK_TRANSACTIONS: Transaction[] = [
-  {
-    id: "tx_001",
-    type: "ADD_MONEY",
-    title: "Cash-in via Agent #101",
-    amount: 2500,
-    status: "COMPLETED",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "tx_002",
-    type: "WITHDRAW",
-    title: "Cash-out to User #202",
-    amount: -1500,
-    status: "PENDING",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "tx_003",
-    type: "SEND_MONEY",
-    title: "Sent to Rahim",
-    amount: -1200,
-    status: "FAILED",
-    createdAt: new Date().toISOString(),
-  },
-  // ...add more mock data
-];
 
 const BDT = new Intl.NumberFormat("en-BD", {
   style: "currency",
   currency: "BDT",
 });
-
+const typeMeta: Record<
+  TxType,
+  { label: string; color: string; icon: React.ReactNode }
+> = {
+  ADD_MONEY: {
+    label: "Deposit",
+    color: "text-emerald-600",
+    icon: <ArrowDownToLine className="h-4 w-4" />,
+  },
+  WITHDRAW: {
+    label: "Withdraw",
+    color: "text-rose-600",
+    icon: <ArrowUpFromLine className="h-4 w-4" />,
+  },
+  SEND_MONEY: {
+    label: "Send Money",
+    color: "text-blue-600",
+    icon: <Send className="h-4 w-4" />,
+  },
+};
 export default function TransactionsPage() {
-  const [loading, setLoading] = useState(true);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const { data: transactionData, isLoading: transactionLoading } =
+    useGetMeTransactionQuery({
+      page: page,
+      limit: pageSize,
+      type: "all",
+    });
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      setTransactions(MOCK_TRANSACTIONS);
-      setLoading(false);
-    }, 700);
-    return () => clearTimeout(t);
-  }, []);
+    setPage(1);
+  }, [pageSize]);
 
-  const getStatusColor = (status: TxStatus) => {
-    switch (status) {
-      case "COMPLETED":
-        return "bg-emerald-100 text-emerald-700";
-      case "PENDING":
-        return "bg-yellow-100 text-yellow-700";
-      case "FAILED":
-        return "bg-rose-100 text-rose-700";
-    }
-  };
+  // backend  data
+  const tx = useMemo(() => transactionData?.data ?? [], [transactionData]);
+  const total = transactionData?.meta?.total ?? 0;
+  const totalPages = transactionData?.meta?.totalPage ?? 1;
+  const start = (page - 1) * pageSize;
+  const end = Math.min(start + pageSize, total);
+  const pageItems = tx;
+  console.log(transactionData);
 
   return (
     <div className="container mx-auto max-w-6xl px-3 md:px-6 py-6 space-y-6">
@@ -101,61 +118,126 @@ export default function TransactionsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {loading ? (
+          {transactionLoading ? (
             <div className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: 10 }).map((_, i) => (
                 <Skeleton key={i} className="h-10 w-full" />
               ))}
             </div>
-          ) : (
+          ) : pageItems?.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-muted-foreground rounded-md">
-                <thead className="bg-muted text-left">
-                  <tr>
-                    <th className="px-4 py-2">ID</th>
-                    <th className="px-4 py-2">Type</th>
-                    <th className="px-4 py-2">Title</th>
-                    <th className="px-4 py-2">Amount</th>
-                    <th className="px-4 py-2">Status</th>
-                    <th className="px-4 py-2">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-muted-foreground">
-                  {transactions.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-muted/20">
-                      <td className="px-4 py-2">{tx.id}</td>
-                      <td className="px-4 py-2 capitalize">{tx.type}</td>
-                      <td className="px-4 py-2">{tx.title}</td>
-                      <td
-                        className={`px-4 py-2 font-semibold ${
-                          tx.amount >= 0 ? "text-emerald-600" : "text-rose-600"
-                        }`}
-                      >
-                        {tx.amount >= 0
-                          ? `+${BDT.format(tx.amount)}`
-                          : `${BDT.format(tx.amount)}`}
-                      </td>
-                      <td className="px-4 py-2">
-                        <Badge className={getStatusColor(tx.status)}>
-                          {tx.status}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-2 text-xs text-muted-foreground">
-                        {new Date(tx.createdAt).toLocaleString()}
-                      </td>
-                    </tr>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">Type</TableHead>
+                    <TableHead>Initiated By</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">
+                      Transaction Date
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pageItems?.map((data: Transaction) => (
+                    <TableRow key={data._id}>
+                      <TableCell className="font-medium capitalize">
+                        <div
+                          className={`inline-flex items-center gap-2 ${
+                            typeMeta[data.type as TxType].color
+                          }`}
+                        >
+                          {typeMeta[data.type as TxType].icon}
+                          <span className="font-medium">
+                            {typeMeta[data.type as TxType].label}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{data.initiatedBy}</TableCell>
+                      <TableCell>
+                        <div
+                          className={`font-semibold flex items-center ${
+                            data.amount >= 0
+                              ? "text-emerald-600"
+                              : "text-rose-600"
+                          }`}
+                        >
+                          {data.amount >= 0
+                            ? `+${BDT.format(data.amount)}`
+                            : `${BDT.format(data.amount)}`}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={data.status} />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {new Date(data.createdAt).toLocaleString()}
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
+              <Separator className="my-4" />
+              {/* Pagination */}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="text-sm text-muted-foreground">
+                  Showing <span className="font-medium">{start + 1}</span>–
+                  <span className="font-medium">{end}</span> of{" "}
+                  <span className="font-medium">{total}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 rounded-full"
+                      onClick={() => setPage(1)}
+                      disabled={page === 1}
+                    >
+                      <ChevronsLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 rounded-full"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <div className="px-3 text-sm">
+                      Page <span className="font-medium">{page}</span> /{" "}
+                      {totalPages}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 rounded-full"
+                      onClick={() =>
+                        setPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      disabled={page === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 rounded-full"
+                      onClick={() => setPage(totalPages)}
+                      disabled={page === totalPages}
+                    >
+                      <ChevronsRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
+          ) : (
+            <EmptyState />
           )}
         </CardContent>
       </Card>
-      {/* Pagination placeholder */}
-      <div className="flex justify-end gap-2 text-sm text-muted-foreground">
-        <button className="btn btn-outline px-3">Prev</button>
-        <button className="btn btn-outline px-3">Next</button>
-      </div>
     </div>
   );
 }
