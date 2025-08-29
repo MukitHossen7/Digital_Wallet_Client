@@ -72,11 +72,13 @@ export const transactionApi = baseApi.injectEndpoints({
     }),
 
     getALLTransaction: builder.query({
-      query: ({ page, limit, type }) => {
+      query: ({ page, limit, type, status, search }) => {
         const params = new URLSearchParams();
         if (page) params.append("page", page.toString());
         if (limit) params.append("limit", limit.toString());
         if (type) params.append("type", type);
+        if (status) params.append("status", status);
+        if (search) params.append("search", search);
         return {
           url: `/transactions?${params.toString()}`,
           method: "GET",

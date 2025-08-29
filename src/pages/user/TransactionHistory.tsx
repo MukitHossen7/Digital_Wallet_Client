@@ -95,7 +95,7 @@ export default function TransactionHistory() {
   const [from, setFrom] = useState<string>(""); // YYYY-MM-DD
   const [to, setTo] = useState<string>("");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(10);
 
   const { data: transactionData, isLoading } = useGetMeTransactionQuery({
     page: page,

@@ -74,7 +74,7 @@ const typeMeta: Record<
 };
 export default function TransactionsPage() {
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(10);
   const { data: transactionData, isLoading: transactionLoading } =
     useGetMeTransactionQuery({
       page: page,
