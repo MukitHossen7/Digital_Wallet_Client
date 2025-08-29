@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -20,6 +21,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "lucide-react";
 import { useGetMeQuery } from "@/redux/features/auth/auth.api";
 import SingleImageUploader from "@/components/SingleImageUploader";
+import { toast } from "sonner";
+import { useUpdateUserProfileMutation } from "@/redux/features/user/user.api";
 
 // -------------------- Validation --------------------
 const agentProfileSchema = z.object({
@@ -57,6 +60,7 @@ type AgentProfileForm = z.infer<typeof agentProfileSchema>;
 type AgentPasswordForm = z.infer<typeof agentPasswordSchema>;
 
 export default function AgentProfile() {
+  const [updateUserProfile] = useUpdateUserProfileMutation();
   const [showPassword, setShowPassword] = useState(false);
   const { data: userData, isLoading: userLoading } = useGetMeQuery(undefined);
   const [image, setImage] = useState<File | null>(null);
@@ -92,11 +96,28 @@ export default function AgentProfile() {
   }, [userData, agentProfileForm]);
 
   async function onSubmitAgentProfile(values: AgentProfileForm) {
-    const formData = new FormData();
-    formData.append("data", JSON.stringify(values));
-    formData.append("file", image as File);
-    console.log(formData.get("data"));
-    console.log(formData.get("file"));
+    let toastId: string | number | undefined;
+    try {
+      toastId = toast.loading("Processing update profile...");
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(values));
+      if (image) {
+        formData.append("file", image as File);
+      }
+
+      const res = await updateUserProfile(formData).unwrap();
+      if (res.success) {
+        toast.success("Update Profile Successfully", { id: toastId });
+      } else {
+        toast.error("Update Profile Failed", { id: toastId });
+      }
+    } catch (error: any) {
+      if (toastId) {
+        toast.error(error?.data?.message, { id: toastId });
+      } else {
+        toast.error("Something went wrong");
+      }
+    }
   }
 
   async function onSubmitAgentPassport(values: AgentPasswordForm) {
