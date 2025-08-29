@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,6 +18,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "lucide-react";
 import { useGetMeQuery } from "@/redux/features/auth/auth.api";
 import SingleImageUploader from "@/components/SingleImageUploader";
+import { toast } from "sonner";
+import { useUpdateUserProfileMutation } from "@/redux/features/user/user.api";
 
 // -------------------- Validation --------------------
 const profileSchema = z.object({
@@ -54,6 +57,7 @@ type ProfileForm = z.infer<typeof profileSchema>;
 type PasswordForm = z.infer<typeof passwordSchema>;
 
 export default function MyProfile() {
+  const [updateUserProfile] = useUpdateUserProfileMutation();
   const { data: adminData, isLoading: adminLoading } = useGetMeQuery(undefined);
   const [showPassword, setShowPassword] = useState(false);
   const [image, setImage] = useState<File | null>(null);
@@ -88,11 +92,27 @@ export default function MyProfile() {
   }, [adminData, profileForm]);
 
   async function onSubmitProfile(values: ProfileForm) {
-    const formData = new FormData();
-    formData.append("data", JSON.stringify(values));
-    formData.append("file", image as File);
-    console.log(formData.get("data"));
-    console.log(formData.get("file"));
+    let toastId: string | number | undefined;
+    try {
+      toastId = toast.loading("Processing update profile...");
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(values));
+      if (image) {
+        formData.append("file", image as File);
+      }
+      const res = await updateUserProfile(formData).unwrap();
+      if (res.success) {
+        toast.success("Update Profile Successfully", { id: toastId });
+      } else {
+        toast.error("Update Profile Failed", { id: toastId });
+      }
+    } catch (error: any) {
+      if (toastId) {
+        toast.error(error?.data?.message, { id: toastId });
+      } else {
+        toast.error("Something went wrong");
+      }
+    }
   }
 
   async function onSubmitPassword(values: PasswordForm) {
@@ -112,7 +132,12 @@ export default function MyProfile() {
           </p>
         </div>
         <div className="text-sm text-muted-foreground">
-          Last updated: <span className="font-medium">Today</span>
+          Last updated:{" "}
+          <span className="font-medium">
+            {adminData?.data?.updatedAt
+              ? new Date(adminData.data.updatedAt).toLocaleDateString()
+              : "N/A"}
+          </span>
         </div>
       </div>
 

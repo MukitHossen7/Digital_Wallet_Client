@@ -137,7 +137,12 @@ export default function MyProfile() {
           </p>
         </div>
         <div className="text-sm text-muted-foreground">
-          Last updated: <span className="font-medium">Today</span>
+          Last updated:{" "}
+          <span className="font-medium">
+            {userData?.data?.updatedAt
+              ? new Date(userData.data.updatedAt).toLocaleDateString()
+              : "N/A"}
+          </span>
         </div>
       </div>
 
