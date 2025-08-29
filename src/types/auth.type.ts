@@ -23,6 +23,12 @@ export interface Auth {
   provider: string;
   providerID: string;
 }
+export interface IUpdateProfile {
+  name: string;
+  address: string;
+  picture: string;
+  phone: string;
+}
 export interface IRegisterData {
   name: string;
   email: string;

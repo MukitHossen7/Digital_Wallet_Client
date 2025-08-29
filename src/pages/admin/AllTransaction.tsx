@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useGetALLTransactionQuery } from "@/redux/features/transaction/transaction.api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -62,13 +62,23 @@ const AllTransaction = () => {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [status, setStatus] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+    return () => {
+      clearInterval(handler);
+    };
+  }, [search]);
 
   const { data: transactionData, isLoading } = useGetALLTransactionQuery({
     page,
     limit: pageSize,
-    search,
+    search: debouncedSearch,
     type: category,
     status,
   });
@@ -82,12 +92,6 @@ const AllTransaction = () => {
   const totalPages = transactionData?.meta?.totalPage ?? 1;
   const start = (page - 1) * pageSize;
   const end = Math.min(start + pageSize, total);
-
-  console.log(transactionData);
-  console.log(transactions);
-  console.log("search", search);
-  console.log("category", category);
-  console.log("status", status);
 
   return (
     <div className="p-6 space-y-6">

@@ -25,6 +25,7 @@ export type {
   IRegister,
   ISendOTP,
   IVerifyOTP,
+  IUpdateProfile,
 } from "./auth.type";
 
 export type {

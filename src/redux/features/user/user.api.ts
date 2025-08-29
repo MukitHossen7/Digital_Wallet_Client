@@ -42,6 +42,15 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["USER"],
     }),
+
+    updateUserProfile: builder.mutation<IResponse<null>, FormData>({
+      query: (updateData) => ({
+        url: "/users/updateProfile",
+        method: "PATCH",
+        data: updateData,
+      }),
+      invalidatesTags: ["USER"],
+    }),
   }),
 });
 
@@ -51,4 +60,5 @@ export const {
   useUnBlockUserMutation,
   useApproveAgentMutation,
   useSuspendAgentMutation,
+  useUpdateUserProfileMutation,
 } = userApi;
