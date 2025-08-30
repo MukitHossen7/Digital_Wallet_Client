@@ -96,25 +96,17 @@ export default function TransactionsPage() {
   console.log(transactionData);
 
   return (
-    <div className="container mx-auto max-w-6xl px-3 md:px-6 py-6 space-y-6">
+    <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
       <Card>
         <CardHeader className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-2xl md:text-3xl font-semibold">
               <FileText className="h-6 w-6 text-primary" /> All Transactions
             </CardTitle>
             <CardDescription>
               View all transactions handled by the agent with status, type, and
               amount
             </CardDescription>
-          </div>
-          <div className="flex gap-2">
-            <button className="btn btn-outline flex items-center gap-1">
-              <Filter className="h-4 w-4" /> Filter
-            </button>
-            <button className="btn btn-outline flex items-center gap-1">
-              <RefreshCw className="h-4 w-4" /> Refresh
-            </button>
           </div>
         </CardHeader>
         <CardContent>
@@ -125,58 +117,60 @@ export default function TransactionsPage() {
               ))}
             </div>
           ) : pageItems?.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">Type</TableHead>
-                    <TableHead>Initiated By</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">
-                      Transaction Date
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pageItems?.map((data: Transaction) => (
-                    <TableRow key={data._id}>
-                      <TableCell className="font-medium capitalize">
-                        <div
-                          className={`inline-flex items-center gap-2 ${
-                            typeMeta[data.type as TxType].color
-                          }`}
-                        >
-                          {typeMeta[data.type as TxType].icon}
-                          <span className="font-medium">
-                            {typeMeta[data.type as TxType].label}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{data.initiatedBy}</TableCell>
-                      <TableCell>
-                        <div
-                          className={`font-semibold flex items-center ${
-                            data.amount >= 0
-                              ? "text-emerald-600"
-                              : "text-rose-600"
-                          }`}
-                        >
-                          {data.amount >= 0
-                            ? `+${BDT.format(data.amount)}`
-                            : `${BDT.format(data.amount)}`}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={data.status} />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {new Date(data.createdAt).toLocaleString()}
-                      </TableCell>
+            <div className="overflow-x-auto w-full">
+              <div className="min-w-[600px] md:min-w-[700px] lg:min-w-full">
+                <Table className="w-full whitespace-nowrap">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">Type</TableHead>
+                      <TableHead>Initiated By</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">
+                        Transaction Date
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {pageItems?.map((data: Transaction) => (
+                      <TableRow key={data._id}>
+                        <TableCell className="font-medium capitalize">
+                          <div
+                            className={`inline-flex items-center gap-2 ${
+                              typeMeta[data.type as TxType].color
+                            }`}
+                          >
+                            {typeMeta[data.type as TxType].icon}
+                            <span className="font-medium">
+                              {typeMeta[data.type as TxType].label}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{data.initiatedBy}</TableCell>
+                        <TableCell>
+                          <div
+                            className={`font-semibold flex items-center ${
+                              data.amount >= 0
+                                ? "text-emerald-600"
+                                : "text-rose-600"
+                            }`}
+                          >
+                            {data.amount >= 0
+                              ? `+${BDT.format(data.amount)}`
+                              : `${BDT.format(data.amount)}`}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge status={data.status} />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {new Date(data.createdAt).toLocaleString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
               <Separator className="my-4" />
               {/* Pagination */}
               <div className="flex flex-wrap items-center justify-between gap-3">
