@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Card,
   CardContent,
@@ -9,9 +8,7 @@ import {
 
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Filter,
   FileText,
-  RefreshCw,
   ArrowDownToLine,
   ArrowUpFromLine,
   Send,
