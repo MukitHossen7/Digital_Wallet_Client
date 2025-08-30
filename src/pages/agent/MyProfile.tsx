@@ -19,7 +19,10 @@ import meImg from "../../assets/images/panda.jpg";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { User } from "lucide-react";
-import { useGetMeQuery } from "@/redux/features/auth/auth.api";
+import {
+  useChangePasswordMutation,
+  useGetMeQuery,
+} from "@/redux/features/auth/auth.api";
 import SingleImageUploader from "@/components/SingleImageUploader";
 import { toast } from "sonner";
 import { useUpdateUserProfileMutation } from "@/redux/features/user/user.api";
@@ -60,6 +63,7 @@ type AgentProfileForm = z.infer<typeof agentProfileSchema>;
 type AgentPasswordForm = z.infer<typeof agentPasswordSchema>;
 
 export default function AgentProfile() {
+  const [changePassword] = useChangePasswordMutation();
   const [updateUserProfile] = useUpdateUserProfileMutation();
   const [showPassword, setShowPassword] = useState(false);
   const { data: userData, isLoading: userLoading } = useGetMeQuery(undefined);
@@ -121,7 +125,27 @@ export default function AgentProfile() {
   }
 
   async function onSubmitAgentPassport(values: AgentPasswordForm) {
-    console.log(values);
+    let toastId: string | number | undefined;
+    try {
+      toastId = toast.loading("Processing change password...");
+      const passwordData = {
+        newPassword: values?.newPassword,
+        oldPassword: values?.currentPassword,
+      };
+      const res = await changePassword(passwordData).unwrap();
+      if (res.success) {
+        toast.success("Change password Successfully", { id: toastId });
+        agentPasswordForm.reset();
+      } else {
+        toast.error("Change password Failed", { id: toastId });
+      }
+    } catch (error: any) {
+      if (toastId) {
+        toast.error(error?.data?.message, { id: toastId });
+      } else {
+        toast.error("Something went wrong");
+      }
+    }
   }
 
   return (
