@@ -14,7 +14,7 @@ import {
 import { Link } from "react-router-dom";
 import { getSidebarItems } from "@/utils/getSidebarItems";
 import { useGetMeQuery } from "@/redux/features/auth/auth.api";
-
+import Logo from "../assets/images/logo (1).png";
 // This is sample data.
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -25,7 +25,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <Link to="/">DW</Link>
+        <div className="flex items-center">
+          <img className="w-8 h-8" src={Logo} />
+          <Link className="text-xl font-bold uppercase" to="/">
+            NeoPay
+          </Link>
+        </div>
       </SidebarHeader>
       <SidebarContent>
         {/* We create a SidebarGroup for each parent. */}

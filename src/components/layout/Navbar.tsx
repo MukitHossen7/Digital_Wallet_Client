@@ -13,9 +13,8 @@ import {
 } from "@/components/ui/popover";
 
 import { Link, useNavigate } from "react-router";
-
+import logo from "../../assets/images/logo (1).png";
 import { role } from "@/constants/role";
-import Logo from "@/assets/icons/Logo";
 import {
   authApi,
   useGetMeQuery,
@@ -129,8 +128,11 @@ export default function Navbar() {
           </Popover>
           {/* Main nav */}
           <div className="flex items-center gap-6">
-            <Link to="/" className="w-8 h-9">
-              <Logo />
+            <Link to="/">
+              <div className="flex items-center">
+                <img className="w-8 h-8" src={logo} />
+                <p className="text-xl font-bold uppercase">NeoPay</p>
+              </div>
             </Link>
             {/* Navigation menu */}
             <NavigationMenu className="max-md:hidden">
