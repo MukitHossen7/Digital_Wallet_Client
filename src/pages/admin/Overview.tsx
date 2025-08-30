@@ -34,7 +34,7 @@ const chartConfig: ChartConfig = {
   },
 };
 
-export default function AdminDashboardOverview() {
+export default function Overview() {
   const { data: userData, isLoading: userLoading } = useGetAllUserAndAgentQuery(
     { user: "user" }
   );

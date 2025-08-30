@@ -18,7 +18,7 @@ const BalanceCard = ({ balance, walletLoading }: IProps) => {
     <Card className="border-dashed" data-tour="balance">
       <CardHeader className="pb-2">
         <CardDescription>Current Balance</CardDescription>
-        <CardTitle className="text-3xl">
+        <CardTitle className="text-2xl md:text-3xl">
           {walletLoading ? (
             <Skeleton className="h-9 w-40" />
           ) : (

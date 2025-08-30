@@ -149,7 +149,7 @@ export default function MyProfile() {
   }
 
   return (
-    <div className="container mx-auto max-w-6xl px-3 md:px-6 py-6 md:py-8">
+    <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
@@ -159,7 +159,7 @@ export default function MyProfile() {
             Update your name, phone, password and profile image.
           </p>
         </div>
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground hidden lg:block">
           Last updated:{" "}
           <span className="font-medium">
             {userData?.data?.updatedAt
@@ -169,7 +169,7 @@ export default function MyProfile() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 space-y-6 lg:space-y-0 lg:gap-6">
         {/* Left side */}
         <Card className="space-y-4">
           <CardHeader>

@@ -131,7 +131,7 @@ export default function Overview() {
     )
     ?.slice(0, 5);
   return (
-    <div className="container mx-auto max-w-6xl px-3 md:px-6 py-6 md:py-8 space-y-6">
+    <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1" data-tour="overview-title">
@@ -142,13 +142,13 @@ export default function Overview() {
             A fast, secure wallet experience
           </p>
         </div>
-        <Badge variant="secondary" className="rounded-xl">
-          Live
+        <Badge className="rounded-full text-green-500 bg-green-100">
+          Active
         </Badge>
       </div>
 
       {/* Top Row: Balance + Security blurb */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 lg:gap-4 items-stretch space-y-4 lg:space-y-0">
         <Card
           className="relative overflow-hidden md:col-span-2 border-none bg-gradient-to-br from-primary/90 via-primary to-primary/70 text-primary-foreground shadow-md"
           data-tour="balance"
@@ -159,7 +159,7 @@ export default function Overview() {
               <CardDescription className="text-primary-foreground/80">
                 Available Balance
               </CardDescription>
-              <CardTitle className="text-4xl mt-1">
+              <CardTitle className="text-3xl md:text-4xl mt-1">
                 BDT{" "}
                 {walletLoading ? (
                   <Skeleton className="h-10 w-52 bg-white/30" />
@@ -203,12 +203,12 @@ export default function Overview() {
           </CardContent>
         </Card>
 
-        <Card className="bg-muted/40">
+        <Card className="bg-muted/40 w-full">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">At a glance</CardTitle>
             <CardDescription>Key tips for smooth transfers</CardDescription>
           </CardHeader>
-          <CardContent className="text-sm space-y-2">
+          <CardContent className="text-sm space-y-2 ">
             <div className="flex items-center gap-2">
               <Info className="h-4 w-4" />
               <span>Verify recipient name before sending.</span>
@@ -225,119 +225,127 @@ export default function Overview() {
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <section className="space-y-3" data-tour="quick-actions">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Quick Actions</h2>
-          <div className="text-sm text-muted-foreground">One-tap to start</div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <ActionCard
-            title="Deposit"
-            description="Add money via bank or agent"
-            icon={<ArrowDownToLine className="h-5 w-5" />}
-            onClick={() => goAction("deposit")}
-          />
-          <ActionCard
-            title="Withdraw"
-            description="Cash out to bank or agent"
-            icon={<ArrowUpFromLine className="h-5 w-5" />}
-            onClick={() => goAction("withdraw")}
-          />
-          <ActionCard
-            title="Send Money"
-            description="Transfer to phone or email"
-            icon={<Send className="h-5 w-5" />}
-            onClick={() => goAction("send")}
-          />
-        </div>
-      </section>
+      <div>
+        {/* Quick Actions */}
+        <section className="space-y-3" data-tour="quick-actions">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Quick Actions</h2>
+            <div className="text-sm text-muted-foreground">
+              One-tap to start
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <ActionCard
+              title="Deposit"
+              description="Add money via bank or agent"
+              icon={<ArrowDownToLine className="h-5 w-5" />}
+              onClick={() => goAction("deposit")}
+            />
+            <ActionCard
+              title="Withdraw"
+              description="Cash out to bank or agent"
+              icon={<ArrowUpFromLine className="h-5 w-5" />}
+              onClick={() => goAction("withdraw")}
+            />
+            <ActionCard
+              title="Send Money"
+              description="Transfer to phone or email"
+              icon={<Send className="h-5 w-5" />}
+              onClick={() => goAction("send")}
+            />
+          </div>
+        </section>
+      </div>
 
       <Separator />
 
-      {/* Recent Transactions */}
-      <section className="space-y-3" data-tour="recent">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Recent Transactions</h2>
-          <Button
-            variant="ghost"
-            className="rounded-full"
-            size="sm"
-            onClick={() => navigate("/user/transactions-history")}
-          >
-            View all
-          </Button>
-        </div>
-        {transactionLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Card key={i} className="p-4">
-                <Skeleton className="h-6 w-full" />
-              </Card>
-            ))}
+      <div className="overflow-x-auto">
+        {/* Recent Transactions */}
+        <section className="space-y-3" data-tour="recent">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Recent Transactions</h2>
+            <Button
+              variant="ghost"
+              className="rounded-full"
+              size="sm"
+              onClick={() => navigate("/user/transactions-history")}
+            >
+              View all
+            </Button>
           </div>
-        ) : transactionData?.data && recentTransactions?.length > 0 ? (
-          <Card>
-            <CardContent className="pt-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>InitiatedBy</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">
-                      Transaction Date
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentTransactions?.map((tx, idx: any) => (
-                    <TableRow key={idx} className="hover:bg-muted/50">
-                      <TableCell>
-                        <div
-                          className={`inline-flex items-center gap-2 ${
-                            typeMeta[tx.type].color
+          {transactionLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Card key={i} className="p-4">
+                  <Skeleton className="h-6 w-full" />
+                </Card>
+              ))}
+            </div>
+          ) : transactionData?.data && recentTransactions?.length > 0 ? (
+            <Card>
+              <CardContent className="pt-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Type</TableHead>
+                      <TableHead>InitiatedBy</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">
+                        Transaction Date
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentTransactions?.map((tx, idx: any) => (
+                      <TableRow key={idx} className="hover:bg-muted/50">
+                        <TableCell>
+                          <div
+                            className={`inline-flex items-center gap-2 ${
+                              typeMeta[tx.type].color
+                            }`}
+                          >
+                            {typeMeta[tx.type].icon}
+                            <span className="font-medium">
+                              {typeMeta[tx.type].label}
+                            </span>
+                          </div>
+                        </TableCell>
+
+                        <TableCell className="text-muted-foreground">
+                          {tx.initiatedBy ?? "_"}
+                        </TableCell>
+                        <TableCell
+                          className={`text-right font-semibold ${
+                            tx.amount >= 0
+                              ? "text-emerald-600"
+                              : "text-rose-600"
                           }`}
                         >
-                          {typeMeta[tx.type].icon}
-                          <span className="font-medium">
-                            {typeMeta[tx.type].label}
-                          </span>
-                        </div>
-                      </TableCell>
-
-                      <TableCell className="text-muted-foreground">
-                        {tx.initiatedBy ?? "_"}
-                      </TableCell>
-                      <TableCell
-                        className={`text-right font-semibold ${
-                          tx.amount >= 0 ? "text-emerald-600" : "text-rose-600"
-                        }`}
-                      >
-                        {tx.amount >= 0
-                          ? `+${formatBDT(tx.amount)}`
-                          : `${formatBDT(tx.amount)}`}
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={tx.status} />
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-right">
-                        {formatTime(tx.createdAt)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-                <TableCaption className="text-left">
-                  Only the latest activities are shown here.
-                </TableCaption>
-              </Table>
-            </CardContent>
-          </Card>
-        ) : (
-          <EmptyState />
-        )}
-      </section>
+                          {tx.amount >= 0
+                            ? `+${formatBDT(tx.amount)}`
+                            : `${formatBDT(tx.amount)}`}
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge status={tx.status} />
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-right">
+                          {formatTime(tx.createdAt)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                  <TableCaption className="text-left">
+                    Only the latest activities are shown here.
+                  </TableCaption>
+                </Table>
+              </CardContent>
+            </Card>
+          ) : (
+            <EmptyState />
+          )}
+        </section>
+      </div>
     </div>
   );
 }

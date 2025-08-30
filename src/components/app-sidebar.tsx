@@ -26,8 +26,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar {...props}>
       <SidebarHeader>
         <div className="flex items-center">
-          <img className="w-8 h-8" src={Logo} />
-          <Link className="text-xl font-bold uppercase" to="/">
+          <img className="w-6 md:w-8 h-6 md:h-8" src={Logo} />
+          <Link className="text-lg md:text-xl font-bold uppercase" to="/">
             NeoPay
           </Link>
         </div>

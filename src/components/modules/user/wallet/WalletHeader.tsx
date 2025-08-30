@@ -17,7 +17,7 @@ const WalletHeader = () => {
         </p>
       </div>
       <div className="hidden md:flex items-center gap-2">
-        <Badge variant="secondary" className="rounded-xl">
+        <Badge className="rounded-full text-green-500 bg-green-200">
           Active
         </Badge>
       </div>

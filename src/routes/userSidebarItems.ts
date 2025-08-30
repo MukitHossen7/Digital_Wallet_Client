@@ -25,16 +25,6 @@ export const userSidebarItems: ISidebarItem[] = [
         component: WalletPage,
         icon: CiWallet,
       },
-      // {
-      //   title: "Withdraw Money",
-      //   url: "/user/withdraw",
-      //   component: WithdrawMoney,
-      // },
-      // {
-      //   title: "Send Money",
-      //   url: "/user/send-money",
-      //   component: SendMoney,
-      // },
       {
         title: "Transaction",
         url: "/user/transactions-history",

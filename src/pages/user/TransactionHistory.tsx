@@ -118,7 +118,7 @@ export default function TransactionHistory() {
   const end = Math.min(start + pageSize, total);
   const pageItems = tx;
   return (
-    <div className="container mx-auto max-w-6xl px-3 md:px-6 py-6 md:py-8 space-y-6">
+    <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
@@ -145,8 +145,8 @@ export default function TransactionHistory() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="md:col-span-1">
+          <div className="flex flex-col  lg:flex-row gap-4">
+            <div className="w-full">
               <Label>Type</Label>
               <Select
                 defaultValue={type}
@@ -164,10 +164,10 @@ export default function TransactionHistory() {
               </Select>
             </div>
 
-            <div className="md:col-span-2">
+            <div className="w-full">
               <Label htmlFor="from">From</Label>
               <div className="relative mt-1">
-                <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground " />
                 <Input
                   id="from"
                   type="date"
@@ -178,7 +178,7 @@ export default function TransactionHistory() {
               </div>
             </div>
 
-            <div className="md:col-span-2">
+            <div className="w-full">
               <Label htmlFor="to">To</Label>
               <div className="relative mt-1">
                 <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -214,7 +214,7 @@ export default function TransactionHistory() {
       </Card>
 
       {/* Table */}
-      <Card>
+      <Card className="overflow-x-auto">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg">Transactions</CardTitle>
           <CardDescription>All activities in your wallet</CardDescription>
@@ -230,55 +230,57 @@ export default function TransactionHistory() {
             </div>
           ) : pageItems.length > 0 ? (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>InitiatedBy</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">
-                      Transaction Date
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pageItems.map((t: any, idx: any) => (
-                    <TableRow key={idx} className="hover:bg-muted/50">
-                      <TableCell>
-                        <div
-                          className={`inline-flex items-center gap-2 ${
-                            typeMeta[t.type as TxType].color
+              <div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Type</TableHead>
+                      <TableHead>InitiatedBy</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">
+                        Transaction Date
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pageItems.map((t: any, idx: any) => (
+                      <TableRow key={idx} className="hover:bg-muted/50">
+                        <TableCell>
+                          <div
+                            className={`inline-flex items-center gap-2 ${
+                              typeMeta[t.type as TxType].color
+                            }`}
+                          >
+                            {typeMeta[t.type as TxType].icon}
+                            <span className="font-medium">
+                              {typeMeta[t.type as TxType].label}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {t.initiatedBy ?? "—"}
+                        </TableCell>
+                        <TableCell
+                          className={`text-right font-semibold ${
+                            t.amount >= 0 ? "text-emerald-600" : "text-rose-600"
                           }`}
                         >
-                          {typeMeta[t.type as TxType].icon}
-                          <span className="font-medium">
-                            {typeMeta[t.type as TxType].label}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {t.initiatedBy ?? "—"}
-                      </TableCell>
-                      <TableCell
-                        className={`text-right font-semibold ${
-                          t.amount >= 0 ? "text-emerald-600" : "text-rose-600"
-                        }`}
-                      >
-                        {t.amount >= 0
-                          ? `+${formatBDT(t.amount)}`
-                          : `${formatBDT(t.amount)}`}
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={t.status} />
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-right">
-                        {new Date(t.createdAt).toLocaleString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                          {t.amount >= 0
+                            ? `+${formatBDT(t.amount)}`
+                            : `${formatBDT(t.amount)}`}
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge status={t.status} />
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-right">
+                          {new Date(t.createdAt).toLocaleString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
               <Separator className="my-4" />
 

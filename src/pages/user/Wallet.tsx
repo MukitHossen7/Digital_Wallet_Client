@@ -46,6 +46,7 @@ import { useGetMeWalletQuery } from "@/redux/features/wallet/wallet.api";
 import DepositFeeSummary from "@/components/modules/user/wallet/DepositFeeSummary";
 import WithdrawFeeSummary from "@/components/modules/user/wallet/WithdrawFeeSummary";
 import SendMoneyFeeSummary from "@/components/modules/user/wallet/SendMoneyFeeSummary";
+import { useGetAllUserAndAgentQuery } from "@/redux/features/user/user.api";
 
 // -------------------- Validation --------------------
 
@@ -86,6 +87,8 @@ export default function WalletPage() {
   const [sendMoney] = useSendMoneyMutation();
   const { data: walletData, isLoading: walletLoading } =
     useGetMeWalletQuery(undefined);
+  const { data: agentData } = useGetAllUserAndAgentQuery({ user: "agent" });
+  const { data: userData } = useGetAllUserAndAgentQuery({ user: "user" });
   const [searchParams] = useSearchParams();
   const tabFromQuery = searchParams.get("tab") || "deposit";
   const [activeTab, setActiveTab] = useState(tabFromQuery);
@@ -223,11 +226,11 @@ export default function WalletPage() {
 
   // -------------------- UI --------------------
   return (
-    <div className="container mx-auto max-w-6xl px-3 md:px-6 py-6 md:py-8 space-y-6">
+    <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
       <WalletHeader />
 
       <div
-        className="grid grid-cols-1 md:grid-cols-3 gap-4"
+        className="grid grid-cols-1 lg:grid-cols-3 space-y-4 lg:space-y-0 lg:gap-4"
         data-tour="overview"
       >
         <BalanceCard balance={balance} walletLoading={walletLoading} />
@@ -342,10 +345,12 @@ export default function WalletPage() {
                 Cash-in via Agent, Bank or Card. Instant balance update.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid md:grid-cols-3 gap-6">
+            <CardContent className="grid grid-cols-1 lg:grid-cols-3 space-y-6 lg:space-y-0 lg:gap-6">
               <div className="md:col-span-2 space-y-4">
                 <div>
-                  <Label htmlFor="deposit-method">Payment Type</Label>
+                  <Label htmlFor="deposit-method" className="mb-2">
+                    Payment Type
+                  </Label>
                   <Select
                     onValueChange={(v) =>
                       depositForm.setValue("type", v as any, {
@@ -374,7 +379,9 @@ export default function WalletPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="deposit-amount">Amount</Label>
+                  <Label htmlFor="deposit-amount" className="mb-2">
+                    Amount
+                  </Label>
                   <Input
                     id="deposit-amount"
                     type="number"
@@ -400,28 +407,40 @@ export default function WalletPage() {
                   </FieldHint>
                 </div>
                 <div>
-                  <Label htmlFor="email">Agent Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter Agent Email"
-                    className="rounded-md w-full"
-                    value={depositForm.watch("email") || ""}
-                    onChange={(e) =>
-                      depositForm.setValue("email", e.target.value || "", {
+                  <Label htmlFor="deposit-method" className="mb-2">
+                    Agent Email
+                  </Label>
+                  <Select
+                    onValueChange={(v) =>
+                      depositForm.setValue("email", v as any, {
                         shouldValidate: true,
                       })
                     }
-                  />
+                    defaultValue={depositForm.getValues("email")}
+                  >
+                    <SelectTrigger
+                      id="deposit-method"
+                      className="rounded-md w-full"
+                    >
+                      <SelectValue placeholder="Select Agent Email" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {agentData?.data?.map((data: any) => (
+                        <SelectItem key={data?.email} value={data?.email}>
+                          {data?.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   {depositForm.formState.errors.email && (
                     <p className="text-destructive text-xs mt-1">
-                      {depositForm.formState.errors.email.message}
+                      {depositForm.formState.errors.email.message?.toString()}
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 ">
                 <Card className="bg-muted/40">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">Summary</CardTitle>
@@ -464,10 +483,12 @@ export default function WalletPage() {
                 Cash-out to Agent or transfer to Bank account.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid md:grid-cols-3 gap-6">
+            <CardContent className="grid  grid-cols-1 lg:grid-cols-3 space-y-6 lg:space-y-0 lg:gap-6">
               <div className="md:col-span-2 space-y-4">
                 <div>
-                  <Label htmlFor="deposit-method">Payment Type</Label>
+                  <Label htmlFor="deposit-method" className="mb-2">
+                    Payment Type
+                  </Label>
                   <Select
                     onValueChange={(v) =>
                       withdrawForm.setValue("type", v as any, {
@@ -496,7 +517,9 @@ export default function WalletPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="withdraw-amount">Amount</Label>
+                  <Label htmlFor="withdraw-amount" className="mb-2">
+                    Amount
+                  </Label>
                   <Input
                     id="withdraw-amount"
                     type="number"
@@ -522,15 +545,17 @@ export default function WalletPage() {
                   </FieldHint>
                 </div>
 
-                {/* <div>
-                  <Label htmlFor="deposit-method">Agent Email</Label>
+                <div>
+                  <Label htmlFor="deposit-method" className="mb-2">
+                    Agent Email
+                  </Label>
                   <Select
                     onValueChange={(v) =>
-                      withdrawForm.setValue("agentId", v as any, {
+                      withdrawForm.setValue("email", v as any, {
                         shouldValidate: true,
                       })
                     }
-                    defaultValue={withdrawForm.getValues("agentId")}
+                    defaultValue={withdrawForm.getValues("email")}
                   >
                     <SelectTrigger
                       id="deposit-method"
@@ -539,35 +564,16 @@ export default function WalletPage() {
                       <SelectValue placeholder="Select Agent Email" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1">mukit@gmil.com</SelectItem>
-                      <SelectItem value="2">mim@gmil.com</SelectItem>
-                      <SelectItem value="3">mou@gmil.com</SelectItem>
+                      {agentData?.data?.map((data: any) => (
+                        <SelectItem key={data?.email} value={data?.email}>
+                          {data?.email}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                  {withdrawForm.formState.errors.agentId && (
-                    <p className="text-destructive text-xs mt-1">
-                      {withdrawForm.formState.errors.agentId.message?.toString()}
-                    </p>
-                  )}
-                </div> */}
-
-                <div>
-                  <Label htmlFor="email">Agent Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter Agent Email"
-                    className="rounded-md w-full"
-                    value={withdrawForm.watch("email") || ""}
-                    onChange={(e) =>
-                      withdrawForm.setValue("email", e.target.value || "", {
-                        shouldValidate: true,
-                      })
-                    }
-                  />
                   {withdrawForm.formState.errors.email && (
                     <p className="text-destructive text-xs mt-1">
-                      {withdrawForm.formState.errors.email.message}
+                      {withdrawForm.formState.errors.email.message?.toString()}
                     </p>
                   )}
                 </div>
@@ -615,10 +621,12 @@ export default function WalletPage() {
                 Transfer to another wallet using phone or email.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid md:grid-cols-3 gap-6">
+            <CardContent className="grid grid-cols-1 lg:grid-cols-3 space-y-6 lg:space-y-0 lg:gap-6">
               <div className="md:col-span-2 space-y-4">
                 <div>
-                  <Label htmlFor="deposit-method">Payment Type</Label>
+                  <Label htmlFor="deposit-method" className="mb-2">
+                    Payment Type
+                  </Label>
                   <Select
                     onValueChange={(v) =>
                       sendForm.setValue("type", v as any, {
@@ -647,7 +655,9 @@ export default function WalletPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="send-amount">Amount</Label>
+                  <Label htmlFor="send-amount" className="mb-2">
+                    Amount
+                  </Label>
                   <Input
                     id="send-amount"
                     type="number"
@@ -669,23 +679,34 @@ export default function WalletPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="send-email">User Email</Label>
-                  <Input
-                    id="send-email"
-                    type="email"
-                    inputMode="email"
-                    placeholder="jon@gmail.com"
-                    className="rounded-md"
-                    value={sendForm.watch("email") || ""}
-                    onChange={(e) =>
-                      sendForm.setValue("email", e.target.value || "", {
+                  <Label htmlFor="deposit-method" className="mb-2">
+                    User Email
+                  </Label>
+                  <Select
+                    onValueChange={(v) =>
+                      sendForm.setValue("email", v as any, {
                         shouldValidate: true,
                       })
                     }
-                  />
+                    defaultValue={sendForm.getValues("email")}
+                  >
+                    <SelectTrigger
+                      id="deposit-method"
+                      className="rounded-md w-full"
+                    >
+                      <SelectValue placeholder="Select User Email" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {userData?.data?.map((data: any) => (
+                        <SelectItem key={data?.email} value={data?.email}>
+                          {data?.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   {sendForm.formState.errors.email && (
                     <p className="text-destructive text-xs mt-1">
-                      {sendForm.formState.errors.email.message}
+                      {sendForm.formState.errors.email.message?.toString()}
                     </p>
                   )}
                 </div>
@@ -723,7 +744,7 @@ export default function WalletPage() {
         </TabsContent>
       </Tabs>
 
-      <div className="grid md:grid-cols-3 gap-4" data-tour="info">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" data-tour="info">
         <Card className="bg-muted/40">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Security</CardTitle>
