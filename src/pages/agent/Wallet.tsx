@@ -26,7 +26,7 @@ import {
   Search,
   Sparkles,
 } from "lucide-react";
-import { MdOutlineAccountBalanceWallet } from "react-icons/md";
+import { MdCreditCard } from "react-icons/md";
 import {
   Select,
   SelectContent,
@@ -217,12 +217,11 @@ export default function AgentWallet() {
   }
 
   return (
-    <div className="container mx-auto max-w-6xl px-3 md:px-6 py-6 md:py-8">
+    <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-3">
-            <MdOutlineAccountBalanceWallet className="h-6 w-6 text-primary" />{" "}
-            Agent: {agentBalance} BDT
+            <MdCreditCard className="h-6 w-6 text-primary" /> {agentBalance} BDT
           </h1>
           <p className="text-sm text-muted-foreground">
             Add or withdraw money from a user's wallet
@@ -234,7 +233,7 @@ export default function AgentWallet() {
         </Badge>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Left: Selected user & quick info */}
         <div className="space-y-4">
           <Card>
@@ -245,7 +244,7 @@ export default function AgentWallet() {
             <CardContent>
               <div className="mb-3">
                 <Label htmlFor="globalSearch">Find user</Label>
-                <div className="relative mt-1">
+                <div className="relative mt-2">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                     <Search className="h-4 w-4" />
                   </span>
@@ -366,7 +365,7 @@ export default function AgentWallet() {
                 <CardContent>
                   <form
                     onSubmit={depositForm.handleSubmit(handleDeposit)}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                    className="grid grid-cols-1 lg:grid-cols-3 space-y-4 lg:space-y-0 lg:gap-4"
                   >
                     <div className="md:col-span-2 space-y-2">
                       <Label>User (email)</Label>
@@ -470,16 +469,12 @@ export default function AgentWallet() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    Withdraw money from user's wallet
+                    Withdraw money
                   </CardTitle>
-                  <CardDescription>
-                    Agent cash-out — ensure user identity and collect fee if
-                    applicable.
-                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form
-                    className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                    className="grid grid-cols-1 lg:grid-cols-3 space-y-4 lg:space-y-0 lg:gap-4"
                     onSubmit={withdrawForm.handleSubmit(handleWithdraw)}
                   >
                     <div className="md:col-span-2 space-y-2">
@@ -511,7 +506,9 @@ export default function AgentWallet() {
                       />
 
                       <div>
-                        <Label htmlFor="withdraw-method">Payment Type</Label>
+                        <Label htmlFor="withdraw-method" className="pb-2">
+                          Payment Type
+                        </Label>
                         <Select
                           onValueChange={(v) =>
                             withdrawForm.setValue("type", v as any, {
