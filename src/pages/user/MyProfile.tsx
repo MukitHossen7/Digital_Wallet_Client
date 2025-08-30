@@ -20,7 +20,10 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { Camera, User } from "lucide-react";
-import { useGetMeQuery } from "@/redux/features/auth/auth.api";
+import {
+  useChangePasswordMutation,
+  useGetMeQuery,
+} from "@/redux/features/auth/auth.api";
 import SingleImageUploader from "@/components/SingleImageUploader";
 import { useUpdateUserProfileMutation } from "@/redux/features/user/user.api";
 import { toast } from "sonner";
@@ -62,6 +65,7 @@ type PasswordForm = z.infer<typeof passwordSchema>;
 
 export default function MyProfile() {
   const [updateUserProfile] = useUpdateUserProfileMutation();
+  const [changePassword] = useChangePasswordMutation();
   const { data: userData, isLoading: userLoading } = useGetMeQuery(undefined);
   const [showPassword, setShowPassword] = useState(false);
   const [image, setImage] = useState<File | null>(null);
@@ -121,8 +125,27 @@ export default function MyProfile() {
   }
 
   async function onSubmitPassword(values: PasswordForm) {
-    console.log(values);
-    passwordForm.reset();
+    let toastId: string | number | undefined;
+    try {
+      toastId = toast.loading("Processing change password...");
+      const passwordData = {
+        newPassword: values?.newPassword,
+        oldPassword: values?.currentPassword,
+      };
+      const res = await changePassword(passwordData).unwrap();
+      if (res.success) {
+        toast.success("Change password Successfully", { id: toastId });
+        passwordForm.reset();
+      } else {
+        toast.error("Change password Failed", { id: toastId });
+      }
+    } catch (error: any) {
+      if (toastId) {
+        toast.error(error?.data?.message, { id: toastId });
+      } else {
+        toast.error("Something went wrong");
+      }
+    }
   }
 
   return (
