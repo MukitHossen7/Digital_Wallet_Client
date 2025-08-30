@@ -16,12 +16,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import {
-  Wallet,
   ArrowDownToLine,
   ArrowUpFromLine,
   TrendingUp,
   Sparkles,
 } from "lucide-react";
+import { GoHomeFill } from "react-icons/go";
 
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
@@ -97,26 +97,25 @@ export default function AgentOverview() {
     last7DaysSummary?.find((d: any) => d._id === "WITHDRAW")?.totalAmount || 0;
 
   const netWeek = totalInWeek - totalOutWeek;
-  const today = daily[daily.length - 1];
 
   return (
-    <div className="container mx-auto max-w-6xl px-3 md:px-6 py-6 md:py-8 space-y-6">
+    <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-3">
-            <Wallet className="h-7 w-7 text-primary" /> Overview
+            <GoHomeFill className="h-7 w-7 text-primary" /> Overview
           </h1>
           <p className="text-muted-foreground">
             Cash-in / Cash-out summary & recent activity
           </p>
         </div>
-        <Badge variant="secondary" className="rounded-xl">
+        <Badge className="rounded-full bg-green-200 text-green-500">
           Active
         </Badge>
       </div>
 
       {/* Top summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <StatCard
           title="Cash In (7d)"
           value={isLoading ? null : fmt(totalInWeek)}
@@ -144,7 +143,7 @@ export default function AgentOverview() {
       </div>
 
       {/* Chart + Recent */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-3 space-y-4 xl:space-y-0 xl:gap-4">
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Weekly Cash Flow</CardTitle>
@@ -241,16 +240,6 @@ export default function AgentOverview() {
           </CardContent>
           <CardFooter>
             <div className="flex items-center justify-between w-full text-sm text-muted-foreground">
-              <div>
-                Today:{" "}
-                <strong className="text-primary">
-                  {isLoading ? (
-                    <Skeleton className="h-4 w-20" />
-                  ) : (
-                    fmt(today?.cashIn - today?.cashOut)
-                  )}
-                </strong>
-              </div>
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4" /> Smooth transfers & low fees
               </div>
