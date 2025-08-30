@@ -169,7 +169,7 @@ export default function MyProfile() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 space-y-6 lg:space-y-0 lg:gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 space-y-6 xl:space-y-0 xl:gap-6">
         {/* Left side */}
         <Card className="space-y-4">
           <CardHeader>
