@@ -150,7 +150,7 @@ export default function Overview() {
       </div>
 
       {/* overview graph */}
-      <Card className="bg-white dark:bg-gray-800 shadow-md rounded-lg">
+      <Card className="shadow-md rounded-lg">
         <CardHeader>
           <CardTitle>Overview Chart</CardTitle>
           <CardDescription>

@@ -92,46 +92,74 @@ export default function ManageAgents() {
           </div>
         ) : agentData?.data?.length > 0 ? (
           <>
-            <Table>
-              <TableHeader>
+            <Table className="min-w-full border-collapse">
+              <TableHeader className="hidden lg:table-header-group">
                 <TableRow>
                   <TableHead>Profile</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead>Role</TableHead>
-                  <TableHead>Action</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
                 {agentData?.data?.map((user: any) => (
-                  <TableRow className="" key={user._id}>
-                    <TableCell className="flex items-center gap-2">
-                      <img
-                        src={user?.picture ?? demoImg}
-                        alt={user?.name}
-                        className="h-10 w-10 rounded-full object-cover ring-1"
-                      />
-                      <span>{user?.name}</span>
+                  <TableRow
+                    key={user._id}
+                    className="flex flex-col lg:table-row border rounded-lg lg:border-0 mb-4 lg:mb-0 p-4 lg:p-0 shadow-sm lg:shadow-none "
+                  >
+                    {/* Profile */}
+                    <TableCell className="flex items-center gap-3 lg:table-cell">
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={user?.picture ?? demoImg}
+                          alt={user?.name}
+                          className="h-8 w-8 rounded-full object-cover ring-1"
+                        />
+                        <span className="font-medium">{user?.name}</span>
+                      </div>
                     </TableCell>
-                    <TableCell>{user?.email}</TableCell>
-                    <TableCell>{user?.phone ?? "N/A"}</TableCell>
-                    <TableCell className="font-semibold">
-                      {user?.isActive}
+
+                    {/* Email */}
+                    <TableCell className="flex justify-between lg:table-cell text-sm text-gray-700 dark:text-gray-200 mt-2 lg:mt-0">
+                      <span className="font-semibold lg:hidden">Email: </span>
+                      {user?.email}
                     </TableCell>
-                    <TableCell>
+
+                    {/* Phone */}
+                    <TableCell className="flex justify-between lg:table-cell text-sm text-gray-700 dark:text-gray-200 mt-2 lg:mt-0">
+                      <span className="font-semibold lg:hidden">Phone: </span>
+                      {user?.phone ?? "N/A"}
+                    </TableCell>
+
+                    {/* Role */}
+                    <TableCell className="flex justify-between lg:table-cell font-semibold text-sm text-gray-700 dark:text-gray-200 mt-2 lg:mt-0">
+                      <span className="font-semibold lg:hidden">Role: </span>
+                      {user?.role}
+                    </TableCell>
+
+                    {/* Status */}
+                    <TableCell className="flex justify-between lg:table-cell mt-2 lg:mt-0">
+                      <span className="font-semibold lg:hidden">Status: </span>
                       <span
                         className={`px-2 py-1 rounded-full text-white font-medium text-xs ${
-                          user?.role === "AGENT" ? "bg-green-500" : "bg-red-500"
+                          user?.isActive === "ACTIVE"
+                            ? "bg-green-500"
+                            : "bg-red-500"
                         }`}
                       >
-                        {user?.role}
+                        {user?.isActive}
                       </span>
                     </TableCell>
-                    <TableCell className="flex gap-2">
-                      {user?.role === "AGENT" ? (
+
+                    {/* Action */}
+                    <TableCell className="flex justify-between lg:table-cell lg:justify-end gap-2 mt-2 lg:mt-0 text-right">
+                      <span className="font-semibold lg:hidden">Action: </span>
+                      {user?.isActive === "ACTIVE" ? (
                         <Button
-                          variant="destructive"
+                          variant="outline"
                           size="sm"
                           onClick={() => handleSuspendAgent(user?._id)}
                           title="Suspend Agent"
