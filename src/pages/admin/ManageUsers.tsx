@@ -74,9 +74,9 @@ export default function ManageUsers() {
   };
 
   return (
-    <Card className="container mx-auto">
+    <Card className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
       <CardHeader>
-        <CardTitle>Manage Users</CardTitle>
+        <CardTitle className="text-2xl lg:text-3xl">Manage Users</CardTitle>
         <CardDescription>
           View all registered users and manage their account status (Block /
           Unblock)
@@ -84,14 +84,19 @@ export default function ManageUsers() {
       </CardHeader>
       <CardContent className="overflow-x-auto">
         {isLoading ? (
-          <Skeleton className="h-96 w-full" />
-        ) : userData.data.length > 0 ? (
+          <div className="space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </div>
+        ) : userData?.data?.length > 0 ? (
           <>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Profile</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Action</TableHead>
@@ -108,11 +113,18 @@ export default function ManageUsers() {
                       />
                       <span>{user?.name}</span>
                     </TableCell>
+
                     <TableCell>{user?.email}</TableCell>
-                    <TableCell>{user?.role}</TableCell>
+                    <TableCell className="font-medium">
+                      {user?.phone ?? "N/A"}
+                    </TableCell>
+                    <TableCell className="font-semibold">
+                      {user?.role}
+                    </TableCell>
+
                     <TableCell>
                       <span
-                        className={`px-2 py-1 rounded-full text-white font-medium text-sm ${
+                        className={`px-2 py-1 rounded-full text-white font-medium text-xs ${
                           user?.isActive === "ACTIVE"
                             ? "bg-green-500"
                             : "bg-red-500"
@@ -124,7 +136,7 @@ export default function ManageUsers() {
                     <TableCell className="flex gap-2">
                       {user?.isActive === "ACTIVE" ? (
                         <Button
-                          variant="destructive"
+                          variant="outline"
                           size="sm"
                           onClick={() => handleBlockUser(user?._id)}
                           title="Block User"

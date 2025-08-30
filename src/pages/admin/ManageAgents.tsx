@@ -76,23 +76,28 @@ export default function ManageAgents() {
   };
 
   return (
-    <Card className="container mx-auto">
+    <Card className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
       <CardHeader>
-        <CardTitle>Manage Agents</CardTitle>
+        <CardTitle className="text-2xl lg:text-3xl">Manage Agents</CardTitle>
         <CardDescription>
           View all agents and manage their account status (approve/suspend)
         </CardDescription>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         {isLoading ? (
-          <Skeleton className="h-40 w-full" />
-        ) : agentData.data.length > 0 ? (
+          <div className="space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </div>
+        ) : agentData?.data?.length > 0 ? (
           <>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Profile</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Action</TableHead>
@@ -110,10 +115,13 @@ export default function ManageAgents() {
                       <span>{user?.name}</span>
                     </TableCell>
                     <TableCell>{user?.email}</TableCell>
-                    <TableCell>{user?.isActive}</TableCell>
+                    <TableCell>{user?.phone ?? "N/A"}</TableCell>
+                    <TableCell className="font-semibold">
+                      {user?.isActive}
+                    </TableCell>
                     <TableCell>
                       <span
-                        className={`px-2 py-1 rounded-full text-white font-medium text-sm ${
+                        className={`px-2 py-1 rounded-full text-white font-medium text-xs ${
                           user?.role === "AGENT" ? "bg-green-500" : "bg-red-500"
                         }`}
                       >

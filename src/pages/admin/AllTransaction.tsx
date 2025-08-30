@@ -94,10 +94,10 @@ const AllTransaction = () => {
   const end = Math.min(start + pageSize, total);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold">All Transactions</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold">All Transactions</h1>
         <p className="text-muted-foreground">
           Manage and review all user transactions with advanced filters and
           search options.
@@ -111,9 +111,9 @@ const AllTransaction = () => {
             <Filter size={18} /> Filter Transactions
           </CardTitle>
         </CardHeader>
-        <CardContent className="grid md:grid-cols-3 gap-4">
+        <CardContent className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
           {/* Search */}
-          <div className="flex items-center gap-2 col-span-1">
+          <div className="flex items-center gap-2 w-full">
             <Search className="text-muted-foreground" size={18} />
             <Input
               placeholder="Search by amount, or ID ."
@@ -150,124 +150,126 @@ const AllTransaction = () => {
       </Card>
 
       {/* Transaction List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Transaction History</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <Skeleton key={i} className="h-10 w-full" />
-              ))}
-            </div>
-          ) : transactions?.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">ID</TableHead>
-                    <TableHead>InitiatedBy</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">
-                      Transaction Date
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transactions.map((tx: any) => (
-                    <TableRow key={tx._id}>
-                      <TableCell className="font-medium">{tx._id}</TableCell>
-                      <TableCell>{tx?.initiatedBy || "N/A"}</TableCell>
-                      <TableCell>
-                        <div
-                          className={`inline-flex items-center gap-2 ${
-                            typeMeta[tx.type as TxType].color
-                          }`}
-                        >
-                          {typeMeta[tx.type as TxType].icon}
-                          <span className="font-medium">
-                            {typeMeta[tx.type as TxType].label}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-semibold">
-                        BDT {tx?.amount}
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={tx.status} />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {new Date(tx?.createdAt).toLocaleString()}
-                      </TableCell>
+      <div className="w-full overflow-x-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Transaction History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-2">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
+                ))}
+              </div>
+            ) : transactions?.length > 0 ? (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">ID</TableHead>
+                      <TableHead>InitiatedBy</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">
+                        Transaction Date
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {transactions.map((tx: any) => (
+                      <TableRow key={tx._id}>
+                        <TableCell className="font-medium">{tx._id}</TableCell>
+                        <TableCell>{tx?.initiatedBy || "N/A"}</TableCell>
+                        <TableCell>
+                          <div
+                            className={`inline-flex items-center gap-2 ${
+                              typeMeta[tx.type as TxType].color
+                            }`}
+                          >
+                            {typeMeta[tx.type as TxType].icon}
+                            <span className="font-medium">
+                              {typeMeta[tx.type as TxType].label}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-semibold">
+                          BDT {tx?.amount}
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge status={tx.status} />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {new Date(tx?.createdAt).toLocaleString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
 
-              <Separator className="my-4" />
-              {/* Pagination */}
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="text-sm text-muted-foreground">
-                  Showing <span className="font-medium">{start + 1}</span>–
-                  <span className="font-medium">{end}</span> of{" "}
-                  <span className="font-medium">{total}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8 rounded-full"
-                      onClick={() => setPage(1)}
-                      disabled={page === 1}
-                    >
-                      <ChevronsLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8 rounded-full"
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <div className="px-3 text-sm">
-                      Page <span className="font-medium">{page}</span> /{" "}
-                      {totalPages}
+                <Separator className="my-4" />
+                {/* Pagination */}
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="text-sm text-muted-foreground">
+                    Showing <span className="font-medium">{start + 1}</span>–
+                    <span className="font-medium">{end}</span> of{" "}
+                    <span className="font-medium">{total}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        onClick={() => setPage(1)}
+                        disabled={page === 1}
+                      >
+                        <ChevronsLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <div className="px-3 text-sm">
+                        Page <span className="font-medium">{page}</span> /{" "}
+                        {totalPages}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        onClick={() =>
+                          setPage((p) => Math.min(totalPages, p + 1))
+                        }
+                        disabled={page === totalPages}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        onClick={() => setPage(totalPages)}
+                        disabled={page === totalPages}
+                      >
+                        <ChevronsRight className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8 rounded-full"
-                      onClick={() =>
-                        setPage((p) => Math.min(totalPages, p + 1))
-                      }
-                      disabled={page === totalPages}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8 rounded-full"
-                      onClick={() => setPage(totalPages)}
-                      disabled={page === totalPages}
-                    >
-                      <ChevronsRight className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <EmptyState />
-          )}
-        </CardContent>
-      </Card>
+            ) : (
+              <EmptyState />
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
