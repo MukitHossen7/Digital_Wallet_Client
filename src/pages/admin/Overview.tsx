@@ -57,9 +57,9 @@ export default function Overview() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
       {/* Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {/* Total Users */}
         <Card className="p-4 flex flex-col justify-between">
           <CardHeader className="flex flex-col items-start gap-2">
@@ -75,7 +75,7 @@ export default function Overview() {
             {userLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
-              <p className="text-3xl font-bold">
+              <p className="text-2xl lg:text-3xl font-bold">
                 {userData?.data?.length || 0}
               </p>
             )}
@@ -97,7 +97,7 @@ export default function Overview() {
             {agentLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
-              <p className="text-3xl font-bold">
+              <p className="text-2xl lg:text-3xl font-bold">
                 {agentData?.data?.length || 0}
               </p>
             )}
@@ -119,7 +119,7 @@ export default function Overview() {
             {transactionLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
-              <p className="text-3xl font-bold">
+              <p className="text-2xl lg:text-3xl font-bold">
                 {transactionData?.meta?.total || 0}
               </p>
             )}
@@ -141,7 +141,7 @@ export default function Overview() {
             {volumeLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
-              <p className="text-3xl font-bold">
+              <p className="text-2xl lg:text-3xl font-bold">
                 {transactionVolume?.data || 0} BDT
               </p>
             )}
@@ -150,7 +150,7 @@ export default function Overview() {
       </div>
 
       {/* overview graph */}
-      <Card className="bg-white dark:bg-gray-800 shadow-lg rounded-lg">
+      <Card className="bg-white dark:bg-gray-800 shadow-md rounded-lg">
         <CardHeader>
           <CardTitle>Overview Chart</CardTitle>
           <CardDescription>
