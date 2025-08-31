@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 
 const AboutHero = () => {
   return (
-    <section className="overflow-hidden py-16 md:py-20 lg:24 xl:py-32">
-      <div className="mx-auto flex max-w-6xl flex-col items-center">
+    <section className="overflow-hidden py-16 md:py-20 lg:24 xl:py-32 mx-auto max-w-6xl">
+      <div className="">
         <div className="relative flex flex-col gap-5 items-center">
           <div
             style={{

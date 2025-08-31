@@ -13,7 +13,7 @@ const HeroSection = () => {
           className="[mask-image:radial-gradient(75%_75%_at_center,white,transparent)] opacity-90"
         />
       </div>
-      <div className="relative z-10 container">
+      <div className="relative z-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center">
           <div className="flex flex-col items-center gap-6 text-center">
             <div className="">
