@@ -63,7 +63,7 @@ export default function Navbar() {
     }
   };
   return (
-    <header className="border-b w-11/12 md:w-11/12 lg:w-11/12 xl:container mx-auto">
+    <header className="border-b w-11/12 md:w-11/12 lg:w-11/12 xl:container mx-auto sticky top-0 bg-white/50 dark:bg-neutral-950/50 backdrop-blur-2xl z-50">
       <div className="flex h-16 items-center justify-between gap-4 ">
         {/* Left side */}
         <div className="flex items-center gap-2">

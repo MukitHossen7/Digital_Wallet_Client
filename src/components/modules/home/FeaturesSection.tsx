@@ -5,8 +5,8 @@ import { Headphones, Shield, Wallet, Zap } from "lucide-react";
 const FeaturesSection = () => {
   return (
     <div>
-      <section className="py-8 md:py-12 lg:py-16">
-        <div className="max-w-6xl mx-auto px-6">
+      <section className="py-8 md:py-12 lg:py-16 w-11/12 md:w-11/12 lg:w-11/12 xl:container mx-auto">
+        <div>
           <h2 className="text-2xl md:text-3xl font-bold text-center mb-10">
             Key Features
           </h2>
