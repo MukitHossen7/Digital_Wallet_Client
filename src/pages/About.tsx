@@ -1,9 +1,17 @@
-const About = () => {
+import AboutHero from "@/components/modules/about/HeroSection";
+import StorySection from "@/components/modules/about/StorySection";
+import MissionSection from "@/components/modules/about/MissionSection";
+import OurTeem from "@/components/modules/about/OurTeem";
+
+const AboutPage = () => {
   return (
     <div>
-      <h1>This is About Page</h1>
+      <AboutHero></AboutHero>
+      <StorySection></StorySection>
+      <MissionSection></MissionSection>
+      <OurTeem></OurTeem>
     </div>
   );
 };
 
-export default About;
+export default AboutPage;
