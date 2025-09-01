@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router";
 
 const AboutHero = () => {
+  const navigate = useNavigate();
   return (
     <section className="overflow-hidden py-16 md:py-20 lg:24 xl:py-32 mx-auto max-w-6xl">
       <div className="">
@@ -41,7 +43,7 @@ const AboutHero = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            <Button>Learn More</Button>
+            <Button onClick={() => navigate("/feature")}>Learn More</Button>
           </motion.div>
         </div>
       </div>

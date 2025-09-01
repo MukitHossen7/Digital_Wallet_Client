@@ -2,8 +2,10 @@ import { ExternalLink } from "lucide-react";
 import logo from "../../../assets/images/logo (1).png";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative overflow-hidden py-16 md:py-20 lg:24 xl:py-32">
       <div className="absolute inset-x-0 top-0 flex h-full w-full items-center justify-center opacity-100">
@@ -43,10 +45,17 @@ const HeroSection = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              <Button className="shadow-sm transition-shadow hover:shadow">
+              <Button
+                onClick={() => navigate("/login")}
+                className="shadow-sm transition-shadow hover:shadow cursor-pointer"
+              >
                 Get Started
               </Button>
-              <Button variant="outline" className="group">
+              <Button
+                onClick={() => navigate("/feature")}
+                variant="outline"
+                className="group cursor-pointer"
+              >
                 Learn more{" "}
                 <ExternalLink className="ml-2 h-4 transition-transform group-hover:translate-x-0.5" />
               </Button>
