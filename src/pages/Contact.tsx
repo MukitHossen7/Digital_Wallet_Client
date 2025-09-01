@@ -1,7 +1,7 @@
 import ContactHero from "@/components/modules/contact/ContactHero";
 import ContactUs from "@/components/modules/contact/ContactUs";
 
-const ContactPage = () => {
+const Contact = () => {
   return (
     <div className="">
       <ContactHero />
@@ -10,4 +10,4 @@ const ContactPage = () => {
   );
 };
 
-export default ContactPage;
+export default Contact;

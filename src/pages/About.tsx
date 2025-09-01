@@ -3,7 +3,7 @@ import StorySection from "@/components/modules/about/StorySection";
 import MissionSection from "@/components/modules/about/MissionSection";
 import OurTeem from "@/components/modules/about/OurTeem";
 
-const AboutPage = () => {
+const About = () => {
   return (
     <div>
       <AboutHero></AboutHero>
@@ -14,4 +14,4 @@ const AboutPage = () => {
   );
 };
 
-export default AboutPage;
+export default About;
