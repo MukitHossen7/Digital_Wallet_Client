@@ -29,6 +29,7 @@ import {
 } from "@/redux/features/auth/auth.api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -117,6 +118,10 @@ const Verify = () => {
   };
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-black">
+      <Helmet>
+        <title>Verify - NEOPAY</title>
+        <meta name="description" content="This is Verify Page" />
+      </Helmet>
       {confirm ? (
         <Card className="w-full max-w-sm p-6 shadow-lg ">
           <CardHeader className="text-center">

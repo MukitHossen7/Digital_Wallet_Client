@@ -21,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useLoginMutation } from "@/redux/features/auth/auth.api";
 import config from "@/config";
+import { ChevronLeft } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.email(),
@@ -41,6 +42,12 @@ export function LoginForm({
       password: "",
     },
   });
+
+  const demoUsers = [
+    { label: "Admin", email: "admin@gmail.com", password: "Admin123@" },
+    { label: "User", email: "hossenmukit7@gmail.com", password: "User123@" },
+    { label: "Agent", email: "mukithossen7@gmail.com", password: "Agent123@" },
+  ];
 
   const handleSubmit = async (data: z.infer<typeof loginSchema>) => {
     let toastId: string | number | undefined;
@@ -76,6 +83,7 @@ export function LoginForm({
       console.error(error);
     }
   };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -86,10 +94,24 @@ export function LoginForm({
               onSubmit={form.handleSubmit(handleSubmit)}
             >
               <div className="flex flex-col gap-6">
+                <div className="flex justify-start">
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <Link to="/">
+                      <ChevronLeft className="h-4 w-4" />
+                      Back to Home
+                    </Link>
+                  </Button>
+                </div>
+
                 <div className="flex flex-col items-center text-center">
                   <h1 className="text-2xl font-bold">Welcome back</h1>
                   <p className="text-muted-foreground text-balance">
-                    Login to your Digital Wallet account
+                    Login to your NeoPay account
                   </p>
                 </div>
                 <FormField
@@ -120,12 +142,9 @@ export function LoginForm({
                     <FormItem>
                       <div className="flex items-center">
                         <FormLabel>Password</FormLabel>
-                        <Link
-                          to="/"
-                          className="ml-auto text-sm underline-offset-2 hover:underline"
-                        >
+                        <p className="ml-auto text-sm underline-offset-2 hover:underline disabled:not-only:">
                           Forgot your password?
-                        </Link>
+                        </p>
                       </div>
                       <FormControl>
                         <Password {...field} />
@@ -140,6 +159,26 @@ export function LoginForm({
                 <Button type="submit" className="w-full">
                   Login
                 </Button>
+                <div className="text-center mb-4">
+                  <h2 className="text-sm font-medium text-muted-foreground mb-2">
+                    Demo Users
+                  </h2>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {demoUsers.map((user) => (
+                      <Button
+                        key={user.label}
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          form.setValue("email", user.email);
+                          form.setValue("password", user.password);
+                        }}
+                      >
+                        {user.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
                 <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                   <span className="bg-card text-muted-foreground relative z-10 px-2">
                     Or continue with
@@ -176,7 +215,7 @@ export function LoginForm({
             <img
               src={loginImg}
               alt="Image"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.6] dark:grayscale"
             />
           </div>
         </CardContent>

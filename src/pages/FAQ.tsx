@@ -1,10 +1,15 @@
 import FAQHeader from "@/components/modules/faq/FAQHeader";
 import FAQHelp from "@/components/modules/faq/FAQHelp";
 import FAQAccordion from "@/components/modules/faq/FAQAccordion";
+import { Helmet } from "react-helmet";
 
 const FAQ = () => {
   return (
     <main className="py-14 w-11/12 md:w-11/12 lg:w-11/12 xl:container mx-auto">
+      <Helmet>
+        <title>FAQ - NEOPAY</title>
+        <meta name="description" content="This is FAQ Page" />
+      </Helmet>
       <div>
         <FAQHeader />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

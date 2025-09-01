@@ -3,7 +3,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import registerImg from "../../../assets/images/registration.webp";
+import registerImg from "../../../assets/images/image2.jpg";
+
 import { Link, useNavigate } from "react-router";
 import {
   Form,
@@ -28,6 +29,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { toast } from "sonner";
 import { useRegisterMutation } from "@/redux/features/auth/auth.api";
+import { ChevronLeft } from "lucide-react";
 
 const registerSchema = z
   .object({
@@ -100,7 +102,7 @@ export function RegisterForm({
             <img
               src={registerImg}
               alt="Image"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.6] dark:grayscale"
             />
           </div>
           <Form {...form}>
@@ -109,6 +111,18 @@ export function RegisterForm({
               className="p-6 md:p-8"
             >
               <div className="flex flex-col gap-6">
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-fit flex items-center gap-2"
+                    onClick={() => navigate("/")}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Back to Home
+                  </Button>
+                </div>
+
                 <div className="flex flex-col items-center text-center">
                   <h1 className="text-2xl font-bold">Create Your Wallet</h1>
                   <p className="text-muted-foreground text-balance">

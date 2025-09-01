@@ -18,11 +18,13 @@ import { createBrowserRouter, Navigate } from "react-router";
 import { adminSidebarItems } from "./adminSidebarItems";
 import { userSidebarItems } from "./userSidebarItems";
 import { agentSidebarItems } from "./agentSidebarItems";
+import NotFound from "@/pages/NotFound";
 
 const router = createBrowserRouter([
   {
     path: "/",
     Component: App,
+
     children: [
       {
         index: true,
@@ -44,6 +46,10 @@ const router = createBrowserRouter([
         path: "faq",
         Component: FAQ,
       },
+      {
+        path: "*",
+        Component: NotFound,
+      },
     ],
   },
   {
@@ -58,6 +64,10 @@ const router = createBrowserRouter([
         }),
       },
       ...generateRoutes(adminSidebarItems),
+      {
+        path: "*",
+        Component: NotFound,
+      },
     ],
   },
   {
@@ -72,6 +82,10 @@ const router = createBrowserRouter([
         }),
       },
       ...generateRoutes(userSidebarItems),
+      {
+        path: "*",
+        Component: NotFound,
+      },
     ],
   },
   {
@@ -86,6 +100,10 @@ const router = createBrowserRouter([
         }),
       },
       ...generateRoutes(agentSidebarItems),
+      {
+        path: "*",
+        Component: NotFound,
+      },
     ],
   },
   {
@@ -103,6 +121,10 @@ const router = createBrowserRouter([
   {
     path: "/unauthorized",
     Component: UnAuthorized,
+  },
+  {
+    path: "*",
+    Component: NotFound,
   },
 ]);
 
