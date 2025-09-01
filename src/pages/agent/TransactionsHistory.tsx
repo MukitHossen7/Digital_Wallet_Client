@@ -31,6 +31,7 @@ import { Separator } from "@/components/ui/separator";
 import EmptyState from "@/components/modules/user/transaction/EmptyState";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Helmet } from "react-helmet";
 
 type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
 type TxStatus = "COMPLETED" | "PENDING" | "FAILED";
@@ -94,6 +95,10 @@ export default function TransactionsPage() {
 
   return (
     <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
+      <Helmet>
+        <title>Dashboard - Transactions</title>
+        <meta name="description" content="This is Transactions Page" />
+      </Helmet>
       <Card>
         <CardHeader className="flex items-center justify-between">
           <div>

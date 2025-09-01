@@ -45,6 +45,7 @@ import StatusBadge from "@/components/modules/user/overview/StatusBadge";
 import EmptyState from "@/components/modules/user/overview/EmptyState";
 import { useGetMeWalletQuery } from "@/redux/features/wallet/wallet.api";
 import { useGetMeTransactionQuery } from "@/redux/features/transaction/transaction.api";
+import { Helmet } from "react-helmet";
 
 // -------------------- Types --------------------
 export type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
@@ -132,6 +133,10 @@ export default function Overview() {
     ?.slice(0, 5);
   return (
     <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
+      <Helmet>
+        <title>Dashboard - Overview</title>
+        <meta name="description" content="This is Overview Page" />
+      </Helmet>
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1" data-tour="overview-title">

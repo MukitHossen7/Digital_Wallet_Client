@@ -35,6 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import EmptyState from "@/components/modules/user/transaction/EmptyState";
+import { Helmet } from "react-helmet";
 
 export type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
 const typeMeta: Record<
@@ -95,6 +96,10 @@ const AllTransaction = () => {
 
   return (
     <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
+      <Helmet>
+        <title>Dashboard - Transactions</title>
+        <meta name="description" content="This is Transactions Page" />
+      </Helmet>
       {/* Header */}
       <div className="space-y-2">
         <h1 className="text-2xl lg:text-3xl font-bold">All Transactions</h1>

@@ -33,6 +33,7 @@ import {
 
 import StatCard from "@/components/modules/agent/overview/StatCard";
 import { useGetTransactionSummeryQuery } from "@/redux/features/transaction/transaction.api";
+import { Helmet } from "react-helmet";
 
 const BDT = new Intl.NumberFormat("en-BD", {
   style: "currency",
@@ -100,6 +101,10 @@ export default function AgentOverview() {
 
   return (
     <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
+      <Helmet>
+        <title>Dashboard - Overview</title>
+        <meta name="description" content="This is Overview Page" />
+      </Helmet>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-3">

@@ -47,6 +47,7 @@ import DepositFeeSummary from "@/components/modules/user/wallet/DepositFeeSummar
 import WithdrawFeeSummary from "@/components/modules/user/wallet/WithdrawFeeSummary";
 import SendMoneyFeeSummary from "@/components/modules/user/wallet/SendMoneyFeeSummary";
 import { useGetAllUserAndAgentQuery } from "@/redux/features/user/user.api";
+import { Helmet } from "react-helmet";
 
 // -------------------- Validation --------------------
 
@@ -227,6 +228,10 @@ export default function WalletPage() {
   // -------------------- UI --------------------
   return (
     <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
+      <Helmet>
+        <title>Dashboard - Wallet</title>
+        <meta name="description" content="This is Wallet Page" />
+      </Helmet>
       <WalletHeader />
 
       <div

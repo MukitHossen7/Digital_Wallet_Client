@@ -41,6 +41,7 @@ import {
   useAgentCashInMutation,
   useAgentCashOutMutation,
 } from "@/redux/features/transaction/transaction.api";
+import { Helmet } from "react-helmet";
 
 const baseSchema = z.object({
   identifier: z.string().min(5, "Enter email of the user"),
@@ -218,6 +219,10 @@ export default function AgentWallet() {
 
   return (
     <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
+      <Helmet>
+        <title>Dashboard - Wallet</title>
+        <meta name="description" content="This is Wallet Page" />
+      </Helmet>
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-3">

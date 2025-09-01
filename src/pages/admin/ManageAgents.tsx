@@ -27,6 +27,7 @@ import {
 import demoImg from "../../assets/images/panda.jpg";
 import { toast } from "sonner";
 import { FaBan } from "react-icons/fa";
+import { Helmet } from "react-helmet";
 
 export default function ManageAgents() {
   const [approveAgent] = useApproveAgentMutation();
@@ -77,6 +78,10 @@ export default function ManageAgents() {
 
   return (
     <Card className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
+      <Helmet>
+        <title>Dashboard - All Agents</title>
+        <meta name="description" content="This is All Agents Page" />
+      </Helmet>
       <CardHeader>
         <CardTitle className="text-2xl lg:text-3xl">Manage Agents</CardTitle>
         <CardDescription>

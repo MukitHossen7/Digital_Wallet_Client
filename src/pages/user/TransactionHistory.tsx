@@ -44,6 +44,7 @@ import {
 import EmptyState from "@/components/modules/user/transaction/EmptyState";
 import StatusBadge from "@/components/modules/user/transaction/StatusBadge";
 import { useGetMeTransactionQuery } from "@/redux/features/transaction/transaction.api";
+import { Helmet } from "react-helmet";
 
 export type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
 export type TxStatus = "COMPLETED" | "PENDING" | "FAILED";
@@ -119,6 +120,10 @@ export default function TransactionHistory() {
   const pageItems = tx;
   return (
     <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
+      <Helmet>
+        <title>Dashboard - Transactions</title>
+        <meta name="description" content="This is Transactions Page" />
+      </Helmet>
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
