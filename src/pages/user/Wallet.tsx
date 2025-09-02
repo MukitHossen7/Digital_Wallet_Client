@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { useState, useEffect } from "react";
@@ -93,15 +92,7 @@ export default function WalletPage() {
   const [searchParams] = useSearchParams();
   const tabFromQuery = searchParams.get("tab") || "deposit";
   const [activeTab, setActiveTab] = useState(tabFromQuery);
-  const [loading, setLoading] = useState(true);
   const [balance, setBalance] = useState<number | undefined>(undefined);
-
-  // skeleton effect
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 600);
-    return () => clearTimeout(t);
-  }, []);
-
   useEffect(() => {
     setActiveTab(tabFromQuery);
   }, [tabFromQuery]);
