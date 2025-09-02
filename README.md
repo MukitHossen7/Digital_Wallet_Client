@@ -46,7 +46,7 @@ Agent:
 - **Frontend**: React.js
 - **Routing**: React Router
 - **State Management**: Redux
-- **UI Framework**: Material-UI
+- **UI Framework**: Shadcn
 - **API Communication**: Axios
 - **Styling**:Tailwind CSS
 - **Animation**:Framer-motion
