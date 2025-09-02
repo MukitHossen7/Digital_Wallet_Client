@@ -21,7 +21,6 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
 
 const FEATURES = [
   {
@@ -155,7 +154,7 @@ const FeaturesStats = () => {
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <Button disabled={userData?.data?.email} asChild>
-              <Link to="/register">Create Account</Link>
+              Create Account
             </Button>
             <div className="mt-3 text-sm text-muted-foreground">
               <strong>New to NeoPay?</strong> Try our demo wallet to explore
