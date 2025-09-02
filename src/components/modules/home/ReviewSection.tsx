@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useGetMeQuery } from "@/redux/features/auth/auth.api";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router";
 
 const ReviewSection = () => {
+  const { data: userData } = useGetMeQuery(undefined);
   const navigate = useNavigate();
   const handleLogin = () => {
     navigate("/login");
@@ -44,7 +46,11 @@ const ReviewSection = () => {
               </motion.div>
             ))}
           </div>
-          <Button onClick={handleLogin} size="lg">
+          <Button
+            onClick={handleLogin}
+            size="lg"
+            disabled={userData?.data?.email}
+          >
             Join NeoPay Now
           </Button>
         </div>

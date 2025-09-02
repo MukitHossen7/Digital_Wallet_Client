@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useGetMeQuery } from "@/redux/features/auth/auth.api";
 import { motion } from "framer-motion";
 import {
   Clock,
@@ -86,7 +87,7 @@ const FEATURES = [
 
 const FeaturesStats = () => {
   const [loading, setLoading] = useState(true);
-
+  const { data: userData } = useGetMeQuery(undefined);
   useEffect(() => {
     const t = setTimeout(() => {
       setLoading(false);
@@ -153,7 +154,7 @@ const FeaturesStats = () => {
             <CardDescription>Quick actions to explore NeoPay</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
-            <Button asChild>
+            <Button disabled={userData?.data?.email} asChild>
               <Link to="/register">Create Account</Link>
             </Button>
             <div className="mt-3 text-sm text-muted-foreground">
