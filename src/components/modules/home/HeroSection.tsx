@@ -3,9 +3,12 @@ import logo from "../../../assets/images/logo (1).png";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router";
+import { useGetMeQuery } from "@/redux/features/auth/auth.api";
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const { data: userData } = useGetMeQuery(undefined);
+  console.log(userData?.data.email);
   return (
     <section className="relative overflow-hidden py-16 md:py-20 lg:24 xl:py-32">
       <div className="absolute inset-x-0 top-0 flex h-full w-full items-center justify-center opacity-100">
@@ -48,6 +51,7 @@ const HeroSection = () => {
               <Button
                 onClick={() => navigate("/login")}
                 className="shadow-sm transition-shadow hover:shadow cursor-pointer"
+                disabled={userData?.data?.email}
               >
                 Get Started
               </Button>

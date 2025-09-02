@@ -43,7 +43,7 @@ Agent:
 
 ## Technologies Used
 
-- **Frontend**: React.js
+- **Frontend**: React.js and TypeScript
 - **Routing**: React Router
 - **State Management**: Redux
 - **UI Framework**: Shadcn
