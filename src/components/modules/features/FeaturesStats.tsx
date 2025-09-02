@@ -153,7 +153,7 @@ const FeaturesStats = () => {
             <CardDescription>Quick actions to explore NeoPay</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
-            <Button variant="default" disabled={userData?.data?.email} asChild>
+            <Button disabled={userData?.data?.email} variant="default">
               Create Account
             </Button>
             <div className="mt-3 text-sm text-muted-foreground">
