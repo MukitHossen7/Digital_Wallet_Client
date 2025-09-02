@@ -21,6 +21,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 const FEATURES = [
   {
@@ -87,6 +88,7 @@ const FEATURES = [
 const FeaturesStats = () => {
   const [loading, setLoading] = useState(true);
   const { data: userData } = useGetMeQuery(undefined);
+  const navigate = useNavigate();
   useEffect(() => {
     const t = setTimeout(() => {
       setLoading(false);
@@ -153,7 +155,12 @@ const FeaturesStats = () => {
             <CardDescription>Quick actions to explore NeoPay</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
-            <Button disabled={userData?.data?.email} variant="default">
+            <Button
+              onClick={() => navigate("/register")}
+              disabled={userData?.data?.email}
+              variant="default"
+              className="cursor-pointer"
+            >
               Create Account
             </Button>
             <div className="mt-3 text-sm text-muted-foreground">
