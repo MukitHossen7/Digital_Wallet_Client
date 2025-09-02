@@ -109,7 +109,7 @@ const AccordionItem: React.FC<{
   onToggle: () => void;
 }> = ({ faq, isOpen, onToggle }) => {
   return (
-    <div className="rounded-lg border bg-white/80 dark:bg-slate-900/60 dark:border-slate-700">
+    <div className="rounded-lg border">
       <button
         aria-expanded={isOpen}
         aria-controls={`${faq.id}-panel`}
