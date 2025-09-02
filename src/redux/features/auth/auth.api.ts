@@ -24,6 +24,7 @@ export const authApi = baseApi.injectEndpoints({
         url: "/auth/logout",
         method: "POST",
       }),
+      invalidatesTags: ["USER"],
     }),
 
     register: builder.mutation<IResponse<IRegisterData>, IRegister>({

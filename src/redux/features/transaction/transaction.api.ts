@@ -16,7 +16,7 @@ export const transactionApi = baseApi.injectEndpoints({
         method: "POST",
         data: transactionData,
       }),
-      invalidatesTags: ["TRANSACTION"],
+      invalidatesTags: ["WALLET", "TRANSACTION"],
     }),
 
     withdrawMoney: builder.mutation<IResponse<null>, IWithdrawMoney>({
@@ -25,7 +25,7 @@ export const transactionApi = baseApi.injectEndpoints({
         method: "POST",
         data: transactionData,
       }),
-      invalidatesTags: ["TRANSACTION"],
+      invalidatesTags: ["WALLET", "TRANSACTION"],
     }),
 
     sendMoney: builder.mutation<IResponse<null>, ISendMoney>({
@@ -34,7 +34,7 @@ export const transactionApi = baseApi.injectEndpoints({
         method: "POST",
         data: transactionData,
       }),
-      invalidatesTags: ["TRANSACTION"],
+      invalidatesTags: ["WALLET", "TRANSACTION"],
     }),
 
     agentCashIn: builder.mutation<IResponse<null>, ICashIn>({
@@ -43,7 +43,7 @@ export const transactionApi = baseApi.injectEndpoints({
         method: "POST",
         data: transactionData,
       }),
-      invalidatesTags: ["TRANSACTION"],
+      invalidatesTags: ["WALLET", "TRANSACTION"],
     }),
 
     agentCashOut: builder.mutation<IResponse<null>, ICashOut>({
@@ -52,7 +52,7 @@ export const transactionApi = baseApi.injectEndpoints({
         method: "POST",
         data: transactionData,
       }),
-      invalidatesTags: ["TRANSACTION"],
+      invalidatesTags: ["WALLET", "TRANSACTION"],
     }),
 
     getMeTransaction: builder.query({

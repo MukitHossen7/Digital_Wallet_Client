@@ -7,6 +7,7 @@ export const walletApi = baseApi.injectEndpoints({
         url: "/wallets/me",
         method: "GET",
       }),
+      providesTags: ["WALLET"],
     }),
   }),
 });
