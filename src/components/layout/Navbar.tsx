@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -12,17 +11,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { IoMdLogIn } from "react-icons/io";
-import { BiLogOutCircle } from "react-icons/bi";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import logo from "../../assets/images/logo (1).png";
 import { role } from "@/constants/role";
-import {
-  authApi,
-  useGetMeQuery,
-  useLogOutMutation,
-} from "@/redux/features/auth/auth.api";
-import { toast } from "sonner";
-import { useAppDispatch } from "@/redux/hook";
+import { useGetMeQuery } from "@/redux/features/auth/auth.api";
 import { ModeToggle } from "./ModeToggler";
 
 const navigationLinks = [
@@ -39,31 +31,7 @@ const navigationLinks = [
 
 export default function Navbar() {
   const { data: userData } = useGetMeQuery(undefined);
-  const [logOut] = useLogOutMutation();
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
 
-  const handleLogOut = async () => {
-    let toastId: string | number | undefined;
-    try {
-      toastId = toast.loading("Logged out, please wait...");
-      const result = await logOut(null).unwrap();
-      if (result.success) {
-        toast.success("Logged out successfully", { id: toastId });
-        dispatch(authApi.util.resetApiState());
-        navigate("/");
-      }
-    } catch (error: any) {
-      if (toastId) {
-        toast.error(error?.data?.message || "Something went wrong", {
-          id: toastId,
-        });
-      } else {
-        toast.error("Logout failed");
-      }
-      console.error("Logout failed:", error);
-    }
-  };
   return (
     <header className="sticky top-0 bg-white/50 dark:bg-neutral-950/50 backdrop-blur-2xl z-50 border-b">
       <div className="w-11/12 md:w-11/12 lg:w-11/12 xl:container mx-auto ">
@@ -167,16 +135,7 @@ export default function Navbar() {
           {/* Right side */}
           <div className="flex items-center gap-2">
             <ModeToggle />
-            {userData?.data?.email ? (
-              <Button
-                className="text-sm"
-                variant="outline"
-                onClick={handleLogOut}
-              >
-                <BiLogOutCircle />
-                LogOut
-              </Button>
-            ) : (
+            {!userData?.data?.email && (
               <Button asChild className="text-sm">
                 <Link to="/login">
                   <IoMdLogIn />
