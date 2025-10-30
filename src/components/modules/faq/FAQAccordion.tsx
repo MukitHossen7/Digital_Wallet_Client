@@ -213,7 +213,9 @@ const FAQAccordion = () => {
               <button
                 onClick={() => setCategoryFilter("all")}
                 className={`rounded-full px-3 py-1 text-sm ${
-                  categoryFilter === "all" ? "bg-sky-600 text-white" : "border"
+                  categoryFilter === "all"
+                    ? "bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900"
+                    : "border"
                 }`}
               >
                 All
@@ -223,7 +225,9 @@ const FAQAccordion = () => {
                   key={c}
                   onClick={() => setCategoryFilter(c)}
                   className={`rounded-full px-3 py-1 text-sm ${
-                    categoryFilter === c ? "bg-sky-600 text-white" : "border"
+                    categoryFilter === c
+                      ? "bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900"
+                      : "border"
                   }`}
                 >
                   {c}

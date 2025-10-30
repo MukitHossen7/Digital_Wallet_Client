@@ -1,8 +1,9 @@
 import AboutHero from "@/components/modules/about/HeroSection";
-import StorySection from "@/components/modules/about/StorySection";
+// import StorySection from "@/components/modules/about/StorySection";
 import MissionSection from "@/components/modules/about/MissionSection";
-import OurTeem from "@/components/modules/about/OurTeem";
 import { Helmet } from "react-helmet";
+import OurTeems from "@/components/modules/about/OurTeems";
+import OurStory from "@/components/modules/about/OurStory";
 
 const About = () => {
   return (
@@ -12,9 +13,11 @@ const About = () => {
         <meta name="description" content="This is About Page" />
       </Helmet>
       <AboutHero></AboutHero>
-      <StorySection></StorySection>
+      {/* <StorySection></StorySection> */}
+      <OurStory />
       <MissionSection></MissionSection>
-      <OurTeem></OurTeem>
+      {/* <OurTeem></OurTeem> */}
+      <OurTeems />
     </div>
   );
 };

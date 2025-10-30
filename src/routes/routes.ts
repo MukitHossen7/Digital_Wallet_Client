@@ -19,6 +19,7 @@ import { adminSidebarItems } from "./adminSidebarItems";
 import { userSidebarItems } from "./userSidebarItems";
 import { agentSidebarItems } from "./agentSidebarItems";
 import NotFound from "@/pages/NotFound";
+import Pricing from "@/pages/Pricing";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
       {
         path: "feature",
         Component: Features,
+      },
+      {
+        path: "pricing",
+        Component: Pricing,
       },
       {
         path: "contact",

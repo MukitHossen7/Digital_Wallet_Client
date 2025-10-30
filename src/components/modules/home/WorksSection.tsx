@@ -40,10 +40,14 @@ const WorksSection = () => {
                 transition={{ delay: i * 0.2 }}
               >
                 <Card className="h-full shadow-md rounded-xl hover:shadow-lg flex flex-col items-center p-6 transition">
-                  <item.icon className="w-10 h-10 text-indigo-600" />
+                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-black/80 shadow-lg dark:bg-gray-800">
+                    <item.icon className="w-8 h-8 text-white dark:text-gray-200" />
+                  </div>
 
                   <h3 className="text-xl font-semibold">{item.title}</h3>
-                  <p className="text-gray-400 text-sm">{item.desc}</p>
+                  <p className="text-gray-400 dark:text-gray-300 text-sm">
+                    {item.desc}
+                  </p>
                 </Card>
               </motion.div>
             ))}

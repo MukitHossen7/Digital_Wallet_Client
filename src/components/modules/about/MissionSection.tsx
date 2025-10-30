@@ -51,11 +51,15 @@ const MissionSection = () => {
             >
               <Card className="h-full flex flex-col justify-center rounded-xl shadow-md hover:shadow-lg transition">
                 <CardHeader className="flex flex-col items-center text-center space-y-2 flex-grow">
-                  <item.icon className="w-10 h-10 text-indigo-600" />
+                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-black/80 shadow-lg dark:bg-gray-800 mb-2">
+                    <item.icon className="w-8 h-8 text-white dark:text-gray-200" />
+                  </div>
                   <CardTitle className="text-lg font-semibold">
                     {item.title}
                   </CardTitle>
-                  <CardDescription>{item.desc}</CardDescription>
+                  <CardDescription className="text-gray-500 dark:text-gray-300">
+                    {item.desc}
+                  </CardDescription>
                 </CardHeader>
               </Card>
             </motion.div>

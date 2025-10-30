@@ -39,13 +39,17 @@ const FeaturesSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.2 }}
               >
-                <Card className="h-full shadow-md rounded-xl">
+                <Card className="h-full shadow-md rounded-xl text-center">
                   <CardHeader>
-                    <item.icon className="w-10 h-10 text-indigo-600 mb-4" />
+                    <div className="w-12 h-12 mb-4 mx-auto flex items-center justify-center rounded-full bg-black/80 shadow-lg dark:bg-gray-800">
+                      <item.icon className="w-8 h-8 text-white dark:text-gray-200" />
+                    </div>
                     <CardTitle>{item.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-gray-400">{item.desc}</p>
+                    <p className="text-sm text-gray-400 dark:text-gray-300">
+                      {item.desc}
+                    </p>
                   </CardContent>
                 </Card>
               </motion.div>
