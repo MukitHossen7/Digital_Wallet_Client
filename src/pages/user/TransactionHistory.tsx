@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -14,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+
 import {
   Select,
   SelectContent,
@@ -35,7 +34,6 @@ import {
   ArrowUpFromLine,
   Send,
   ListFilter,
-  Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -45,6 +43,7 @@ import EmptyState from "@/components/modules/user/transaction/EmptyState";
 import StatusBadge from "@/components/modules/user/transaction/StatusBadge";
 import { useGetMeTransactionQuery } from "@/redux/features/transaction/transaction.api";
 import { Helmet } from "react-helmet";
+import DateComponent from "@/components/date-component";
 
 export type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
 export type TxStatus = "COMPLETED" | "PENDING" | "FAILED";
@@ -128,10 +127,10 @@ export default function TransactionHistory() {
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight flex items-center gap-3">
-            <ListFilter className="h-7 w-7 text-primary" /> Transaction History
+            Transaction History
           </h1>
           <p className="text-muted-foreground">
-            Filter by type & date range. Built for speed
+            View and manage all your transactions
           </p>
         </div>
         <Badge variant="secondary" className="rounded-xl">
@@ -151,7 +150,7 @@ export default function TransactionHistory() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col  lg:flex-row gap-4">
-            <div className="w-full">
+            <div className="w-full mt-1">
               <Label>Type</Label>
               <Select
                 defaultValue={type}
@@ -170,31 +169,10 @@ export default function TransactionHistory() {
             </div>
 
             <div className="w-full">
-              <Label htmlFor="from">From</Label>
-              <div className="relative mt-1">
-                <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground " />
-                <Input
-                  id="from"
-                  type="date"
-                  value={from}
-                  onChange={(e) => setFrom(e.target.value)}
-                  className="pl-9 rounded-md w-full"
-                />
-              </div>
+              <DateComponent label="From" value={from} onChange={setFrom} />
             </div>
-
             <div className="w-full">
-              <Label htmlFor="to">To</Label>
-              <div className="relative mt-1">
-                <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="to"
-                  type="date"
-                  value={to}
-                  onChange={(e) => setTo(e.target.value)}
-                  className="pl-9 rounded-md w-full"
-                />
-              </div>
+              <DateComponent label="To" value={to} onChange={setTo} />
             </div>
           </div>
 
