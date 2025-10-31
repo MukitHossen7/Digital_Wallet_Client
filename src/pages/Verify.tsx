@@ -180,7 +180,12 @@ const Verify = () => {
                 >
                   <span>Resend OTP: </span>
                 </Button>
-                <span className="ml-1">{timer}</span>
+                <span className="ml-1 font-semibold">
+                  {`${Math.floor(timer / 60)}:${String(timer % 60).padStart(
+                    2,
+                    "0"
+                  )}`}
+                </span>
                 <Button className="w-full mt-4" type="submit">
                   Submit
                 </Button>

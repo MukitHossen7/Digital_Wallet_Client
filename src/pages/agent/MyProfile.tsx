@@ -18,7 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import meImg from "../../assets/images/panda.jpg";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { User } from "lucide-react";
+import { CalendarDays, MapPin, ShieldCheck, User } from "lucide-react";
 import {
   useChangePasswordMutation,
   useGetMeQuery,
@@ -158,7 +158,7 @@ export default function AgentProfile() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
-            <User className="h-6 w-6 text-primary" /> Agent Profile
+            Agent Profile
           </h1>
           <p className="text-sm text-muted-foreground">
             Update your agent details and avatar
@@ -178,7 +178,7 @@ export default function AgentProfile() {
         {/* Left: side bar */}
         <Card className="space-y-4">
           <CardHeader>
-            <CardTitle>Agent Info</CardTitle>
+            <CardTitle>Agent Overview</CardTitle>
           </CardHeader>
           <CardContent>
             {userLoading || !userData?.data ? (
@@ -197,28 +197,66 @@ export default function AgentProfile() {
                   className="h-28 w-28 rounded-full ring-1 object-cover object-center"
                 />
 
-                <div className="w-full space-y-2 text-center">
-                  <div className="text-sm text-muted-foreground">Name</div>
-                  <div className="font-medium">{userData?.data?.name}</div>
-
-                  <div className="text-sm text-muted-foreground mt-2">
-                    Email
+                <div className="w-full text-center">
+                  <div className="font-medium text-xl">
+                    {userData?.data?.name ?? "N/A"}
                   </div>
-                  <div className="font-medium">{userData?.data?.email}</div>
 
-                  <div className="text-sm text-muted-foreground mt-2">
-                    Phone
+                  <div className="text-gray-600 dark:text-gray-400 text-sm">
+                    {userData?.data?.email ?? "N/A"}
                   </div>
-                  <div className="font-medium">
-                    {userData?.data?.phone ?? "N/A"}
+                  <div className="text-sm font-semibold mt-2 text-green-400">
+                    {userData?.data?.isVerified ? "Verified Agent" : "N/A"}
                   </div>
                 </div>
-
-                <div className="text-sm text-muted-foreground mt-2">
-                  Address
-                </div>
-                <div className="font-medium">
-                  {userData?.data?.address ?? "N/A"}
+                <Separator />
+                <div className="w-full">
+                  <div className="flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    <div className="">
+                      <p className="font-medium text-sm">Agent ID</p>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">
+                        {userData?.data?._id ?? "00000000"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <MapPin className="w-5 h-5" />
+                    <div className="">
+                      <p className="font-medium text-sm">Location</p>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">
+                        {userData?.data?.address ?? "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <CalendarDays className="w-5 h-5" />
+                    <div className="">
+                      <p className="font-medium text-sm">Agent since</p>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">
+                        {userData?.data?.createdAt
+                          ? new Date(
+                              userData.data.createdAt
+                            ).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })
+                          : "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <ShieldCheck className="w-5 h-5 text-green-400" />
+                    <div className="">
+                      <p className="font-medium text-sm">Status</p>
+                      <p className="text-green-600 text-sm">
+                        {userData?.data?.isVerified && userData?.data?.isActive
+                          ? "Active & Verified"
+                          : "N/A"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

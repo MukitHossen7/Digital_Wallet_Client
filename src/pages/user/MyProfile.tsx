@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,29 +19,17 @@ import { Separator } from "@/components/ui/separator";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { Camera, User } from "lucide-react";
+import { Camera, ShieldCheck, User } from "lucide-react";
 import {
   useChangePasswordMutation,
   useGetMeQuery,
 } from "@/redux/features/auth/auth.api";
-import SingleImageUploader from "@/components/SingleImageUploader";
-import { useUpdateUserProfileMutation } from "@/redux/features/user/user.api";
+
 import { toast } from "sonner";
 import { Helmet } from "react-helmet";
+import ProfileModal from "@/components/modules/user/modal/ProfileUpdateModal";
 
 // -------------------- Validation --------------------
-const profileSchema = z.object({
-  name: z.string().min(2, { error: "Name is Required" }).max(50),
-  phone: z
-    .string()
-    .min(10, { error: "Enter a valid phone number" })
-    .max(20)
-    .regex(
-      /^(?:\+?88)?01[3-9][0-9]{8}$/,
-      "Enter a valid Bangladeshi phone (e.g. 017XXXXXXXX)"
-    ),
-  address: z.string().min(2, { error: "Address is Required" }),
-});
 
 const passwordSchema = z
   .object({
@@ -61,24 +49,13 @@ const passwordSchema = z
     path: ["confirmPassword"],
   });
 
-type ProfileForm = z.infer<typeof profileSchema>;
 type PasswordForm = z.infer<typeof passwordSchema>;
 
 export default function MyProfile() {
-  const [updateUserProfile] = useUpdateUserProfileMutation();
   const [changePassword] = useChangePasswordMutation();
   const { data: userData, isLoading: userLoading } = useGetMeQuery(undefined);
   const [showPassword, setShowPassword] = useState(false);
-  const [image, setImage] = useState<File | null>(null);
-
-  const profileForm = useForm<ProfileForm>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      name: "",
-      phone: "",
-      address: "",
-    },
-  });
+  // const [showUpdateForm, setShowUpdateForm] = useState(false);
 
   const passwordForm = useForm<PasswordForm>({
     resolver: zodResolver(passwordSchema),
@@ -89,41 +66,6 @@ export default function MyProfile() {
     },
     mode: "onChange",
   });
-
-  useEffect(() => {
-    if (userData?.data) {
-      profileForm.reset({
-        name: userData.data.name ?? "",
-        phone: userData.data.phone ?? "",
-        address: userData.data.address ?? "",
-      });
-    }
-  }, [userData, profileForm]);
-
-  async function onSubmitProfile(values: ProfileForm) {
-    let toastId: string | number | undefined;
-    try {
-      toastId = toast.loading("Processing update profile...");
-      const formData = new FormData();
-      formData.append("data", JSON.stringify(values));
-      if (image) {
-        formData.append("file", image as File);
-      }
-      const res = await updateUserProfile(formData).unwrap();
-      if (res.success) {
-        toast.success("Update Profile Successfully", { id: toastId });
-      } else {
-        toast.error("Update Profile Failed", { id: toastId });
-      }
-    } catch (error: any) {
-      if (toastId) {
-        toast.error(error?.data?.message, { id: toastId });
-      } else {
-        toast.error("Something went wrong");
-      }
-      console.log(error);
-    }
-  }
 
   async function onSubmitPassword(values: PasswordForm) {
     let toastId: string | number | undefined;
@@ -158,7 +100,7 @@ export default function MyProfile() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
-            <User className="h-6 w-6 text-primary" /> Profile
+            Profile Settings
           </h1>
           <p className="text-sm text-muted-foreground">
             Update your name, phone, password and profile image.
@@ -178,7 +120,7 @@ export default function MyProfile() {
         {/* Left side */}
         <Card className="space-y-4">
           <CardHeader>
-            <CardTitle>Profile</CardTitle>
+            <CardTitle>Profile Overview</CardTitle>
             <CardDescription>Personal details & avatar</CardDescription>
           </CardHeader>
 
@@ -199,30 +141,48 @@ export default function MyProfile() {
                   className="h-28 w-28 rounded-full ring-1 object-cover object-center"
                 />
 
-                <div className="w-full space-y-2 text-center">
-                  <div className="text-sm text-muted-foreground">Name</div>
-                  <div className="font-medium">
+                <div className="w-full text-center">
+                  <div className="font-medium text-xl">
                     {userData?.data?.name ?? "N/A"}
                   </div>
 
-                  <div className="text-sm text-muted-foreground mt-2">
-                    Email
-                  </div>
-                  <div className="font-medium">
+                  <div className="text-gray-600 dark:text-gray-400 text-sm">
                     {userData?.data?.email ?? "N/A"}
                   </div>
+                  <div className="text-sm font-semibold mt-2 text-green-400">
+                    {userData?.data?.isVerified ? "Verified User" : "N/A"}
+                  </div>
+                </div>
 
-                  <div className="text-sm text-muted-foreground mt-2">
-                    Phone
+                <Separator />
+                <div className="w-full">
+                  <div className="flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    <div className="">
+                      <p className="font-medium text-sm">Member since</p>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">
+                        {userData?.data?.createdAt
+                          ? new Date(
+                              userData.data.createdAt
+                            ).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })
+                          : "N/A"}
+                      </p>
+                    </div>
                   </div>
-                  <div className="font-medium">
-                    {userData?.data?.phone ?? "N/A"}
-                  </div>
-                  <div className="text-sm text-muted-foreground mt-2">
-                    Address
-                  </div>
-                  <div className="font-medium">
-                    {userData?.data?.address ?? "N/A"}
+                  <div className="flex items-center gap-2 mt-3">
+                    <ShieldCheck className="w-5 h-5 text-green-400" />
+                    <div className="">
+                      <p className="font-medium text-sm">Account Status</p>
+                      <p className="text-green-600 text-sm">
+                        {userData?.data?.isVerified && userData?.data?.isActive
+                          ? "Active & Verified"
+                          : "N/A"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -232,94 +192,58 @@ export default function MyProfile() {
 
         {/* Right: Forms */}
         <div className="md:col-span-2 space-y-4">
+          {/* personal Information  */}
           <Card>
-            <CardHeader>
-              <CardTitle>Update profile</CardTitle>
-              <CardDescription>
-                Change your profile to make it look better
-              </CardDescription>
+            <CardHeader className="flex items-center justify-between">
+              <CardTitle className="text-lg font-medium">
+                Personal Information
+              </CardTitle>
+              <ProfileModal />
             </CardHeader>
             <CardContent>
-              <form
-                onSubmit={profileForm.handleSubmit(onSubmitProfile)}
-                className="space-y-4"
-              >
+              <div className="space-y-4 -mt-4">
                 {/* Name & Phone */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Full name */}
                   <div>
-                    <Label htmlFor="name">Full name</Label>
-                    <Input
-                      id="name"
-                      placeholder="Your full name"
-                      {...profileForm.register("name")}
-                      className="rounded-md mt-1 w-full"
-                    />
-                    {profileForm.formState.errors.name && (
-                      <p className="text-destructive text-xs mt-1">
-                        {profileForm.formState.errors.name.message}
-                      </p>
-                    )}
+                    <Label className="text-sm text-foreground">Full Name</Label>
+                    <p className="text-base font-medium text-muted-foreground mt-1 border rounded-md px-3 py-2 bg-muted/30">
+                      {userData?.data?.name || "Not Provided"}
+                    </p>
                   </div>
 
                   {/* Phone */}
                   <div>
-                    <Label htmlFor="phone">Phone</Label>
-                    <div className="relative mt-1">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                        +88
-                      </span>
-                      <Input
-                        id="phone"
-                        placeholder="17XXXXXXXX"
-                        className="pl-12 rounded-md w-full"
-                        {...profileForm.register("phone")}
-                      />
-                    </div>
-                    {profileForm.formState.errors.phone && (
-                      <p className="text-destructive text-xs mt-1">
-                        {profileForm.formState.errors.phone.message}
-                      </p>
-                    )}
+                    <Label className="text-sm  text-foreground">Phone</Label>
+                    <p className="text-base font-medium text-muted-foreground mt-1 border rounded-md px-3 py-2 bg-muted/30">
+                      {userData?.data?.phone
+                        ? `+88${userData.data.phone}`
+                        : "Not Provided"}
+                    </p>
                   </div>
                 </div>
 
                 {/* Address full width */}
                 <div>
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    placeholder="Enter your Address"
-                    {...profileForm.register("address")}
-                    className="rounded-md mt-1 w-full"
-                  />
-                  {profileForm.formState.errors.address && (
-                    <p className="text-destructive text-xs mt-1">
-                      {profileForm.formState.errors.address.message}
-                    </p>
-                  )}
+                  <Label className="text-sm  text-foreground">Address</Label>
+                  <p className="text-base font-medium text-muted-foreground mt-1 border rounded-md px-3 py-2 bg-muted/30">
+                    {userData?.data?.address || "Not Provided"}
+                  </p>
                 </div>
-
-                <div className="w-full">
-                  <SingleImageUploader onChange={setImage} />
-                </div>
-
-                {/* Buttons */}
-                <div className="flex items-center gap-2 justify-end">
-                  <Button type="submit">Save changes</Button>
-                </div>
-              </form>
+              </div>
             </CardContent>
           </Card>
+          {/* Update Profile Form (toggle) */}
 
+          {/* change Password */}
           <Card>
             <CardHeader>
-              <CardTitle>Change password</CardTitle>
+              <CardTitle className="text-lg">Security Settings</CardTitle>
               <CardDescription>
                 Update your password to keep your account secure
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="-mt-2">
               <form
                 onSubmit={passwordForm.handleSubmit(onSubmitPassword)}
                 className="grid grid-cols-1 gap-4"
@@ -403,7 +327,7 @@ export default function MyProfile() {
               </form>
             </CardContent>
           </Card>
-
+          {/* some text */}
           <div className="text-sm text-muted-foreground flex items-start gap-2">
             <Camera className="mt-1" />
             <div>

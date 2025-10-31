@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { User } from "lucide-react";
+import { CalendarDays, MapPin, ShieldCheck } from "lucide-react";
 import {
   useChangePasswordMutation,
   useGetMeQuery,
@@ -24,6 +24,7 @@ import SingleImageUploader from "@/components/SingleImageUploader";
 import { toast } from "sonner";
 import { useUpdateUserProfileMutation } from "@/redux/features/user/user.api";
 import { Helmet } from "react-helmet";
+import { Separator } from "@/components/ui/separator";
 
 // -------------------- Validation --------------------
 const profileSchema = z.object({
@@ -153,7 +154,7 @@ export default function MyProfile() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
-            <User className="h-6 w-6 text-primary" /> Profile
+            Admin Profile
           </h1>
           <p className="text-sm text-muted-foreground">
             Update your name, phone, password and profile image.
@@ -173,7 +174,7 @@ export default function MyProfile() {
         {/* Left side */}
         <Card className="space-y-4">
           <CardHeader>
-            <CardTitle>Profile</CardTitle>
+            <CardTitle>Profile Overview</CardTitle>
             <CardDescription>Personal details & avatar</CardDescription>
           </CardHeader>
 
@@ -193,31 +194,57 @@ export default function MyProfile() {
                   }}
                   className="h-28 w-28 rounded-full ring-1 object-cover object-center"
                 />
-
-                <div className="w-full space-y-2 text-center">
-                  <div className="text-sm text-muted-foreground">Name</div>
-                  <div className="font-medium">
+                <div className="w-full text-center">
+                  <div className="font-medium text-xl">
                     {adminData?.data?.name ?? "N/A"}
                   </div>
 
-                  <div className="text-sm text-muted-foreground mt-2">
-                    Email
-                  </div>
-                  <div className="font-medium">
+                  <div className="text-gray-600 dark:text-gray-400 text-sm">
                     {adminData?.data?.email ?? "N/A"}
                   </div>
-
-                  <div className="text-sm text-muted-foreground mt-2">
-                    Phone
+                  <div className="text-sm font-semibold mt-2 text-green-400">
+                    {adminData?.data?.isVerified ? "Verified Admin" : "N/A"}
                   </div>
-                  <div className="font-medium">
-                    {adminData?.data?.phone ?? "N/A"}
+                </div>
+                <Separator />
+                <div className="w-full">
+                  <div className="flex items-center gap-2 mt-3">
+                    <MapPin className="w-5 h-5" />
+                    <div className="">
+                      <p className="font-medium text-sm">Location</p>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">
+                        {adminData?.data?.address ?? "N/A"}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground mt-2">
-                    Address
+                  <div className="flex items-center gap-2 mt-3">
+                    <CalendarDays className="w-5 h-5" />
+                    <div className="">
+                      <p className="font-medium text-sm">Admin since</p>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">
+                        {adminData?.data?.createdAt
+                          ? new Date(
+                              adminData.data.createdAt
+                            ).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })
+                          : "N/A"}
+                      </p>
+                    </div>
                   </div>
-                  <div className="font-medium">
-                    {adminData?.data?.address ?? "N/A"}
+                  <div className="flex items-center gap-2 mt-3">
+                    <ShieldCheck className="w-5 h-5 text-green-400" />
+                    <div className="">
+                      <p className="font-medium text-sm">Status</p>
+                      <p className="text-green-600 text-sm">
+                        {adminData?.data?.isVerified &&
+                        adminData?.data?.isActive
+                          ? "Active & Verified"
+                          : "N/A"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
