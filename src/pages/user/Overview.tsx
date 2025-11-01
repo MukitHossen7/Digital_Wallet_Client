@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/table";
 
 import {
-  Wallet,
   Eye,
   EyeOff,
   ArrowDownToLine,
@@ -141,7 +140,7 @@ export default function Overview() {
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1" data-tour="overview-title">
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight flex items-center gap-3">
-            <Wallet className="h-7 w-7 text-primary" /> Wallet Overview
+            Wallet Overview
           </h1>
           <p className="text-muted-foreground">
             A fast, secure wallet experience

@@ -10,10 +10,10 @@ const WalletHeader = () => {
           <span>Fast • Secure • Reliable</span>
         </div>
         <h1 className="text-2xl md:text-3xl font-semibold tracking-tight flex items-center gap-3">
-          <Wallet className="h-7 w-7 text-primary" /> Wallet Actions
+          <Wallet className="h-7 w-7 text-primary" /> Wallet
         </h1>
         <p className="text-muted-foreground max-w-prose">
-          Deposit, Withdraw & Send — All in One Place.
+          Manage your wallet balance and transactions.
         </p>
       </div>
       <div className="hidden md:flex items-center gap-2">
