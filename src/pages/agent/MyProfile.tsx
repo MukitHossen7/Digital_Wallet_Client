@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,24 +23,11 @@ import {
   useChangePasswordMutation,
   useGetMeQuery,
 } from "@/redux/features/auth/auth.api";
-import SingleImageUploader from "@/components/SingleImageUploader";
-import { toast } from "sonner";
-import { useUpdateUserProfileMutation } from "@/redux/features/user/user.api";
-import { Helmet } from "react-helmet";
 
-// -------------------- Validation --------------------
-const agentProfileSchema = z.object({
-  name: z.string().min(2, { error: "Name is Required" }).max(50),
-  phone: z
-    .string()
-    .min(10, { error: "Enter a valid phone number" })
-    .max(20)
-    .regex(
-      /^(?:\+?88)?01[3-9][0-9]{8}$/,
-      "Enter a valid Bangladeshi phone (e.g. 017XXXXXXXX)"
-    ),
-  address: z.string().min(2, { error: "Address is Required" }),
-});
+import { toast } from "sonner";
+
+import { Helmet } from "react-helmet";
+import ProfileModal from "@/components/modules/agent/modal/ProfileUpdateModal";
 
 const agentPasswordSchema = z
   .object({
@@ -60,25 +47,13 @@ const agentPasswordSchema = z
     path: ["confirmPassword"],
   });
 
-type AgentProfileForm = z.infer<typeof agentProfileSchema>;
 type AgentPasswordForm = z.infer<typeof agentPasswordSchema>;
 
 export default function AgentProfile() {
   const [changePassword] = useChangePasswordMutation();
-  const [updateUserProfile] = useUpdateUserProfileMutation();
+
   const [showPassword, setShowPassword] = useState(false);
   const { data: userData, isLoading: userLoading } = useGetMeQuery(undefined);
-  const [image, setImage] = useState<File | null>(null);
-  // console.log(userData);
-
-  const agentProfileForm = useForm<AgentProfileForm>({
-    resolver: zodResolver(agentProfileSchema),
-    defaultValues: {
-      name: "",
-      phone: "",
-      address: "",
-    },
-  });
 
   const agentPasswordForm = useForm<AgentPasswordForm>({
     resolver: zodResolver(agentPasswordSchema),
@@ -89,41 +64,6 @@ export default function AgentProfile() {
     },
     mode: "onChange",
   });
-
-  useEffect(() => {
-    if (userData?.data) {
-      agentProfileForm.reset({
-        name: userData.data.name ?? "",
-        phone: userData.data.phone ?? "",
-        address: userData.data.address ?? "",
-      });
-    }
-  }, [userData, agentProfileForm]);
-
-  async function onSubmitAgentProfile(values: AgentProfileForm) {
-    let toastId: string | number | undefined;
-    try {
-      toastId = toast.loading("Processing update profile...");
-      const formData = new FormData();
-      formData.append("data", JSON.stringify(values));
-      if (image) {
-        formData.append("file", image as File);
-      }
-
-      const res = await updateUserProfile(formData).unwrap();
-      if (res.success) {
-        toast.success("Update Profile Successfully", { id: toastId });
-      } else {
-        toast.error("Update Profile Failed", { id: toastId });
-      }
-    } catch (error: any) {
-      if (toastId) {
-        toast.error(error?.data?.message, { id: toastId });
-      } else {
-        toast.error("Something went wrong");
-      }
-    }
-  }
 
   async function onSubmitAgentPassport(values: AgentPasswordForm) {
     let toastId: string | number | undefined;
@@ -264,91 +204,64 @@ export default function AgentProfile() {
         </Card>
 
         <div className="md:col-span-2 space-y-4">
-          {/* Right: Edit Form */}
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Update Agent Profile</CardTitle>
-              <CardDescription>
-                Change your profile to make it look better
-              </CardDescription>
+          {/* personal Information  */}
+          <Card>
+            <CardHeader className="flex items-center justify-between">
+              <CardTitle className="text-lg font-medium">
+                Personal Information
+              </CardTitle>
+              {/* Edit profile component */}
+              <ProfileModal />
             </CardHeader>
             <CardContent>
-              <form
-                onSubmit={agentProfileForm.handleSubmit(onSubmitAgentProfile)}
-                className="space-y-4"
-              >
+              <div className="space-y-4 -mt-4">
                 {/* Name & Phone */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Full name */}
                   <div>
-                    <Label htmlFor="name">Full name</Label>
-                    <Input
-                      id="name"
-                      placeholder="Your full name"
-                      {...agentProfileForm.register("name")}
-                      className="rounded-md mt-1 w-full"
-                    />
-                    {agentProfileForm.formState.errors.name && (
-                      <p className="text-destructive text-xs mt-1">
-                        {agentProfileForm.formState.errors.name.message}
-                      </p>
-                    )}
+                    <Label className="text-sm text-foreground">Full Name</Label>
+                    <p className="text-base font-medium text-muted-foreground mt-1 border rounded-md px-3 py-2 bg-muted/30">
+                      {userData?.data?.name || "Not Provided"}
+                    </p>
                   </div>
 
                   {/* Phone */}
                   <div>
-                    <Label htmlFor="phone">Phone</Label>
-                    <div className="relative mt-1">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                        +88
-                      </span>
-                      <Input
-                        id="phone"
-                        placeholder="17XXXXXXXX"
-                        className="pl-12 rounded-md w-full"
-                        {...agentProfileForm.register("phone")}
-                      />
-                    </div>
-                    {agentProfileForm.formState.errors.phone && (
-                      <p className="text-destructive text-xs mt-1">
-                        {agentProfileForm.formState.errors.phone.message}
-                      </p>
-                    )}
+                    <Label className="text-sm  text-foreground">Phone</Label>
+                    <p className="text-base font-medium text-muted-foreground mt-1 border rounded-md px-3 py-2 bg-muted/30">
+                      {userData?.data?.phone
+                        ? `+88${userData.data.phone}`
+                        : "Not Provided"}
+                    </p>
                   </div>
+                </div>
+                {/* Agent Email */}
+                <div>
+                  <Label className="text-sm  text-foreground">
+                    Email Address
+                  </Label>
+                  <p className="text-base font-medium text-muted-foreground mt-1 border rounded-md px-3 py-2 bg-muted/30">
+                    {userData?.data?.email || "Not Provided"}
+                  </p>
                 </div>
 
                 {/* Address full width */}
                 <div>
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    placeholder="Enter your Address"
-                    {...agentProfileForm.register("address")}
-                    className="rounded-md mt-1 w-full"
-                  />
-                  {agentProfileForm.formState.errors.address && (
-                    <p className="text-destructive text-xs mt-1">
-                      {agentProfileForm.formState.errors.address.message}
-                    </p>
-                  )}
+                  <Label className="text-sm  text-foreground">
+                    Branch Location
+                  </Label>
+                  <p className="text-base font-medium text-muted-foreground mt-1 border rounded-md px-3 py-2 bg-muted/30">
+                    {userData?.data?.address || "Not Provided"}
+                  </p>
                 </div>
-
-                <div className="w-full">
-                  <SingleImageUploader onChange={setImage} />
-                </div>
-
-                {/* Buttons */}
-                <div className="flex items-center gap-2 justify-end">
-                  <Button type="submit">Save changes</Button>
-                </div>
-              </form>
+              </div>
             </CardContent>
           </Card>
 
           {/* Right change Password */}
           <Card>
             <CardHeader>
-              <CardTitle>Change password</CardTitle>
+              <CardTitle className="text-lg">Security Settings</CardTitle>
               <CardDescription>
                 Update your password to keep your account secure
               </CardDescription>
@@ -356,7 +269,7 @@ export default function AgentProfile() {
             <CardContent>
               <form
                 onSubmit={agentPasswordForm.handleSubmit(onSubmitAgentPassport)}
-                className="grid grid-cols-1 gap-4"
+                className="grid grid-cols-1 gap-4 -mt-1"
               >
                 <div>
                   <Label htmlFor="currentPassword">Current password</Label>
@@ -446,7 +359,7 @@ export default function AgentProfile() {
         </div>
       </div>
 
-      <Separator className="my-6" />
+      {/* <Separator className="my-6" /> */}
     </div>
   );
 }

@@ -233,7 +233,6 @@ export default function MyProfile() {
               </div>
             </CardContent>
           </Card>
-          {/* Update Profile Form (toggle) */}
 
           {/* change Password */}
           <Card>
