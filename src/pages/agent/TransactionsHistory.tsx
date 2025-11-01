@@ -8,7 +8,6 @@ import {
 
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  FileText,
   ArrowDownToLine,
   ArrowUpFromLine,
   Send,
@@ -103,11 +102,10 @@ export default function TransactionsPage() {
         <CardHeader className="flex items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2 text-2xl md:text-3xl font-semibold">
-              <FileText className="h-6 w-6 text-primary" /> All Transactions
+              Agent Transactions
             </CardTitle>
             <CardDescription>
-              View all transactions handled by the agent with status, type, and
-              amount
+              View all transactions you've handled
             </CardDescription>
           </div>
         </CardHeader>
@@ -123,7 +121,7 @@ export default function TransactionsPage() {
               <Table className="w-full whitespace-nowrap">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[100px]">Type</TableHead>
+                    <TableHead className="w-[100px]">Transaction</TableHead>
                     <TableHead>Initiated By</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Status</TableHead>
