@@ -27,6 +27,7 @@ import {
   useGetAllTransactionVolumeQuery,
 } from "@/redux/features/transaction/transaction.api";
 import { Helmet } from "react-helmet";
+import { NumberTicker } from "@/components/ui/number-ticker";
 
 const chartConfig: ChartConfig = {
   value: {
@@ -76,12 +77,12 @@ export default function Overview() {
             </div>
             <CardDescription>All registered users</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="-mt-4">
             {userLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
               <p className="text-2xl lg:text-3xl font-bold">
-                {userData?.data?.length || 0}
+                <NumberTicker value={userData?.data?.length || 0} />
               </p>
             )}
           </CardContent>
@@ -98,12 +99,12 @@ export default function Overview() {
             </div>
             <CardDescription>Verified service providers</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="-mt-4">
             {agentLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
               <p className="text-2xl lg:text-3xl font-bold">
-                {agentData?.data?.length || 0}
+                <NumberTicker value={agentData?.data?.length || 0} />
               </p>
             )}
           </CardContent>
@@ -120,12 +121,12 @@ export default function Overview() {
             </div>
             <CardDescription>Total successful transactions</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="-mt-4">
             {transactionLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
               <p className="text-2xl lg:text-3xl font-bold">
-                {transactionData?.meta?.total || 0}
+                <NumberTicker value={transactionData?.meta?.total || 0} />
               </p>
             )}
           </CardContent>
@@ -142,12 +143,12 @@ export default function Overview() {
             </div>
             <CardDescription>Overall money flow</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="-mt-4">
             {volumeLoading ? (
               <Skeleton className="h-8 w-20" />
             ) : (
               <p className="text-2xl lg:text-3xl font-bold">
-                {transactionVolume?.data || 0} BDT
+                <NumberTicker value={transactionVolume?.data || 0} /> BDT
               </p>
             )}
           </CardContent>
