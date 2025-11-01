@@ -21,7 +21,6 @@ import {
   TrendingUp,
   Sparkles,
 } from "lucide-react";
-import { GoHomeFill } from "react-icons/go";
 
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
@@ -108,13 +107,13 @@ export default function AgentOverview() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-3">
-            <GoHomeFill className="h-7 w-7 text-primary" /> Overview
+            Overview
           </h1>
           <p className="text-muted-foreground">
             Cash-in / Cash-out summary & recent activity
           </p>
         </div>
-        <Badge className="rounded-full bg-green-200 text-green-500">
+        <Badge className="rounded-full bg-green-100 text-green-400">
           Active
         </Badge>
       </div>

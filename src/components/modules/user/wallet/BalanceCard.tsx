@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { NumberTicker } from "@/components/ui/number-ticker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShieldCheck } from "lucide-react";
 
@@ -22,7 +23,9 @@ const BalanceCard = ({ balance, walletLoading }: IProps) => {
           {walletLoading ? (
             <Skeleton className="h-9 w-40" />
           ) : (
-            <span>BDT {balance}</span>
+            <span>
+              BDT <NumberTicker value={balance as number} />{" "}
+            </span>
           )}
         </CardTitle>
       </CardHeader>

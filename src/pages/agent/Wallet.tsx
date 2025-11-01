@@ -42,6 +42,7 @@ import {
   useAgentCashOutMutation,
 } from "@/redux/features/transaction/transaction.api";
 import { Helmet } from "react-helmet";
+import { NumberTicker } from "@/components/ui/number-ticker";
 
 const baseSchema = z.object({
   identifier: z.string().min(5, "Enter email of the user"),
@@ -225,8 +226,9 @@ export default function AgentWallet() {
       </Helmet>
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-3">
-            <MdCreditCard className="h-6 w-6 text-primary" /> {agentBalance} BDT
+          <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-2">
+            <MdCreditCard className="h-6 w-6 text-primary" />{" "}
+            <NumberTicker value={agentBalance} /> BDT
           </h1>
           <p className="text-sm text-muted-foreground">
             Add or withdraw money from a user's wallet
