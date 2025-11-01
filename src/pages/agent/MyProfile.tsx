@@ -51,7 +51,6 @@ type AgentPasswordForm = z.infer<typeof agentPasswordSchema>;
 
 export default function AgentProfile() {
   const [changePassword] = useChangePasswordMutation();
-
   const [showPassword, setShowPassword] = useState(false);
   const { data: userData, isLoading: userLoading } = useGetMeQuery(undefined);
 

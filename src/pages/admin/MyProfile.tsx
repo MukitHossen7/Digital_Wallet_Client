@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,25 +20,13 @@ import {
   useChangePasswordMutation,
   useGetMeQuery,
 } from "@/redux/features/auth/auth.api";
-import SingleImageUploader from "@/components/SingleImageUploader";
 import { toast } from "sonner";
-import { useUpdateUserProfileMutation } from "@/redux/features/user/user.api";
+
 import { Helmet } from "react-helmet";
 import { Separator } from "@/components/ui/separator";
+import ProfileModal from "@/components/modules/admin/modal/ProfileUpdateModal";
 
 // -------------------- Validation --------------------
-const profileSchema = z.object({
-  name: z.string().min(2, { error: "Name is Required" }).max(50),
-  phone: z
-    .string()
-    .min(10, { error: "Enter a valid phone number" })
-    .max(20)
-    .regex(
-      /^(?:\+?88)?01[3-9][0-9]{8}$/,
-      "Enter a valid Bangladeshi phone (e.g. 017XXXXXXXX)"
-    ),
-  address: z.string().min(2, { error: "Address is Required" }),
-});
 
 const passwordSchema = z
   .object({
@@ -58,25 +46,12 @@ const passwordSchema = z
     path: ["confirmPassword"],
   });
 
-type ProfileForm = z.infer<typeof profileSchema>;
 type PasswordForm = z.infer<typeof passwordSchema>;
 
 export default function MyProfile() {
   const [changePassword] = useChangePasswordMutation();
-  const [updateUserProfile] = useUpdateUserProfileMutation();
   const { data: adminData, isLoading: adminLoading } = useGetMeQuery(undefined);
   const [showPassword, setShowPassword] = useState(false);
-  const [image, setImage] = useState<File | null>(null);
-
-  const profileForm = useForm<ProfileForm>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      name: "",
-      phone: "",
-      address: "",
-    },
-  });
-
   const passwordForm = useForm<PasswordForm>({
     resolver: zodResolver(passwordSchema),
     defaultValues: {
@@ -86,40 +61,6 @@ export default function MyProfile() {
     },
     mode: "onChange",
   });
-
-  useEffect(() => {
-    if (adminData?.data) {
-      profileForm.reset({
-        name: adminData.data.name ?? "",
-        phone: adminData.data.phone ?? "",
-        address: adminData.data.address ?? "",
-      });
-    }
-  }, [adminData, profileForm]);
-
-  async function onSubmitProfile(values: ProfileForm) {
-    let toastId: string | number | undefined;
-    try {
-      toastId = toast.loading("Processing update profile...");
-      const formData = new FormData();
-      formData.append("data", JSON.stringify(values));
-      if (image) {
-        formData.append("file", image as File);
-      }
-      const res = await updateUserProfile(formData).unwrap();
-      if (res.success) {
-        toast.success("Update Profile Successfully", { id: toastId });
-      } else {
-        toast.error("Update Profile Failed", { id: toastId });
-      }
-    } catch (error: any) {
-      if (toastId) {
-        toast.error(error?.data?.message, { id: toastId });
-      } else {
-        toast.error("Something went wrong");
-      }
-    }
-  }
 
   async function onSubmitPassword(values: PasswordForm) {
     let toastId: string | number | undefined;
@@ -254,86 +195,61 @@ export default function MyProfile() {
 
         {/* Right: Forms */}
         <div className="md:col-span-2 space-y-4">
+          {/* personal Information  */}
           <Card>
-            <CardHeader>
-              <CardTitle>Update profile</CardTitle>
-              <CardDescription>
-                Change your profile to make it look better
-              </CardDescription>
+            <CardHeader className="flex items-center justify-between">
+              <CardTitle className="text-lg font-medium">
+                Personal Information
+              </CardTitle>
+              {/* Edit profile component */}
+              <ProfileModal />
             </CardHeader>
             <CardContent>
-              <form
-                onSubmit={profileForm.handleSubmit(onSubmitProfile)}
-                className="space-y-4"
-              >
+              <div className="space-y-4 -mt-4">
                 {/* Name & Phone */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Full name */}
                   <div>
-                    <Label htmlFor="name">Full name</Label>
-                    <Input
-                      id="name"
-                      placeholder="Your full name"
-                      {...profileForm.register("name")}
-                      className="rounded-md mt-1 w-full"
-                    />
-                    {profileForm.formState.errors.name && (
-                      <p className="text-destructive text-xs mt-1">
-                        {profileForm.formState.errors.name.message}
-                      </p>
-                    )}
+                    <Label className="text-sm text-foreground">Full Name</Label>
+                    <p className="text-base font-medium text-muted-foreground mt-1 border rounded-md px-3 py-2 bg-muted/30">
+                      {adminData?.data?.name || "Not Provided"}
+                    </p>
                   </div>
 
                   {/* Phone */}
                   <div>
-                    <Label htmlFor="phone">Phone</Label>
-                    <div className="relative mt-1">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                        +88
-                      </span>
-                      <Input
-                        id="phone"
-                        placeholder="17XXXXXXXX"
-                        className="pl-12 rounded-md w-full"
-                        {...profileForm.register("phone")}
-                      />
-                    </div>
-                    {profileForm.formState.errors.phone && (
-                      <p className="text-destructive text-xs mt-1">
-                        {profileForm.formState.errors.phone.message}
-                      </p>
-                    )}
+                    <Label className="text-sm  text-foreground">Phone</Label>
+                    <p className="text-base font-medium text-muted-foreground mt-1 border rounded-md px-3 py-2 bg-muted/30">
+                      {adminData?.data?.phone
+                        ? `+88${adminData.data.phone}`
+                        : "Not Provided"}
+                    </p>
                   </div>
+                </div>
+                {/* Agent Email */}
+                <div>
+                  <Label className="text-sm  text-foreground">
+                    Email Address
+                  </Label>
+                  <p className="text-base font-medium text-muted-foreground mt-1 border rounded-md px-3 py-2 bg-muted/30">
+                    {adminData?.data?.email || "Not Provided"}
+                  </p>
                 </div>
 
                 {/* Address full width */}
                 <div>
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    placeholder="Enter your Address"
-                    {...profileForm.register("address")}
-                    className="rounded-md mt-1 w-full"
-                  />
-                  {profileForm.formState.errors.address && (
-                    <p className="text-destructive text-xs mt-1">
-                      {profileForm.formState.errors.address.message}
-                    </p>
-                  )}
+                  <Label className="text-sm  text-foreground">
+                    Branch Location
+                  </Label>
+                  <p className="text-base font-medium text-muted-foreground mt-1 border rounded-md px-3 py-2 bg-muted/30">
+                    {adminData?.data?.address || "Not Provided"}
+                  </p>
                 </div>
-
-                <div className="w-full">
-                  <SingleImageUploader onChange={setImage} />
-                </div>
-
-                {/* Buttons */}
-                <div className="flex items-center gap-2 justify-end">
-                  <Button type="submit">Save changes</Button>
-                </div>
-              </form>
+              </div>
             </CardContent>
           </Card>
 
+          {/* Change password from */}
           <Card>
             <CardHeader>
               <CardTitle>Change password</CardTitle>
