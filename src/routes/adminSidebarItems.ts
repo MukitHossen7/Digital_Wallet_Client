@@ -2,11 +2,11 @@ import { GoHomeFill } from "react-icons/go";
 import { ListFilter, UserCheck, Users } from "lucide-react";
 import { CgProfile } from "react-icons/cg";
 import AllTransaction from "@/pages/admin/AllTransaction";
-import ManageAgents from "@/pages/admin/ManageAgents";
 import MyProfile from "@/pages/admin/MyProfile";
 import Overview from "@/pages/admin/Overview";
 import { ISidebarItem } from "@/types";
 import ManageUser from "@/pages/admin/ManageUser";
+import ManageAgent from "@/pages/admin/ManageAgent";
 
 export const adminSidebarItems: ISidebarItem[] = [
   {
@@ -28,7 +28,7 @@ export const adminSidebarItems: ISidebarItem[] = [
       {
         title: "Agents",
         url: "/admin/manage-agents",
-        component: ManageAgents,
+        component: ManageAgent,
         icon: UserCheck,
       },
       {

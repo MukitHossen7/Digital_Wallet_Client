@@ -101,7 +101,7 @@ export default function AgentOverview() {
   return (
     <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
       <Helmet>
-        <title>Dashboard - Overview</title>
+        <title>NEOPAY - Digital Wallet for NEOPAY</title>
         <meta name="description" content="This is Overview Page" />
       </Helmet>
       <div className="flex items-center justify-between">

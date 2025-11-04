@@ -1,18 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-// your magic number ticker
-import { MapPin, ShieldMinus, UserCheck, Users, UserX } from "lucide-react";
-import { useGetAllUsersStatisticsQuery } from "@/redux/features/stats/stats.api";
 import { NumberTicker } from "@/components/ui/number-ticker";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -21,15 +20,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useGetAllAgentStatisticsQuery } from "@/redux/features/stats/stats.api";
 import {
-  useHandleBlockMutation,
-  useUnBlockUserMutation,
+  useApproveAgentMutation,
+  useSuspendAgentMutation,
 } from "@/redux/features/user/user.api";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { MdBlockFlipped } from "react-icons/md";
+import { MapPin, UserCheck, Users, UserX } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { FaBan } from "react-icons/fa";
+import { MdCheckCircleOutline } from "react-icons/md";
+import { toast } from "sonner";
 
 const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
   const normalized = status?.toUpperCase() || "UNKNOWN";
@@ -48,21 +48,20 @@ const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
   return <Badge>{normalized}</Badge>;
 };
 
-// Main component
-export default function ManageUser() {
-  const [handleBlock] = useHandleBlockMutation();
-  const [unBlockUser] = useUnBlockUserMutation();
-  const { data, isLoading } = useGetAllUsersStatisticsQuery(null);
+const ManageAgent = () => {
+  const [approveAgent] = useApproveAgentMutation();
+  const [suspendAgent] = useSuspendAgentMutation();
+  const { data: agentData, isLoading } = useGetAllAgentStatisticsQuery(null);
 
-  const handleBlockUser = async (id: string) => {
+  const handleApproveAgent = async (id: string) => {
     let toastId: string | number | undefined;
     try {
-      toastId = toast.loading("Processing user block...");
-      const res = await handleBlock({ id: id }).unwrap();
+      toastId = toast.loading("Processing agent approve...");
+      const res = await approveAgent({ id: id }).unwrap();
       if (res.success) {
-        toast.success("User blocked Successfully", { id: toastId });
+        toast.success("Agent approve Successfully", { id: toastId });
       } else {
-        toast.error("User blocked Failed", { id: toastId });
+        toast.error("Agent approve Failed", { id: toastId });
       }
     } catch (error: any) {
       if (toastId) {
@@ -74,15 +73,15 @@ export default function ManageUser() {
     }
   };
 
-  const handleUnblockUser = async (id: string) => {
+  const handleSuspendAgent = async (id: string) => {
     let toastId: string | number | undefined;
     try {
-      toastId = toast.loading("Processing user unblock...");
-      const res = await unBlockUser({ id: id }).unwrap();
+      toastId = toast.loading("Processing agent suspend...");
+      const res = await suspendAgent({ id: id }).unwrap();
       if (res.success) {
-        toast.success("User unblocked Successfully", { id: toastId });
+        toast.success("Agent Suspend Successfully", { id: toastId });
       } else {
-        toast.error("User unblocked Failed", { id: toastId });
+        toast.error("Agent Suspend Failed", { id: toastId });
       }
     } catch (error: any) {
       if (toastId) {
@@ -93,18 +92,17 @@ export default function ManageUser() {
       console.log(error);
     }
   };
-
   return (
     <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
       <Helmet>
         <title>Admin Dashboard - NEOPAY</title>
-        <meta name="description" content="This is All Users Page" />
+        <meta name="description" content="This is All Agent Page" />
       </Helmet>
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold">User Management</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">Agent Management</h1>
         <p className="text-base text-muted-foreground">
-          View and manage all user accounts
+          Approve, manage, and monitor agent performance
         </p>
       </div>
 
@@ -113,18 +111,18 @@ export default function ManageUser() {
         {/* Total Users */}
         <Card className="shadow-sm hover:shadow-md transition">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Agent</CardTitle>
             <Users className="h-6 w-6 text-blue-600" />
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">
               <NumberTicker
                 className="text-blue-700 dark:text-blue-700"
-                value={data?.data?.totalUsers ?? 0}
+                value={agentData?.data?.totalAgents ?? 0}
               />
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              All registered users
+              All registered agents
             </p>
           </CardContent>
         </Card>
@@ -132,18 +130,18 @@ export default function ManageUser() {
         {/* Active Users */}
         <Card className="shadow-sm hover:shadow-md transition">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Agent</CardTitle>
             <UserCheck className="h-6 w-6 text-green-500" />
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">
               <NumberTicker
                 className="text-green-500 dark:text-green-500"
-                value={data?.data?.activeUsers ?? 0}
+                value={agentData?.data?.activeAgents ?? 0}
               />
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Currently active users
+              Currently active agents
             </p>
           </CardContent>
         </Card>
@@ -151,18 +149,20 @@ export default function ManageUser() {
         {/* Blocked Users */}
         <Card className="shadow-sm hover:shadow-md transition">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Blocked Users</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Suspended Agent
+            </CardTitle>
             <UserX className="h-6 w-6 text-red-600" />
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold ">
               <NumberTicker
                 className="text-red-600 dark:text-red-600"
-                value={data?.data?.blockUsers ?? 0}
+                value={agentData?.data?.blockAgents ?? 0}
               />
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Users who are blocked
+              Agents who are suspended
             </p>
           </CardContent>
         </Card>
@@ -173,25 +173,25 @@ export default function ManageUser() {
         <CardHeader className="-mb-2">
           <div className="">
             <CardTitle className="text-lg font-semibold">
-              Users (<NumberTicker value={data?.data?.totalUsers ?? 0} />)
+              Agents (<NumberTicker value={agentData?.data?.totalAgents ?? 0} />
+              )
             </CardTitle>
-            <CardDescription>List of registered users</CardDescription>
           </div>
         </CardHeader>
         <Separator />
         <CardContent className="overflow-x-auto">
           {isLoading ? (
             <div className="space-y-2">
-              {Array.from({ length: 10 }).map((_, i) => (
+              {Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} className="h-12 w-full" />
               ))}
             </div>
-          ) : data?.data?.userData?.length > 0 ? (
+          ) : agentData?.data?.data?.length > 0 ? (
             <>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>User</TableHead>
+                    <TableHead>Agent</TableHead>
                     <TableHead>Contact Number</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Location</TableHead>
@@ -201,7 +201,7 @@ export default function ManageUser() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data?.data?.userData?.map((user: any) => (
+                  {agentData?.data?.data?.map((user: any) => (
                     <TableRow key={user._id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -252,21 +252,21 @@ export default function ManageUser() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleBlockUser(user?._id)}
-                            title="Block User"
+                            onClick={() => handleSuspendAgent(user?._id)}
+                            title="Suspend Agent"
                             className="cursor-pointer"
                           >
-                            <MdBlockFlipped className="h-4 w-4" />
+                            <FaBan className="h-4 w-4" />
                           </Button>
                         ) : (
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleUnblockUser(user?._id)}
-                            title="Unblock User"
+                            onClick={() => handleApproveAgent(user?._id)}
+                            title="Approve Agent"
                             className="cursor-pointer"
                           >
-                            <ShieldMinus className="h-4 w-4" />
+                            <MdCheckCircleOutline className="h-4 w-4" />
                           </Button>
                         )}
                       </TableCell>
@@ -279,9 +279,9 @@ export default function ManageUser() {
             <div>
               <Card className="bg-muted/40">
                 <CardHeader>
-                  <CardTitle className="text-base">No user found</CardTitle>
+                  <CardTitle className="text-base">No agent found</CardTitle>
                   <CardDescription>
-                    No users match your criteria. Try adjusting filters.
+                    No agents match your criteria. Try adjusting filters.
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -291,4 +291,6 @@ export default function ManageUser() {
       </Card>
     </div>
   );
-}
+};
+
+export default ManageAgent;

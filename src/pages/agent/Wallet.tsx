@@ -221,7 +221,7 @@ export default function AgentWallet() {
   return (
     <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
       <Helmet>
-        <title>Dashboard - Wallet</title>
+        <title>NEOPAY - Digital Wallet for NEOPAY</title>
         <meta name="description" content="This is Wallet Page" />
       </Helmet>
       <div className="flex items-start justify-between gap-4 mb-4">

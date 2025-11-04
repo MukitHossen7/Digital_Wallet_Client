@@ -9,7 +9,15 @@ export const statsApi = baseApi.injectEndpoints({
       }),
       providesTags: ["USER", "STATS"],
     }),
+    getAllAgentStatistics: builder.query({
+      query: () => ({
+        url: `/stats/all-agents`,
+        method: "GET",
+      }),
+      providesTags: ["USER", "STATS"],
+    }),
   }),
 });
 
-export const { useGetAllUsersStatisticsQuery } = statsApi;
+export const { useGetAllUsersStatisticsQuery, useGetAllAgentStatisticsQuery } =
+  statsApi;
