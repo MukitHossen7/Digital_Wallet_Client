@@ -3,10 +3,10 @@ import { ListFilter, UserCheck, Users } from "lucide-react";
 import { CgProfile } from "react-icons/cg";
 import AllTransaction from "@/pages/admin/AllTransaction";
 import ManageAgents from "@/pages/admin/ManageAgents";
-import ManageUsers from "@/pages/admin/ManageUsers";
 import MyProfile from "@/pages/admin/MyProfile";
 import Overview from "@/pages/admin/Overview";
 import { ISidebarItem } from "@/types";
+import ManageUser from "@/pages/admin/ManageUser";
 
 export const adminSidebarItems: ISidebarItem[] = [
   {
@@ -22,7 +22,7 @@ export const adminSidebarItems: ISidebarItem[] = [
       {
         title: "Users",
         url: "/admin/manage-users",
-        component: ManageUsers,
+        component: ManageUser,
         icon: Users,
       },
       {

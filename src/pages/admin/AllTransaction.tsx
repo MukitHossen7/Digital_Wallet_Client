@@ -102,10 +102,11 @@ const AllTransaction = () => {
       </Helmet>
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-2xl lg:text-3xl font-bold">All Transactions</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold">
+          Transaction Management
+        </h1>
         <p className="text-muted-foreground">
-          Manage and review all user transactions with advanced filters and
-          search options.
+          Monitor and analyze all system transactions
         </p>
       </div>
 
