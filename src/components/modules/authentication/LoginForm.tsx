@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { useLoginMutation } from "@/redux/features/auth/auth.api";
 import config from "@/config";
 import { ChevronLeft } from "lucide-react";
+import ForgotPasswordDialog from "./ForgotPasswordDialog";
 
 const loginSchema = z.object({
   email: z.email(),
@@ -142,8 +143,8 @@ export function LoginForm({
                     <FormItem>
                       <div className="flex items-center">
                         <FormLabel>Password</FormLabel>
-                        <p className="ml-auto text-sm underline-offset-2 hover:underline disabled:not-only:">
-                          Forgot your password?
+                        <p className="ml-auto text-sm underline-offset-2 hover:underline hover:cursor-pointer">
+                          <ForgotPasswordDialog />
                         </p>
                       </div>
                       <FormControl>
