@@ -62,19 +62,18 @@ export function LoginForm({
       if (res.success) {
         toast.success("Login Successfully", { id: toastId });
         navigate("/");
+      } else {
+        toast.error("Invalid credentials", { id: toastId });
       }
     } catch (error: any) {
-      const message = error?.data?.message || "Something went wrong";
-      if (toastId) {
-        toast.error(message, { id: toastId });
-      } else {
-        toast.error(message);
-      }
+      const message =
+        error?.data?.message || "Something went wrong. Please try again.";
+      toast.error(message, { id: toastId });
 
-      if (message === "Password is incorrect") {
-        toast.error("Invalid credentials");
-        return;
-      }
+      // if (message === "Password is incorrect") {
+      //   toast.error("Invalid credentials");
+      //   return;
+      // }
 
       if (message === "Your account is not Verified") {
         toast.error("Your account is not Verified");

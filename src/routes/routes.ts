@@ -20,6 +20,7 @@ import { userSidebarItems } from "./userSidebarItems";
 import { agentSidebarItems } from "./agentSidebarItems";
 import NotFound from "@/pages/NotFound";
 import Pricing from "@/pages/Pricing";
+import ResetPassword from "@/pages/ResetPassword";
 
 const router = createBrowserRouter([
   {
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
       {
         path: "faq",
         Component: FAQ,
+      },
+      {
+        path: "reset-password",
+        Component: ResetPassword,
       },
       {
         path: "*",
