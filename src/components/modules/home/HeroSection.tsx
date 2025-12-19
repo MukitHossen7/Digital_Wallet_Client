@@ -89,7 +89,7 @@ const HeroSection = () => {
                 onClick={() =>
                   navigate(userData?.data?.email ? "/user" : "/login")
                 }
-                className="h-12 lg:h-14 px-8 text-md font-bold rounded-md shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all group"
+                className="h-12 lg:h-14 px-10 text-md font-bold rounded-md shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all group"
               >
                 Get Started Now
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -99,7 +99,7 @@ const HeroSection = () => {
                 size="lg"
                 variant="outline"
                 onClick={() => navigate("/feature")}
-                className="h-12 lg:h-14 px-8 text-md font-semibold rounded-md border-primary/20 hover:bg-primary/5 group"
+                className="h-12 lg:h-14 px-10 text-md font-semibold rounded-md border-primary/20 hover:bg-primary/5 group"
               >
                 Learn more
                 <ExternalLink className="ml-2 w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
