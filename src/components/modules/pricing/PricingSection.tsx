@@ -64,58 +64,95 @@ const PricingSection = () => {
     <section className="py-20 bg-background">
       <div className="w-11/12 md:w-11/12 lg:w-11/12 xl:container mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-primary font-semibold tracking-wide uppercase text-sm"
-          >
-            Pricing Plans
-          </motion.h2>
-          <motion.h3
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="mt-2 text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight"
-          >
-            Choose the right plan for you
-          </motion.h3>
-          <p className="mt-4 text-xl text-muted-foreground max-w-2xl mx-auto">
-            Simple, transparent pricing that grows with your financial needs.
-          </p>
-
-          {/* Monthly/Yearly Toggle */}
-          <div className="mt-10 flex justify-center items-center gap-4">
-            <span
-              className={`text-sm font-medium ${
-                !isYearly ? "text-foreground" : "text-muted-foreground"
-              }`}
-            >
-              Monthly
-            </span>
-            <button
-              onClick={() => setIsYearly(!isYearly)}
-              className="relative w-14 h-7 bg-secondary rounded-full p-1 transition-colors duration-300 focus:outline-none ring-2 ring-primary/20"
-            >
-              <motion.div
-                animate={{ x: isYearly ? 28 : 0 }}
-                className="w-5 h-5 bg-primary rounded-full shadow-lg"
-              />
-            </button>
-            <span
-              className={`text-sm font-medium ${
-                isYearly ? "text-foreground" : "text-muted-foreground"
-              }`}
-            >
-              Yearly{" "}
-              <span className="text-primary text-xs ml-1 font-bold">
-                (Save 20%)
-              </span>
-            </span>
+        <section className="relative pb-10 overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none">
+            <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/10 rounded-[100%] blur-[120px]" />
           </div>
-        </div>
+
+          <div className="container mx-auto">
+            <div className="text-center mb-16">
+              {/* Badge */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-6"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+                Flexible Pricing
+              </motion.div>
+
+              {/* Titles */}
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-4xl md:text-5xl lg:text-7xl font-black tracking-tight text-foreground leading-[1.1]"
+              >
+                Ready to scale your <br />
+                <span className="text-primary italic">NeoPay</span> wallet?
+              </motion.h2>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+              >
+                Choose a plan that fits your personal or business needs. No
+                hidden fees, cancel anytime.
+              </motion.p>
+
+              {/* Monthly/Yearly Toggle - Modern SaaS Style */}
+              <div className="mt-12 flex justify-center items-center">
+                <div className="bg-secondary/50 backdrop-blur-sm p-1.5 rounded-2xl border border-border flex items-center gap-2">
+                  <button
+                    onClick={() => setIsYearly(false)}
+                    className={`px-6 py-2.5 rounded-md text-sm font-bold transition-all duration-300 ${
+                      !isYearly
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    onClick={() => setIsYearly(true)}
+                    className={`px-6 py-2.5 rounded-md text-sm font-bold transition-all duration-300 relative ${
+                      isYearly
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Yearly
+                    {/* Save Badge */}
+                    <span
+                      className={`absolute -top-3 -right-3 px-2 py-0.5 rounded-lg bg-chart-2 text-[10px] text-black font-black uppercase shadow-sm transition-opacity duration-300 ${
+                        isYearly ? "opacity-100" : "opacity-80"
+                      }`}
+                    >
+                      -20%
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Trust Indicators */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="mt-6 text-xs text-muted-foreground/60 font-medium uppercase tracking-tighter"
+              >
+                Trusted by 50,000+ users worldwide
+              </motion.p>
+            </div>
+          </div>
+        </section>
 
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
