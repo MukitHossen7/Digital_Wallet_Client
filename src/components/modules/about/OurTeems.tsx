@@ -1,8 +1,8 @@
-import image4 from "../../../assets/images/mukit.jpeg";
-import { FaGithub } from "react-icons/fa6";
-import { FaLinkedinIn } from "react-icons/fa";
-import { FaTwitter } from "react-icons/fa";
+import { motion } from "framer-motion";
+import { FaGithub, FaLinkedinIn, FaTwitter } from "react-icons/fa6";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import image4 from "../../../assets/images/mukit.jpeg";
+import { Users } from "lucide-react";
 
 interface TeamMember {
   id: string;
@@ -14,14 +14,13 @@ interface TeamMember {
   linkedin?: string;
 }
 
-interface Team1Props {
+interface TeamProps {
   heading?: string;
-  subheading?: string;
   description?: string;
   members?: TeamMember[];
 }
 
-const OurTeems = ({
+const OurTeam = ({
   heading = "Meet Our Team",
   description = "NeoPay is powered by a dedicated team of professionals committed to delivering a secure, fast, and user-friendly digital wallet experience.",
   members = [
@@ -30,8 +29,8 @@ const OurTeems = ({
       name: "Mukit Hossen",
       role: "Founder & CEO",
       avatar: image4,
-      linkedin: "https://linkedin.com/in/rahimhossen",
-      twitter: "https://twitter.com/rahimhossen",
+      linkedin: "#",
+      twitter: "#",
       github: "#",
     },
     {
@@ -39,8 +38,8 @@ const OurTeems = ({
       name: "Ayesha Khan",
       role: "Frontend Developer",
       avatar: "https://randomuser.me/api/portraits/women/68.jpg",
-      linkedin: "https://linkedin.com/in/ayeshakhan",
-      twitter: "https://twitter.com/ayeshakhan",
+      linkedin: "#",
+      twitter: "#",
       github: "#",
     },
     {
@@ -48,8 +47,8 @@ const OurTeems = ({
       name: "Shihab Hossen",
       role: "Full Stack Developer",
       avatar: "https://randomuser.me/api/portraits/men/15.jpg",
-      linkedin: "https://linkedin.com/in/karimahmed",
-      twitter: "https://twitter.com/karimahmed",
+      linkedin: "#",
+      twitter: "#",
       github: "#",
     },
     {
@@ -57,8 +56,8 @@ const OurTeems = ({
       name: "Sabrina Noor",
       role: "Marketing Head",
       avatar: "https://randomuser.me/api/portraits/women/22.jpg",
-      linkedin: "https://linkedin.com/in/sabrina",
-      twitter: "https://twitter.com/sabrina",
+      linkedin: "#",
+      twitter: "#",
       github: "#",
     },
     {
@@ -80,70 +79,117 @@ const OurTeems = ({
       linkedin: "#",
     },
   ],
-}: Team1Props) => {
+}: TeamProps) => {
   return (
-    <div className="py-8 md:py-12 lg:py-16 w-11/12 md:w-11/12 lg:w-11/12 xl:container mx-auto">
-      <div className="text-center">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-5">
-          {heading}
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
-          {description}
-        </p>
+    <section className="relative py-20 bg-background overflow-hidden">
+      {/* Background Subtle Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none -z-10">
+        <div className="absolute top-[10%] right-[5%] w-72 h-72 bg-primary/5 rounded-full blur-[100px]" />
+        <div className="absolute bottom-[10%] left-[5%] w-72 h-72 bg-primary/10 rounded-full blur-[100px]" />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {members.map((member) => (
-          <div key={member.id} className="p-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-4">
-                <Avatar className="size-20 lg:size-24  object-cover ring-1">
-                  <AvatarImage src={member.avatar} />
-                  <AvatarFallback className="text-lg font-semibold">
+      <div className="w-11/12 md:w-11/12 lg:w-11/12 xl:container mx-auto">
+        {/* Header Section */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-6"
+          >
+            <Users className="w-4 h-4" />
+            <span>Core Members</span>
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-6"
+          >
+            {heading}
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-lg text-muted-foreground leading-relaxed"
+          >
+            {description}
+          </motion.p>
+        </div>
+
+        {/* Team Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {members.map((member, i) => (
+            <motion.div
+              key={member.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              whileHover={{ y: -10 }}
+              className="group relative"
+            >
+              {/* Card Container */}
+              <div className="relative p-8 rounded-3xl border bg-card/50 backdrop-blur-sm transition-all duration-300 group-hover:bg-card group-hover:border-primary/30 group-hover:shadow-2xl group-hover:shadow-primary/5 text-center">
+                {/* Avatar with Glow */}
+                <div className="relative mb-6 inline-block">
+                  <div className="absolute inset-0 rounded-full bg-primary/20 blur-lg scale-0 group-hover:scale-125 transition-transform duration-500" />
+                  <Avatar className="size-24 lg:size-28 border-2 border-background shadow-xl relative z-10">
+                    <AvatarImage src={member.avatar} className="object-cover" />
+                    <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                      {member.name.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+
+                {/* Name & Role */}
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold group-hover:text-primary transition-colors duration-300">
                     {member.name}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
+                  </h3>
+                  <p className="text-muted-foreground text-sm font-medium mt-1 uppercase tracking-wider">
+                    {member.role}
+                  </p>
+                </div>
 
-              <div className="mb-6">
-                <h3 className="mb-1 text-lg font-semibold">{member.name}</h3>
-                <p className="text-primary text-sm font-medium">
-                  {member.role}
-                </p>
-              </div>
+                {/* Social Links */}
+                <div className="flex justify-center gap-3">
+                  {[
+                    {
+                      icon: FaLinkedinIn,
+                      link: member.linkedin,
+                      label: "LinkedIn",
+                    },
+                    { icon: FaTwitter, link: member.twitter, label: "Twitter" },
+                    { icon: FaGithub, link: member.github, label: "GitHub" },
+                  ].map(
+                    (social, idx) =>
+                      social.link && (
+                        <a
+                          key={idx}
+                          href={social.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="size-10 flex items-center justify-center rounded-xl bg-muted/50 text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+                          title={social.label}
+                        >
+                          <social.icon className="size-5" />
+                        </a>
+                      )
+                  )}
+                </div>
 
-              <div className="flex gap-3">
-                {member.github && (
-                  <a
-                    href={member.github}
-                    className="bg-muted/50 rounded-lg p-2"
-                  >
-                    <FaGithub className="text-muted-foreground size-4" />
-                  </a>
-                )}
-                {member.twitter && (
-                  <a
-                    href={member.twitter}
-                    className="bg-muted/50 rounded-lg p-2"
-                  >
-                    <FaTwitter className="text-muted-foreground size-4" />
-                  </a>
-                )}
-                {member.linkedin && (
-                  <a
-                    href={member.linkedin}
-                    className="bg-muted/50 rounded-lg p-2"
-                  >
-                    <FaLinkedinIn className="text-muted-foreground size-4" />
-                  </a>
-                )}
+                {/* Decorative Bottom Glow */}
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
               </div>
-            </div>
-          </div>
-        ))}
+            </motion.div>
+          ))}
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 
-export default OurTeems;
+export default OurTeam;
