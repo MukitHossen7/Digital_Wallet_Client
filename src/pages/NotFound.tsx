@@ -10,7 +10,7 @@ const NotFoundPage = () => {
         <title>NotFound - NEOPAY</title>
         <meta name="description" content="This is NotFound Page" />
       </Helmet>
-      <Card className="max-w-lg w-full text-center shadow-md">
+      <Card className="max-w-lg w-full text-center shadow-none">
         <CardHeader>
           <CardTitle className="text-8xl font-extrabold text-red-500">
             404
