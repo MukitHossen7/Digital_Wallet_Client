@@ -17,9 +17,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
-import { Skeleton } from "@/components/ui/skeleton";
+// import { Skeleton } from "@/components/ui/skeleton";
 
-import { Camera, ShieldCheck, User } from "lucide-react";
+import {
+  Camera,
+  ShieldCheck,
+  User,
+  Mail,
+  Calendar,
+  MapPin,
+  Phone,
+  Lock,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import {
   useChangePasswordMutation,
   useGetMeQuery,
@@ -53,9 +64,8 @@ type PasswordForm = z.infer<typeof passwordSchema>;
 
 export default function MyProfile() {
   const [changePassword] = useChangePasswordMutation();
-  const { data: userData, isLoading: userLoading } = useGetMeQuery(undefined);
+  const { data: userData } = useGetMeQuery(undefined);
   const [showPassword, setShowPassword] = useState(false);
-  // const [showUpdateForm, setShowUpdateForm] = useState(false);
 
   const passwordForm = useForm<PasswordForm>({
     resolver: zodResolver(passwordSchema),
@@ -92,255 +102,302 @@ export default function MyProfile() {
   }
 
   return (
-    <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
+    <div className="max-w-7xl container mx-auto py-6 space-y-8 animate-in fade-in duration-700">
       <Helmet>
-        <title>NEOPAY - Digital Wallet for NEOPAY</title>
-        <meta name="description" content="This is Profile Page" />
+        <title>Profile Settings | NEOPAY</title>
+        <meta
+          name="description"
+          content="Manage your NeoPay profile and security settings"
+        />
       </Helmet>
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-2xl font-semibold flex items-center gap-2">
-            Profile Settings
+
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gradient-to-r from-primary/10 via-transparent to-transparent p-6 rounded-2xl border border-primary/5">
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-4xl font-bold tracking-tight flex items-center gap-3">
+            <div className="bg-primary p-2 rounded-xl text-white">
+              <User className="h-4 w-4" />
+            </div>
+            Profile <span className="text-primary">Settings</span>
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Update your name, phone, password and profile image.
+          <p className="text-muted-foreground font-medium">
+            Manage your personal identity, contact info, and security.
           </p>
         </div>
-        <div className="text-sm text-muted-foreground hidden lg:block">
-          Last updated:{" "}
-          <span className="font-medium">
+        <div className="bg-background/50 backdrop-blur-sm px-4 py-2 rounded-full border border-border shadow-none text-sm font-semibold text-muted-foreground md:hidden lg:block">
+          Last Activity:{" "}
+          <span className="text-primary">
             {userData?.data?.updatedAt
               ? new Date(userData.data.updatedAt).toLocaleDateString()
-              : "N/A"}
+              : "Today"}
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 space-y-6 xl:space-y-0 xl:gap-6">
-        {/* Left side */}
-        <Card className="space-y-4">
-          <CardHeader>
-            <CardTitle>Profile Overview</CardTitle>
-            <CardDescription>Personal details & avatar</CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            {userLoading || !userData?.data ? (
-              <div className="space-y-3">
-                <Skeleton className="h-28 w-full" />
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Section: Avatar & Status */}
+        <div className="lg:col-span-4 space-y-6">
+          <Card className="border-none shadow-none shadow-black/5 bg-card/60 backdrop-blur-md overflow-hidden sticky top-24">
+            <div className="h-2 w-full bg-primary" />
+            <CardHeader className="text-center pb-2">
+              <div className="relative mx-auto w-32 h-32 mb-4 group">
+                <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping group-hover:pause" />
                 <img
                   src={userData?.data?.picture || meImg}
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = meImg;
-                  }}
-                  className="h-28 w-28 rounded-full ring-1 object-cover object-center"
+                  className="relative h-32 w-32 rounded-full ring-4 ring-background shadow-2xl object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                  alt="Profile"
                 />
-
-                <div className="w-full text-center">
-                  <div className="font-medium text-xl">
-                    {userData?.data?.name ?? "N/A"}
+                {userData?.data?.isVerified && (
+                  <div className="absolute bottom-1 right-1 bg-primary text-white p-1.5 rounded-full border-4 border-background shadow-lg">
+                    <ShieldCheck className="h-4 w-4" />
                   </div>
+                )}
+              </div>
+              <CardTitle className="text-2xl font-bold tracking-tight">
+                {userData?.data?.name || "Premium User"}
+              </CardTitle>
+              <CardDescription className="flex items-center justify-center gap-1.5 font-bold text-primary">
+                <Mail className="h-3.5 w-3.5" /> {userData?.data?.email}
+              </CardDescription>
+            </CardHeader>
 
-                  <div className="text-gray-600 dark:text-gray-400 text-sm">
-                    {userData?.data?.email ?? "N/A"}
+            <CardContent className="space-y-6 pt-4">
+              <Separator className="opacity-50" />
+
+              <div className="grid grid-cols-1 gap-4">
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-primary/5 border border-primary/10 transition-colors hover:bg-primary/10">
+                  <div className="bg-background p-2 rounded-lg shadow-sm">
+                    <Calendar className="h-4 w-4 text-primary" />
                   </div>
-                  <div className="text-sm font-semibold mt-2 text-green-400">
-                    {userData?.data?.isVerified ? "Verified User" : "N/A"}
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">
+                      Member Since
+                    </p>
+                    <p className="text-sm font-bold">
+                      {userData?.data?.createdAt
+                        ? new Date(userData.data.createdAt).toLocaleDateString(
+                            "en-US",
+                            { year: "numeric", month: "long" }
+                          )
+                        : "N/A"}
+                    </p>
                   </div>
                 </div>
 
-                <Separator />
-                <div className="w-full">
-                  <div className="flex items-center gap-2">
-                    <User className="w-5 h-5" />
-                    <div className="">
-                      <p className="font-medium text-sm">Member since</p>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">
-                        {userData?.data?.createdAt
-                          ? new Date(
-                              userData.data.createdAt
-                            ).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            })
-                          : "N/A"}
-                      </p>
-                    </div>
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary/50 border border-secondary transition-colors hover:bg-secondary">
+                  <div className="bg-background p-2 rounded-lg shadow-sm">
+                    <ShieldCheck className="h-4 w-4 text-primary" />
                   </div>
-                  <div className="flex items-center gap-2 mt-3">
-                    <ShieldCheck className="w-5 h-5 text-green-400" />
-                    <div className="">
-                      <p className="font-medium text-sm">Account Status</p>
-                      <p className="text-green-600 text-sm">
-                        {userData?.data?.isVerified && userData?.data?.isActive
-                          ? "Active & Verified"
-                          : "N/A"}
-                      </p>
-                    </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">
+                      Account Status
+                    </p>
+                    <p className="text-sm font-bold text-primary">
+                      {userData?.data?.isActive
+                        ? "Verified & Active"
+                        : "Pending Verification"}
+                    </p>
                   </div>
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Right: Forms */}
-        <div className="md:col-span-2 space-y-4">
-          {/* personal Information  */}
-          <Card>
-            <CardHeader className="flex items-center justify-between">
-              <CardTitle className="text-lg font-medium">
-                Personal Information
-              </CardTitle>
+        {/* Right Section: Detailed Forms */}
+        <div className="lg:col-span-8 space-y-8">
+          {/* Personal Information */}
+          <Card className="border-none shadow-none shadow-black/5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
+              <div className="space-y-1">
+                <CardTitle className="text-xl font-bold flex items-center gap-2">
+                  <User className="h-5 w-5 text-primary" /> Personal Information
+                </CardTitle>
+                <CardDescription>
+                  Your identity details as per KYC documents.
+                </CardDescription>
+              </div>
               <ProfileModal />
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4 -mt-4">
-                {/* Name & Phone */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Full name */}
-                  <div>
-                    <Label className="text-sm text-foreground">Full Name</Label>
-                    <p className="text-base font-medium text-muted-foreground mt-1 border rounded-md px-3 py-2 bg-muted/30">
-                      {userData?.data?.name || "Not Provided"}
-                    </p>
-                  </div>
-
-                  {/* Phone */}
-                  <div>
-                    <Label className="text-sm  text-foreground">Phone</Label>
-                    <p className="text-base font-medium text-muted-foreground mt-1 border rounded-md px-3 py-2 bg-muted/30">
-                      {userData?.data?.phone
-                        ? `+88${userData.data.phone}`
-                        : "Not Provided"}
-                    </p>
-                  </div>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+              <div className="space-y-1.5 group">
+                <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                  Full Name
+                </Label>
+                <div className="flex items-center gap-3 p-3.5 rounded-xl bg-muted/30 border border-transparent group-hover:border-primary/20 transition-all">
+                  <User className="h-4 w-4 text-primary/60" />
+                  <p className="text-sm font-bold">
+                    {userData?.data?.name || "Not Provided"}
+                  </p>
                 </div>
+              </div>
 
-                {/* Address full width */}
-                <div>
-                  <Label className="text-sm  text-foreground">Address</Label>
-                  <p className="text-base font-medium text-muted-foreground mt-1 border rounded-md px-3 py-2 bg-muted/30">
-                    {userData?.data?.address || "Not Provided"}
+              <div className="space-y-1.5 group">
+                <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                  Phone Number
+                </Label>
+                <div className="flex items-center gap-3 p-3.5 rounded-xl bg-muted/30 border border-transparent group-hover:border-primary/20 transition-all">
+                  <Phone className="h-4 w-4 text-primary/60" />
+                  <p className="text-sm font-bold">
+                    {userData?.data?.phone
+                      ? `+88${userData.data.phone}`
+                      : "Not Provided"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-1.5 group md:col-span-2">
+                <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                  Current Address
+                </Label>
+                <div className="flex items-center gap-3 p-3.5 rounded-xl bg-muted/30 border border-transparent group-hover:border-primary/20 transition-all">
+                  <MapPin className="h-4 w-4 text-primary/60" />
+                  <p className="text-sm font-bold">
+                    {userData?.data?.address || "Street address not provided"}
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* change Password */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Security Settings</CardTitle>
+          {/* Security Settings */}
+          <Card className="border-none shadow-none shadow-black/5 overflow-hidden">
+            <div className="h-1 w-full bg-destructive/50" />
+            <CardHeader className="pb-6">
+              <CardTitle className="text-xl font-bold flex items-center gap-2">
+                <Lock className="h-5 w-5 text-destructive" /> Security Settings
+              </CardTitle>
               <CardDescription>
-                Update your password to keep your account secure
+                We recommend a strong, unique password to protect your funds.
               </CardDescription>
             </CardHeader>
-            <CardContent className="-mt-2">
+            <CardContent>
               <form
                 onSubmit={passwordForm.handleSubmit(onSubmitPassword)}
-                className="grid grid-cols-1 gap-4"
+                className="space-y-6"
               >
-                <div>
-                  <Label htmlFor="currentPassword">Current password</Label>
-                  <Input
-                    id="currentPassword"
-                    type="password"
-                    placeholder="********"
-                    {...passwordForm.register("currentPassword")}
-                    className="rounded-md mt-1"
-                  />
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">Current Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="currentPassword"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      className="h-12 rounded-xl bg-muted/20 border-border/60 focus:ring-primary/20 pl-4 pr-10"
+                      {...passwordForm.register("currentPassword")}
+                    />
+                  </div>
                   {passwordForm.formState.errors.currentPassword && (
-                    <p className="text-destructive text-xs mt-1">
+                    <p className="text-destructive text-xs font-bold mt-1 ml-1">
                       {passwordForm.formState.errors.currentPassword.message}
                     </p>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="newPassword">New password</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword">New Password</Label>
                     <Input
                       id="newPassword"
                       type={showPassword ? "text" : "password"}
-                      placeholder="At least 8 chars, 1 uppercase, 1 digit"
+                      placeholder="New strong password"
+                      className="h-12 rounded-xl bg-muted/20 border-border/60 focus:ring-primary/20 pl-4"
                       {...passwordForm.register("newPassword")}
-                      className="rounded-md mt-1"
                     />
                     {passwordForm.formState.errors.newPassword && (
-                      <p className="text-destructive text-xs mt-1">
+                      <p className="text-destructive text-xs font-bold mt-1 ml-1">
                         {passwordForm.formState.errors.newPassword.message}
                       </p>
                     )}
                   </div>
 
-                  <div>
-                    <Label htmlFor="confirmPassword">Confirm password</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
                     <Input
                       id="confirmPassword"
                       type={showPassword ? "text" : "password"}
                       placeholder="Repeat new password"
+                      className="h-12 rounded-xl bg-muted/20 border-border/60 focus:ring-primary/20 pl-4"
                       {...passwordForm.register("confirmPassword")}
-                      className="rounded-md mt-1"
                     />
                     {passwordForm.formState.errors.confirmPassword && (
-                      <p className="text-destructive text-xs mt-1">
+                      <p className="text-destructive text-xs font-bold mt-1 ml-1">
                         {passwordForm.formState.errors.confirmPassword.message}
                       </p>
                     )}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between bg-muted/30 p-4 rounded-xl border border-border/40">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`p-2 rounded-lg bg-background shadow-sm transition-colors ${
+                        showPassword ? "text-primary" : "text-muted-foreground"
+                      }`}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </div>
+                    <label
+                      htmlFor="show"
+                      className="text-sm font-bold cursor-pointer select-none"
+                    >
+                      Show Passwords
+                    </label>
+                  </div>
                   <input
                     id="show"
                     type="checkbox"
-                    className="h-4 w-4"
+                    className="h-5 w-5 rounded-md border-primary text-primary focus:ring-primary transition-all cursor-pointer"
                     checked={showPassword}
                     onChange={() => setShowPassword((show) => !show)}
                   />
-                  <label
-                    htmlFor="show"
-                    className="text-sm text-muted-foreground"
-                  >
-                    Show passwords
-                  </label>
                 </div>
 
-                <div className="flex items-center justify-end gap-2">
+                <div className="flex items-center justify-end gap-3 pt-2">
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     type="button"
+                    className="h-10 px-6 rounded-md font-bold text-muted-foreground"
                     onClick={() => passwordForm.reset()}
                   >
-                    Reset
+                    Discard
                   </Button>
-                  <Button type="submit">Change password</Button>
+                  <Button
+                    type="submit"
+                    className="h-10 px-10 rounded-md font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  >
+                    Update Password
+                  </Button>
                 </div>
               </form>
             </CardContent>
           </Card>
-          {/* some text */}
-          <div className="text-sm text-muted-foreground flex items-start gap-2">
-            <Camera className="mt-1" />
-            <div>
-              <span className="font-bold">
-                Welcome to {userData?.data?.name}
-              </span>{" "}
-              Your trusted digital wallet for secure transactions. Send,
-              receive, and manage your money with confidence.
+
+          {/* Footer Info */}
+          <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 flex items-start gap-4 transition-all hover:bg-primary/10">
+            <div className="bg-primary text-white p-2.5 rounded-xl shadow-sm">
+              <Camera className="h-5 w-5" />
+            </div>
+            <div className="space-y-1">
+              <h4 className="font-black text-sm uppercase tracking-tight">
+                Security Tip
+              </h4>
+              <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                <span className="text-primary font-bold">
+                  Hello {userData?.data?.name?.split(" ")[0]},
+                </span>{" "}
+                your security is our priority. Never share your password or OTP
+                with anyone. NeoPay will never ask for your credentials.
+              </p>
             </div>
           </div>
         </div>
       </div>
-
-      <Separator className="my-6" />
+      <div className="h-8" />
     </div>
   );
 }
