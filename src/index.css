@@ -45,8 +45,8 @@
   --radius: 0.75rem;
 
   /* Light Mode - Base on #00B14F */
-  --background: oklch(0.99 0.01 155); /* খুব হালকা গ্রিন-হোয়াইট */
-  --foreground: oklch(0.2 0.04 155); /* গভীর সবুজ-কালো টেক্সট */
+  --background: oklch(0.99 0.01 155);
+  --foreground: oklch(0.2 0.04 155);
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.2 0.04 155);
