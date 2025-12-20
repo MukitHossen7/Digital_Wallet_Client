@@ -78,7 +78,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="py-6">
+      <SidebarContent>
         {sidebarData.map((group) => (
           <SidebarGroup key={group.title} className="px-3">
             <SidebarGroupLabel className="px-4 mb-2 text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70">
