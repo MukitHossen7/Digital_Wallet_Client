@@ -1,25 +1,13 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+// /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Users,
   UserCheck,
   CreditCard,
   BarChart2,
-  TrendingUp,
+  LayoutDashboard,
 } from "lucide-react";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetAllUserAndAgentQuery } from "@/redux/features/user/user.api";
 import {
@@ -28,13 +16,8 @@ import {
 } from "@/redux/features/transaction/transaction.api";
 import { Helmet } from "react-helmet";
 import { NumberTicker } from "@/components/ui/number-ticker";
-
-const chartConfig: ChartConfig = {
-  value: {
-    label: "Overview",
-    color: "var(--chart-1)",
-  },
-};
+import { Badge } from "@/components/ui/badge";
+import { AdminAnalyticsChart } from "@/components/modules/admin/AdminChart";
 
 export default function Overview() {
   const { data: userData, isLoading: userLoading } = useGetAllUserAndAgentQuery(
@@ -52,187 +35,129 @@ export default function Overview() {
   const { data: transactionVolume, isLoading: volumeLoading } =
     useGetAllTransactionVolumeQuery(undefined);
 
-  const chartData = [
-    { name: "Total Users", value: userData?.data?.length ?? 0 },
-    { name: "Total Agents", value: agentData?.data?.length ?? 0 },
-    { name: "Transactions", value: transactionData?.meta?.total ?? 0 },
+  const stats = [
+    {
+      title: "Total Users",
+      value: userData?.data?.length || 0,
+      description: "All registered users",
+      icon: <Users className="h-6 w-6" />,
+      color: "bg-blue-500/10 text-blue-500",
+      isLoading: userLoading,
+    },
+    {
+      title: "Total Agents",
+      value: agentData?.data?.length || 0,
+      description: "Verified providers",
+      icon: <UserCheck className="h-6 w-6" />,
+      color: "bg-amber-500/10 text-amber-500",
+      isLoading: agentLoading,
+    },
+    {
+      title: "Transactions",
+      value: transactionData?.meta?.total || 0,
+      description: "Total successful",
+      icon: <CreditCard className="h-6 w-6" />,
+      color: "bg-emerald-500/10 text-emerald-500",
+      isLoading: transactionLoading,
+    },
+    {
+      title: "Volume",
+      value: transactionVolume?.data || 0,
+      description: "Money flow (BDT)",
+      icon: <BarChart2 className="h-6 w-6" />,
+      color: "bg-purple-500/10 text-purple-500",
+      isLoading: volumeLoading,
+    },
   ];
 
   return (
-    <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
+    <div className="max-w-7xl container mx-auto py-6 space-y-8 animate-in fade-in duration-500">
       <Helmet>
-        <title>Admin Dashboard - NEOPAY</title>
-        <meta name="description" content="This is Overview Page" />
+        <title>Admin Dashboard | NEOPAY</title>
       </Helmet>
-      {/* Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {/* Total Users */}
-        <Card className="p-4 flex flex-col justify-between">
-          <CardHeader className="flex flex-col items-start gap-2">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-full bg-blue-400 text-white">
-                <Users />
-              </div>
-              <CardTitle>Total Users</CardTitle>
-            </div>
-            <CardDescription>All registered users</CardDescription>
-          </CardHeader>
-          <CardContent className="-mt-4">
-            {userLoading ? (
-              <Skeleton className="h-8 w-20" />
-            ) : (
-              <p className="text-2xl lg:text-3xl font-bold">
-                <NumberTicker value={userData?.data?.length || 0} />
-              </p>
-            )}
-          </CardContent>
-        </Card>
 
-        {/* Total Agents */}
-        <Card className="p-4 flex flex-col justify-between">
-          <CardHeader className="flex flex-col items-start gap-2">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-full bg-yellow-400 text-white">
-                <UserCheck />
-              </div>
-              <CardTitle>Total Agents</CardTitle>
-            </div>
-            <CardDescription>Verified service providers</CardDescription>
-          </CardHeader>
-          <CardContent className="-mt-4">
-            {agentLoading ? (
-              <Skeleton className="h-8 w-20" />
-            ) : (
-              <p className="text-2xl lg:text-3xl font-bold">
-                <NumberTicker value={agentData?.data?.length || 0} />
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Transactions */}
-        <Card className="p-4 flex flex-col justify-between">
-          <CardHeader className="flex flex-col items-start gap-2">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-full bg-pink-400 text-white">
-                <CreditCard />
-              </div>
-              <CardTitle>Transactions</CardTitle>
-            </div>
-            <CardDescription>Total successful transactions</CardDescription>
-          </CardHeader>
-          <CardContent className="-mt-4">
-            {transactionLoading ? (
-              <Skeleton className="h-8 w-20" />
-            ) : (
-              <p className="text-2xl lg:text-3xl font-bold">
-                <NumberTicker value={transactionData?.meta?.total || 0} />
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Transaction Volume */}
-        <Card className="p-4 flex flex-col justify-between">
-          <CardHeader className="flex flex-col items-start gap-2">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-full bg-purple-400 text-white">
-                <BarChart2 />
-              </div>
-              <CardTitle>Transaction Volume</CardTitle>
-            </div>
-            <CardDescription>Overall money flow</CardDescription>
-          </CardHeader>
-          <CardContent className="-mt-4">
-            {volumeLoading ? (
-              <Skeleton className="h-8 w-20" />
-            ) : (
-              <p className="text-2xl lg:text-3xl font-bold">
-                <NumberTicker value={transactionVolume?.data || 0} /> BDT
-              </p>
-            )}
-          </CardContent>
-        </Card>
+      {/* Modern Header Section */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-card/40 backdrop-blur-md border border-border/50 p-6 rounded-lg shadow-none shadow-primary/5 transition-all">
+        <div className="flex items-center gap-4">
+          <div className="bg-primary p-3 rounded-2xl shadow-lg shadow-primary/20 text-white">
+            <LayoutDashboard className="h-4 w-4" />
+          </div>
+          <div>
+            <h1 className="text-2xl md:text-4xl font-bold tracking-tight">
+              Admin <span className="text-primary">Overview</span>
+            </h1>
+            <p className="text-muted-foreground font-medium text-sm">
+              Real-time platform analytics & statistics
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 self-end md:self-center">
+          <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+          <Badge
+            variant="outline"
+            className="font-bold uppercase tracking-widest text-[10px] px-3 py-1"
+          >
+            System Online
+          </Badge>
+        </div>
       </div>
 
-      {/* overview graph */}
-      <Card className="shadow-md rounded-lg">
-        <CardHeader>
-          <CardTitle>Overview Chart</CardTitle>
-          <CardDescription>
-            Snapshot of Users, Agents, and Transactions
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          {userLoading || agentLoading || transactionLoading ? (
-            <Skeleton className="h-[250px] w-full rounded-lg" />
-          ) : (
-            <ChartContainer config={chartConfig} className="h-[300px] w-full">
-              <AreaChart
-                accessibilityLayer
-                data={chartData}
-                margin={{ left: 12, right: 12, top: 12, bottom: 0 }}
+      {/* Summary Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+        {stats.map((stat, index) => (
+          <Card
+            key={index}
+            className="border-none shadow-sm shadow-black/[0.02] bg-card/60 backdrop-blur-sm rounded-3xl overflow-hidden group hover:scale-[1.02] transition-all duration-300"
+          >
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <div
+                className={`p-3 rounded-2xl ${stat.color} transition-colors group-hover:bg-primary group-hover:text-white`}
               >
-                <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="name"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                />
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent />}
-                />
-                <defs>
-                  <linearGradient
-                    id="overviewGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset="5%"
-                      stopColor="var(--chart-1)"
-                      stopOpacity={0.8}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor="var(--chart-1)"
-                      stopOpacity={0.1}
-                    />
-                  </linearGradient>
-                </defs>
-                <Area
-                  dataKey="value"
-                  type="natural"
-                  fill="url(#overviewGradient)"
-                  fillOpacity={0.4}
-                  stroke="var(--chart-1)"
-                />
-              </AreaChart>
-            </ChartContainer>
-          )}
-        </CardContent>
-
-        {!userLoading && !agentLoading && !transactionLoading && (
-          <CardFooter>
-            <div className="flex w-full items-start gap-2 text-sm">
-              <div className="grid gap-2">
-                <div className="flex items-center gap-2 leading-none font-medium">
-                  Overview data updated in real-time{" "}
-                  <TrendingUp className="h-4 w-4" />
-                </div>
-                <div className="text-muted-foreground flex items-center gap-2 leading-none">
-                  Users · Agents · Transactions
-                </div>
+                {stat.icon}
               </div>
-            </div>
-          </CardFooter>
-        )}
-      </Card>
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  Snapshot
+                </span>
+                <Badge
+                  variant="secondary"
+                  className="text-[10px] font-bold text-emerald-500"
+                >
+                  +Live
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-muted-foreground/80">
+                  {stat.title}
+                </p>
+                {stat.isLoading ? (
+                  <Skeleton className="h-10 w-24 rounded-lg" />
+                ) : (
+                  <div className="text-3xl font-bold tracking-tighter text-foreground">
+                    <NumberTicker value={stat.value} />
+                  </div>
+                )}
+              </div>
+              <p className="text-[11px] font-medium text-muted-foreground mt-4 border-t border-border/50 pt-2 italic">
+                {stat.description}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Professional Overview Graph */}
+      <AdminAnalyticsChart
+        userData={userData}
+        agentData={agentData}
+        transactionData={transactionData}
+        transactionVolume={transactionVolume}
+        isLoading={
+          userLoading || agentLoading || transactionLoading || volumeLoading
+        }
+      />
     </div>
   );
 }
