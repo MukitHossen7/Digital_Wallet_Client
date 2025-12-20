@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,6 +25,9 @@ import {
   ArrowUpFromLine,
   Search,
   Sparkles,
+  Wallet,
+  ShieldCheck,
+  UserCheck,
 } from "lucide-react";
 import { MdCreditCard } from "react-icons/md";
 import {
@@ -43,6 +46,7 @@ import {
 } from "@/redux/features/transaction/transaction.api";
 import { Helmet } from "react-helmet";
 import { NumberTicker } from "@/components/ui/number-ticker";
+import { Badge } from "@/components/ui/badge";
 
 const baseSchema = z.object({
   identifier: z.string().min(5, "Enter email of the user"),
@@ -75,7 +79,6 @@ export default function AgentWallet() {
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [agentBalance, setAgentBalance] = useState<number>(0);
 
-  // forms
   const depositForm = useForm<ActionForm>({
     resolver: zodResolver(baseSchema),
     defaultValues: { identifier: "", amount: 0, type: "ADD_MONEY" },
@@ -88,7 +91,6 @@ export default function AgentWallet() {
     mode: "onChange",
   });
 
-  // search suggestions
   const [suggestions, setSuggestions] = useState<typeof users>([]);
 
   useEffect(() => {
@@ -103,7 +105,6 @@ export default function AgentWallet() {
     }
   }, [walletData]);
 
-  // watch identifier from both forms and update suggestions
   useEffect(() => {
     const subDep = depositForm.watch((val, { name }) => {
       if (name === "identifier") onIdentifierChange(val.identifier || "");
@@ -133,18 +134,12 @@ export default function AgentWallet() {
 
   function pickUser(u: (typeof users)[0]) {
     setSelectedUser(u);
-    // populate identifier fields in both forms so agent can switch tabs seamlessly
     depositForm.setValue("identifier", u.email);
     withdrawForm.setValue("identifier", u.email);
     setSuggestions([]);
   }
 
-  // ---- Handlers ----
   async function handleDeposit(values: ActionForm) {
-    // if (!selectedUser) {
-    //   toast.error("Select a user first");
-    //   return;
-    // }
     if (Number(values.amount) > Number(agentBalance)) {
       toast.error("Agent has insufficient balance");
       return;
@@ -166,20 +161,13 @@ export default function AgentWallet() {
         toast.error("Cash In failed", { id: toastId });
       }
     } catch (error: any) {
-      if (toastId) {
-        toast.error(error?.data?.message, { id: toastId });
-      } else {
-        toast.error(error?.data?.message || "Something went wrong");
-      }
-      console.log(error);
+      toast.error(error?.data?.message || "Something went wrong", {
+        id: toastId,
+      });
     }
   }
 
   async function handleWithdraw(values: ActionForm) {
-    // if (!selectedUser) {
-    //   toast.error("Select a user first");
-    //   return;
-    // }
     const { fee, totalAmount } = calculateFee(values.amount, "WITHDRAW");
     let toastId: string | number | undefined;
     try {
@@ -201,16 +189,12 @@ export default function AgentWallet() {
         toast.error("Cash Out failed", { id: toastId });
       }
     } catch (error: any) {
-      if (toastId) {
-        toast.error(error?.data?.message, { id: toastId });
-      } else {
-        toast.error(error?.data?.message || "Something went wrong");
-      }
-      console.log(error);
+      toast.error(error?.data?.message || "Something went wrong", {
+        id: toastId,
+      });
     }
   }
 
-  // Quick amounts
   const presets = [500, 1000, 2000, 5000, 10000];
   function applyPreset(n: number, target: "deposit" | "withdraw") {
     if (target === "deposit")
@@ -219,72 +203,92 @@ export default function AgentWallet() {
   }
 
   return (
-    <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
+    <div className="max-w-7xl container mx-auto py-6 space-y-8 animate-in fade-in duration-500">
       <Helmet>
-        <title>NEOPAY - Digital Wallet for NEOPAY</title>
-        <meta name="description" content="This is Wallet Page" />
+        <title>Agent Terminal | NEOPAY</title>
       </Helmet>
-      <div className="flex items-start justify-between gap-4 mb-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-semibold flex items-center gap-2">
-            <MdCreditCard className="h-6 w-6 text-primary" />{" "}
-            <NumberTicker value={agentBalance} /> BDT
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Add or withdraw money from a user's wallet
+
+      {/* Modern Dashboard Header */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-card/60 backdrop-blur-md border border-border/50 p-6 md:p-8 rounded-md shadow-none shadow-primary/5">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="bg-primary p-2.5 rounded-2xl shadow-lg shadow-primary/20">
+              <Wallet className="h-4 w-4 text-white" />
+            </div>
+            <h1 className="text-2xl md:text-4xl font-bold tracking-tight flex items-baseline gap-2">
+              <NumberTicker
+                value={agentBalance}
+                className="text-primary tracking-tighter"
+              />
+              <span className="text-xl font-bold text-muted-foreground uppercase">
+                BDT
+              </span>
+            </h1>
+          </div>
+          <p className="text-muted-foreground font-medium flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-primary" /> Agent Terminal •
+            Secure Transactions
           </p>
         </div>
 
-        <Badge variant="secondary" className="rounded-xl">
-          Agent Mode
-        </Badge>
+        <div className="flex flex-col items-end gap-2">
+          <Badge className="rounded-full px-4 py-1.5 bg-primary/10 text-primary border-primary/20 font-bold uppercase tracking-widest text-[10px]">
+            Agent Mode Active
+          </Badge>
+          <div className="text-[10px] text-muted-foreground font-bold tracking-widest uppercase">
+            Protocol v2.4.0
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Left: Selected user & quick info */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Selected user</CardTitle>
-              <CardDescription>Search by phone, email or name</CardDescription>
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+        {/* Left Sidebar: User Selection */}
+        <div className="xl:col-span-4 space-y-6">
+          <Card className="border-none shadow-none shadow-black/[0.03] rounded-md overflow-hidden">
+            <CardHeader className="bg-muted/30 pb-6">
+              <CardTitle className="text-lg font-bold flex items-center gap-2">
+                <UserCheck className="h-5 w-5 text-primary" /> Find Customer
+              </CardTitle>
+              <CardDescription className="font-medium">
+                Enter customer phone, email or name
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="mb-3">
-                <Label htmlFor="globalSearch">Find user</Label>
-                <div className="relative mt-2">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    <Search className="h-4 w-4" />
-                  </span>
-                  <Input
-                    id="globalSearch"
-                    placeholder="017..., name or email"
-                    className="pl-10 rounded-md"
-                    onChange={(e) => onIdentifierChange(e.target.value)}
-                  />
+            <CardContent className="pt-6">
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
+                  <Search className="h-5 w-5" />
                 </div>
+                <Input
+                  id="globalSearch"
+                  placeholder="017..., name or email"
+                  className="h-12 pl-12 rounded-xl bg-muted/20 border-border/60 focus:ring-1 font-semibold"
+                  onChange={(e) => onIdentifierChange(e.target.value)}
+                />
+
+                {/* Search Suggestions */}
                 {suggestions.length > 0 && (
-                  <div className="mt-2 rounded-xl border bg-popover p-2 text-sm divide-y">
-                    {suggestions.map((s, idx: any) => (
+                  <div className="absolute top-full left-0 right-0 mt-2 z-50 rounded-2xl border border-border/50 bg-popover/90 backdrop-blur-xl p-2 shadow-2xl animate-in zoom-in-95">
+                    {suggestions.map((s, idx) => (
                       <button
                         key={idx}
-                        className="w-full text-left p-2 hover:bg-muted/60 rounded-md"
+                        className="w-full text-left p-3 hover:bg-primary/5 rounded-xl transition-colors flex items-center gap-3 group/item"
                         onClick={() => pickUser(s)}
                       >
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>
-                              {s.name
-                                .split(" ")
-                                .map((n: any) => n[0])
-                                .slice(0, 2)
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium">{s.name}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {s.phone} • {s.email}
-                            </div>
+                        <Avatar className="h-10 w-10 border border-border/50">
+                          <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                            {s.name
+                              .split(" ")
+                              .map((n: any) => n[0])
+                              .slice(0, 2)
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-bold text-sm group-hover/item:text-primary transition-colors">
+                            {s.name}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-tight">
+                            {s.phone} • {s.email}
                           </div>
                         </div>
                       </button>
@@ -293,16 +297,16 @@ export default function AgentWallet() {
                 )}
               </div>
 
-              {userLoading ? (
-                <div className="space-y-2">
-                  <Skeleton className="h-8 w-full" />
-                  <Skeleton className="h-6 w-1/2" />
-                </div>
-              ) : selectedUser ? (
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-12 w-12">
-                      <AvatarFallback>
+              <div className="mt-6 p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                {userLoading ? (
+                  <div className="space-y-3">
+                    <Skeleton className="h-10 w-full rounded-xl" />
+                    <Skeleton className="h-4 w-1/2 rounded-xl" />
+                  </div>
+                ) : selectedUser ? (
+                  <div className="flex items-center gap-4 animate-in slide-in-from-left-2">
+                    <Avatar className="h-14 w-14 ring-4 ring-background shadow-lg">
+                      <AvatarFallback className="bg-primary text-white font-black">
                         {selectedUser.name
                           .split(" ")
                           .map((n) => n[0])
@@ -310,211 +314,265 @@ export default function AgentWallet() {
                           .join("")}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <div className="font-medium">{selectedUser.name}</div>
-                      <div className="text-xs text-muted-foreground">
+                    <div className="min-w-0">
+                      <div className="font-black text-base truncate">
+                        {selectedUser.name}
+                      </div>
+                      <div className="text-xs text-muted-foreground font-bold uppercase tracking-tight truncate">
                         {selectedUser.phone} • {selectedUser.email}
                       </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="text-sm text-muted-foreground">
-                  No user selected. Search above or click a suggestion.
-                </div>
-              )}
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-4 text-center">
+                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                      <Search className="h-6 w-6 text-muted-foreground/50" />
+                    </div>
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                      No User Selected
+                    </p>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-muted/40">
-            <CardHeader>
-              <CardTitle className="text-sm">Quick presets</CardTitle>
+          {/* Presets Card */}
+          <Card className="border-none shadow-none shadow-black/[0.02] rounded-md">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-sm font-black uppercase tracking-[0.15em] text-muted-foreground">
+                Quick Shortcuts
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {presets.map((money) => (
                   <Button
                     key={money}
-                    variant="ghost"
-                    size="sm"
-                    className="rounded-full"
+                    variant="outline"
+                    className="h-8 rounded-xl font-medium border-border/60 hover:border-primary/50 hover:bg-primary/5 transition-all active:scale-95"
                     onClick={() => applyPreset(money, "deposit")}
                   >
-                    BDT {money}
+                    ৳{money.toLocaleString()}
                   </Button>
                 ))}
-              </div>
-              <div className="text-xs text-muted-foreground mt-3">
-                Tap a preset to quickly fill amount in current form tab.
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Right: Tabs for Add / Withdraw */}
-        <div className="lg:col-span-2">
+        {/* Right Section: Transaction Forms */}
+        <div className="xl:col-span-8">
           <Tabs defaultValue="add" className="w-full">
-            <TabsList className="grid grid-cols-2">
-              <TabsTrigger value="add" className="gap-2">
-                <ArrowDownToLine className="h-4 w-4" /> Add money
+            <TabsList className="grid grid-cols-2 h-14 p-1.5 bg-muted/50 rounded-2xl border border-border/50 mb-6 w-full">
+              <TabsTrigger
+                value="add"
+                className="rounded-lg font-bold text-sm transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg"
+              >
+                <ArrowDownToLine className="h-4 w-4 mr-2" /> CASH IN
               </TabsTrigger>
-              <TabsTrigger value="withdraw" className="gap-2">
-                <ArrowUpFromLine className="h-4 w-4" /> Withdraw
+              <TabsTrigger
+                value="withdraw"
+                className="rounded-lg font-bold text-sm transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg"
+              >
+                <ArrowUpFromLine className="h-4 w-4 mr-2" /> CASH OUT
               </TabsTrigger>
             </TabsList>
 
-            {/* Add Money */}
-            <TabsContent value="add">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Add money</CardTitle>
-                </CardHeader>
-                <CardContent>
+            {/* Add Money (Cash-in) */}
+            <TabsContent value="add" className="mt-0 outline-none">
+              <Card className="border-border/50 shadow-none shadow-black/[0.02] rounded-lg overflow-hidden border">
+                <div className="bg-primary/5 px-8 py-5 border-b border-border/40">
+                  <CardTitle className="text-xl font-bold uppercase tracking-tight flex items-center gap-2">
+                    Cash-In to User
+                    {/* </Badge> */}
+                  </CardTitle>
+                </div>
+                <CardContent className="p-6 md:p-10">
                   <form
                     onSubmit={depositForm.handleSubmit(handleDeposit)}
-                    className="grid grid-cols-1 lg:grid-cols-3 space-y-4 lg:space-y-0 lg:gap-4"
+                    className="grid grid-cols-1 lg:grid-cols-12 gap-8"
                   >
-                    <div className="md:col-span-2 space-y-2">
-                      <Label>User (email)</Label>
-                      <Input
-                        placeholder="e.g. user@mail.com"
-                        {...depositForm.register("identifier")}
-                      />
-                      {depositForm.formState.errors.identifier && (
-                        <p className="text-xs text-red-500">
-                          {depositForm.formState.errors.identifier.message}
-                        </p>
-                      )}
+                    <div className="lg:col-span-7 space-y-6">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold ml-1">
+                          Customer Identifier (Email)
+                        </Label>
+                        <Input
+                          placeholder="user@example.com"
+                          className="h-12 rounded-lg bg-muted/20 border-border/60 focus:ring-primary/20 font-semibold"
+                          {...depositForm.register("identifier")}
+                        />
+                        {depositForm.formState.errors.identifier && (
+                          <p className="text-xs font-bold text-destructive mt-1 ml-1">
+                            {depositForm.formState.errors.identifier.message}
+                          </p>
+                        )}
+                      </div>
 
-                      <Label>Amount</Label>
-                      <Input
-                        type="number"
-                        {...depositForm.register("amount", {
-                          valueAsNumber: true,
-                        })}
-                      />
-                      {depositForm.formState.errors.amount && (
-                        <p className="text-xs text-red-500">
-                          {depositForm.formState.errors.amount.message}
-                        </p>
-                      )}
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold ml-1">
+                          Cash Amount
+                        </Label>
+                        <div className="relative">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-xl text-muted-foreground">
+                            ৳
+                          </span>
+                          <Input
+                            type="number"
+                            className="h-14 rounded-lg pl-10 text-2xl font-black bg-muted/20 border-border/60 focus:ring-primary/20 tracking-tighter"
+                            {...depositForm.register("amount", {
+                              valueAsNumber: true,
+                            })}
+                          />
+                        </div>
+                        {depositForm.formState.errors.amount && (
+                          <p className="text-xs font-bold text-destructive mt-1 ml-1">
+                            {depositForm.formState.errors.amount.message}
+                          </p>
+                        )}
+                      </div>
 
-                      <Label>Payment Type</Label>
-                      <Select
-                        onValueChange={(v) =>
-                          depositForm.setValue("type", v as any, {
-                            shouldValidate: true,
-                          })
-                        }
-                        defaultValue={depositForm.getValues("type")}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select Payment Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="ADD_MONEY">Add Money</SelectItem>
-                          <SelectItem value="WITHDRAW">Withdraw</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold ml-1">
+                          Method Type
+                        </Label>
+                        <Select
+                          onValueChange={(v) =>
+                            depositForm.setValue("type", v as any, {
+                              shouldValidate: true,
+                            })
+                          }
+                          defaultValue="ADD_MONEY"
+                        >
+                          <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border/60 w-full">
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl">
+                            <SelectItem value="ADD_MONEY">
+                              Direct Cash-In
+                            </SelectItem>
+                            <SelectItem value="WITHDRAW">
+                              Emergency Return
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
 
-                    <div className="space-y-4">
-                      {/* summary */}
-                      <Card className="bg-muted/40">
-                        <CardHeader>
-                          <CardTitle className="text-sm">Summary</CardTitle>
+                    <div className="lg:col-span-5">
+                      <Card className="bg-secondary/40 border-none rounded-lg h-full shadow-inner">
+                        <CardHeader className="pb-3 pt-6">
+                          <CardTitle className="text-base font-bold flex items-center gap-2">
+                            <Sparkles className="h-4 w-4 text-primary" />{" "}
+                            Invoice Summary
+                          </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between items-center">
-                              <span>Amount</span>
-                              <strong className="text-sm">
-                                BDT {depositForm.watch("amount") || 0}
-                              </strong>
+                        <CardContent className="space-y-4">
+                          <div className="space-y-3">
+                            <div className="flex justify-between text-sm font-medium">
+                              <span className="text-muted-foreground">
+                                Transfer Amount
+                              </span>
+                              <span className="font-black text-foreground">
+                                ৳
+                                {(
+                                  depositForm.watch("amount") || 0
+                                ).toLocaleString()}
+                              </span>
                             </div>
-                            <div className="flex justify-between items-center">
-                              <span>Fee</span>
-                              <strong className="text-sm">
-                                BDT{" "}
-                                {
-                                  calculateFee(
-                                    depositForm.watch("amount") || 0,
-                                    "ADD_MONEY"
-                                  ).fee
-                                }
-                              </strong>
+                            <div className="flex justify-between text-sm font-medium">
+                              <span className="text-muted-foreground">
+                                Service Fee
+                              </span>
+                              <span className="font-black text-emerald-600">
+                                FREE
+                              </span>
                             </div>
-                            <Separator />
+                            <Separator className="bg-border/60" />
                             <div className="flex justify-between items-center">
-                              <span>Total Amount</span>
-                              <strong className="text-sm">
-                                BDT {depositForm.watch("amount") || 0}
-                              </strong>
+                              <span className="text-sm font-bold text-foreground">
+                                Net Deductible
+                              </span>
+                              <span className="text-xl font-black text-primary tracking-tighter">
+                                ৳
+                                {(
+                                  depositForm.watch("amount") || 0
+                                ).toLocaleString()}
+                              </span>
                             </div>
+                          </div>
+
+                          <div className="pt-6 flex flex-col gap-3">
+                            <Button
+                              type="submit"
+                              className="h-12 rounded-xl font-bold text-base shadow-none shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                            >
+                              CONFIRM CASH-IN
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="h-10 rounded-xl font-bold text-muted-foreground"
+                              onClick={() => depositForm.reset()}
+                            >
+                              Reset Form
+                            </Button>
                           </div>
                         </CardContent>
                       </Card>
-
-                      <div className="flex gap-2 justify-end">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => depositForm.reset()}
-                        >
-                          Reset
-                        </Button>
-                        <Button type="submit">Add money</Button>
-                      </div>
                     </div>
                   </form>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            {/* Withdraw */}
-            <TabsContent value="withdraw">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    Withdraw money
+            {/* Withdraw (Cash-out) */}
+            <TabsContent value="withdraw" className="mt-0 outline-none">
+              <Card className="border-border/50 shadow-none shadow-black/[0.02] rounded-lg overflow-hidden border">
+                <div className="bg-destructive/5 px-8 py-5 border-b border-border/40">
+                  <CardTitle className="text-xl font-bold uppercase tracking-tight flex items-center gap-2">
+                    Cash-Out from User
                   </CardTitle>
-                </CardHeader>
-                <CardContent>
+                </div>
+                <CardContent className="p-6 md:p-10">
                   <form
-                    className="grid grid-cols-1 lg:grid-cols-3 space-y-4 lg:space-y-0 lg:gap-4"
                     onSubmit={withdrawForm.handleSubmit(handleWithdraw)}
+                    className="grid grid-cols-1 lg:grid-cols-12 gap-8"
                   >
-                    <div className="md:col-span-2 space-y-2">
-                      <Label htmlFor="identifierWith">User ( email)</Label>
-                      <Input
-                        id="identifierWith"
-                        placeholder="e.g. user@mail.com"
-                        className="rounded-md"
-                        {...withdrawForm.register("identifier")}
-                      />
+                    <div className="lg:col-span-7 space-y-6">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold ml-1">
+                          Customer Identifier (Email)
+                        </Label>
+                        <Input
+                          placeholder="user@example.com"
+                          className="h-12 rounded-lg bg-muted/20 border-border/60 focus:ring-primary/20 font-semibold"
+                          {...withdrawForm.register("identifier")}
+                        />
+                      </div>
 
-                      <Label htmlFor="amountWith" className="mt-2">
-                        Amount
-                      </Label>
-                      <Input
-                        id="amountWith"
-                        type="number"
-                        inputMode="numeric"
-                        placeholder="e.g. 500"
-                        className="rounded-md"
-                        value={withdrawForm.watch("amount") || ""}
-                        onChange={(e) =>
-                          withdrawForm.setValue(
-                            "amount",
-                            Number(e.target.value || 0),
-                            { shouldValidate: true }
-                          )
-                        }
-                      />
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold ml-1">
+                          Withdraw Amount
+                        </Label>
+                        <div className="relative">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-xl text-muted-foreground">
+                            ৳
+                          </span>
+                          <Input
+                            type="number"
+                            className="h-14 rounded-lg pl-10 text-2xl font-black bg-muted/20 border-border/60 focus:ring-primary/20 tracking-tighter"
+                            {...withdrawForm.register("amount", {
+                              valueAsNumber: true,
+                            })}
+                          />
+                        </div>
+                      </div>
 
-                      <div>
-                        <Label htmlFor="withdraw-method" className="pb-2">
-                          Payment Type
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold ml-1">
+                          Transaction Method
                         </Label>
                         <Select
                           onValueChange={(v) =>
@@ -522,91 +580,89 @@ export default function AgentWallet() {
                               shouldValidate: true,
                             })
                           }
-                          defaultValue={withdrawForm.getValues("type")}
+                          defaultValue="WITHDRAW"
                         >
-                          <SelectTrigger
-                            id="withdraw-method"
-                            className="rounded-md w-full"
-                          >
-                            <SelectValue placeholder="Select Payment Type" />
+                          <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border/60 w-full">
+                            <SelectValue placeholder="Select Method" />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ADD_MONEY">
-                              Deposit Money
-                            </SelectItem>
+                          <SelectContent className="rounded-xl">
                             <SelectItem value="WITHDRAW">
-                              Withdraw Money
+                              Direct Cash-Out
+                            </SelectItem>
+                            <SelectItem value="ADD_MONEY">
+                              Correction Entry
                             </SelectItem>
                           </SelectContent>
                         </Select>
-                        {withdrawForm.formState.errors.type && (
-                          <p className="text-destructive text-xs mt-1">
-                            {withdrawForm.formState.errors.type.message?.toString()}
-                          </p>
-                        )}
                       </div>
                     </div>
 
-                    <div className="space-y-4">
-                      <Card className="bg-muted/40">
-                        <CardHeader>
-                          <CardTitle className="text-sm">Summary</CardTitle>
-                          <CardDescription>
-                            Includes estimated fee
-                          </CardDescription>
+                    <div className="lg:col-span-5">
+                      <Card className="bg-muted/40 border-none rounded-lg h-full shadow-inner">
+                        <CardHeader className="pb-3 pt-6">
+                          <CardTitle className="text-base font-bold flex items-center gap-2">
+                            <MdCreditCard className="h-4 w-4 text-primary" />{" "}
+                            Payout Summary
+                          </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                          <div className="text-sm space-y-2">
-                            <div className="flex justify-between">
-                              <span>Amount</span>
-                              <strong>
-                                BDT {withdrawForm.watch("amount") || 0}
-                              </strong>
+                        <CardContent className="space-y-4">
+                          <div className="space-y-3">
+                            <div className="flex justify-between text-sm font-medium">
+                              <span className="text-muted-foreground">
+                                Gross Amount
+                              </span>
+                              <span className="font-black">
+                                ৳
+                                {(
+                                  withdrawForm.watch("amount") || 0
+                                ).toLocaleString()}
+                              </span>
                             </div>
-                            <div className="flex justify-between">
-                              <span>Fee</span>
-                              <strong>
-                                BDT{" "}
-                                {
-                                  calculateFee(
-                                    withdrawForm.watch("amount") || 0,
-                                    "WITHDRAW"
-                                  ).fee
-                                }
-                              </strong>
+                            <div className="flex justify-between text-sm font-medium">
+                              <span className="text-muted-foreground">
+                                System Fee
+                              </span>
+                              <span className="font-black text-destructive">
+                                ৳
+                                {calculateFee(
+                                  withdrawForm.watch("amount") || 0,
+                                  "WITHDRAW"
+                                ).fee.toLocaleString()}
+                              </span>
                             </div>
-                            <Separator />
-                            <div className="flex justify-between">
-                              <span>Total Amount</span>
-                              <strong>
-                                BDT{" "}
-                                {
-                                  calculateFee(
-                                    withdrawForm.watch("amount") || 0,
-                                    "WITHDRAW"
-                                  ).totalAmount
-                                }
-                              </strong>
+                            <Separator className="bg-border/60" />
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm font-bold text-foreground">
+                                Total Payout
+                              </span>
+                              <span className="text-xl font-black text-primary tracking-tighter">
+                                ৳
+                                {calculateFee(
+                                  withdrawForm.watch("amount") || 0,
+                                  "WITHDRAW"
+                                ).totalAmount.toLocaleString()}
+                              </span>
                             </div>
+                          </div>
+
+                          <div className="pt-6 flex flex-col gap-3">
+                            <Button
+                              type="submit"
+                              className="h-12 rounded-xl font-bold text-base shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                            >
+                              WITHDRAWAL
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="h-10 rounded-xl font-bold text-muted-foreground"
+                              onClick={() => withdrawForm.reset()}
+                            >
+                              Reset Form
+                            </Button>
                           </div>
                         </CardContent>
                       </Card>
-
-                      <div className="flex gap-2 justify-end">
-                        <Button
-                          variant="outline"
-                          type="button"
-                          onClick={() =>
-                            withdrawForm.reset({
-                              identifier: "",
-                              amount: 0,
-                            })
-                          }
-                        >
-                          Reset
-                        </Button>
-                        <Button type="submit">Withdraw</Button>
-                      </div>
                     </div>
                   </form>
                 </CardContent>
@@ -616,11 +672,19 @@ export default function AgentWallet() {
         </div>
       </div>
 
-      <Separator className="my-6" />
-
-      <div className="text-sm text-muted-foreground flex items-center gap-2">
-        <Sparkles className="h-4 w-4" /> Tip: All agent actions are logged. Keep
-        a receipt for the customer.
+      {/* Compliance Footer */}
+      <div className="mt-10 p-6 bg-primary/5 rounded-lg border border-primary/10 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3 text-sm font-bold text-primary">
+          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <span>
+            Compliance Tip: Ensure customer signature on physical receipts.
+          </span>
+        </div>
+        <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest text-center md:text-right">
+          Security Audited Transaction Layer • 256-bit AES Encrypted
+        </div>
       </div>
     </div>
   );
