@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
@@ -22,7 +21,6 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -46,7 +44,7 @@ import { useGetMeWalletQuery } from "@/redux/features/wallet/wallet.api";
 import { useGetMeTransactionQuery } from "@/redux/features/transaction/transaction.api";
 import { Helmet } from "react-helmet";
 
-// -------------------- Types --------------------
+// Types remain unchanged...
 export type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
 export type TxStatus = "COMPLETED" | "PENDING" | "FAILED" | "REVERSED";
 
@@ -86,17 +84,17 @@ const typeMeta: Record<
 > = {
   ADD_MONEY: {
     label: "Deposit",
-    color: "text-emerald-600",
+    color: "text-emerald-600 dark:text-emerald-400",
     icon: <ArrowDownToLine className="h-4 w-4" />,
   },
   WITHDRAW: {
     label: "Withdraw",
-    color: "text-rose-600",
+    color: "text-rose-600 dark:text-rose-400",
     icon: <ArrowUpFromLine className="h-4 w-4" />,
   },
   SEND_MONEY: {
     label: "Send Money",
-    color: "text-blue-600",
+    color: "text-blue-600 dark:text-blue-400",
     icon: <Send className="h-4 w-4" />,
   },
 };
@@ -111,11 +109,10 @@ export default function Overview() {
       type: "all",
     });
   const navigate = useNavigate();
-
   const [hidden, setHidden] = useState(false);
 
   const balanceText = useMemo(
-    () => (hidden ? "••••••" : walletData?.data?.balance ?? 0),
+    () => (hidden ? "••••••" : formatBDT(walletData?.data?.balance ?? 0)),
     [hidden, walletData?.data?.balance]
   );
 
@@ -130,43 +127,41 @@ export default function Overview() {
         new Date(b.date).getTime() - new Date(a.date).getTime()
     )
     ?.slice(0, 5);
+
   return (
-    <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
+    <div className="max-w-7xl container mx-auto py-6 space-y-8">
       <Helmet>
-        <title>NEOPAY - Digital Wallet for NEOPAY</title>
-        <meta name="description" content="This is Overview Page" />
+        <title>Dashboard | NEOPAY</title>
       </Helmet>
+
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1" data-tour="overview-title">
-          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight flex items-center gap-3">
-            Wallet Overview
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-4xl font-bold tracking-tight">
+            Account <span className="text-primary">Overview</span>
           </h1>
-          <p className="text-muted-foreground">
-            A fast, secure wallet experience
+          <p className="text-muted-foreground font-medium">
+            Manage your digital assets securely.
           </p>
         </div>
-        <Badge className="rounded-full text-green-500 bg-green-100">
-          Active
+        <Badge className="rounded-full px-4 py-1 text-xs font-bold uppercase tracking-wider bg-primary/10 text-primary border-primary/20">
+          Account Active
         </Badge>
       </div>
 
-      {/* Top Row: Balance + Security blurb */}
-      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 lg:gap-4 items-stretch space-y-4 lg:space-y-0">
-        <Card
-          className="relative overflow-hidden md:col-span-2 border-none bg-gradient-to-br from-primary/90 via-primary to-primary/70 text-primary-foreground shadow-md"
-          data-tour="balance"
-        >
-          <div className="absolute right-[-60px] top-[-60px] h-48 w-48 rounded-full bg-white/10 blur-2xl" />
-          <CardHeader className="flex-row items-center justify-between">
+      {/* Top Row: Balance Card */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <Card className="lg:col-span-8 relative overflow-hidden border-none bg-gradient-to-br from-primary via-primary/90 to-emerald-700 text-primary-foreground shadow-2xl shadow-primary/20 p-2 sm:p-4">
+          <div className="absolute right-[-40px] top-[-40px] h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+
+          <CardHeader className="flex-row items-center justify-between space-y-0 pb-7 relative z-10">
             <div>
-              <CardDescription className="text-primary-foreground/80">
+              <CardDescription className="text-primary-foreground/80 font-bold uppercase tracking-widest text-xs">
                 Available Balance
               </CardDescription>
-              <CardTitle className="text-3xl md:text-4xl mt-1">
-                BDT{" "}
+              <CardTitle className="text-3xl sm:text-4xl md:text-5xl font-black mt-2 tracking-tighter">
                 {walletLoading ? (
-                  <Skeleton className="h-10 w-52 bg-white/30" />
+                  <Skeleton className="h-12 w-48 bg-white/20" />
                 ) : (
                   balanceText
                 )}
@@ -178,178 +173,170 @@ export default function Overview() {
                   <Button
                     variant="secondary"
                     size="icon"
-                    className="rounded-xl"
-                    aria-label="Toggle balance visibility"
+                    className="h-12 w-12 rounded-2xl bg-white/20 hover:bg-white/30 backdrop-blur-md border-white/10 transition-transform active:scale-90"
                     onClick={() => setHidden((v) => !v)}
                   >
                     {hidden ? (
-                      <Eye className="h-5 w-5" />
+                      <Eye className="h-6 w-6" />
                     ) : (
-                      <EyeOff className="h-5 w-5" />
+                      <EyeOff className="h-6 w-6" />
                     )}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Hide / show balance</TooltipContent>
+                <TooltipContent>Show/Hide Balance</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </CardHeader>
-          <CardContent className="pt-0">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-              <div className="flex items-center gap-2">
+
+          <CardContent className="relative z-10">
+            <div className="flex flex-wrap items-center gap-4 text-xs font-bold uppercase tracking-wider">
+              <div className="flex items-center gap-2 bg-black/10 px-3 py-1.5 rounded-full backdrop-blur-sm">
                 <ShieldCheck className="h-4 w-4" />
-                <span>Device binding & OTP secured</span>
+                <span>Encrypted OTP</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-black/10 px-3 py-1.5 rounded-full backdrop-blur-sm">
                 <TrendingUp className="h-4 w-4" />
-                <span>Low fees, instant transfers</span>
+                <span>Instant Transfer</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-muted/40 w-full">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">At a glance</CardTitle>
-            <CardDescription>Key tips for smooth transfers</CardDescription>
+        {/* Security Info Card */}
+        <Card className="lg:col-span-4 bg-card border-border/50 shadow-sm border-dashed">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-bold flex items-center gap-2">
+              <Info className="h-4 w-4 text-primary" /> Security Center
+            </CardTitle>
           </CardHeader>
-          <CardContent className="text-sm space-y-2 ">
-            <div className="flex items-center gap-2">
-              <Info className="h-4 w-4" />
-              <span>Verify recipient name before sending.</span>
+          <CardContent className="text-[13px] space-y-4 font-medium text-muted-foreground">
+            <div className="p-3 rounded-xl bg-muted/50 border border-border/40">
+              Don't share your PIN or OTP with anyone to keep your account safe.
             </div>
-            <div className="flex items-center gap-2">
-              <Info className="h-4 w-4" />
-              <span>Cash-in via agent is instant after code confirm.</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Info className="h-4 w-4" />
-              <span>Keep your credentials secure</span>
+            <div className="p-3 rounded-xl bg-muted/50 border border-border/40">
+              Cash-in transactions are usually updated within seconds.
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div>
-        {/* Quick Actions */}
-        <section className="space-y-3" data-tour="quick-actions">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Quick Actions</h2>
-            <div className="text-sm text-muted-foreground">
-              One-tap to start
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <ActionCard
-              title="Deposit"
-              description="Add money via bank or agent"
-              icon={<ArrowDownToLine className="h-5 w-5" />}
-              onClick={() => goAction("deposit")}
-            />
-            <ActionCard
-              title="Withdraw"
-              description="Cash out to bank or agent"
-              icon={<ArrowUpFromLine className="h-5 w-5" />}
-              onClick={() => goAction("withdraw")}
-            />
-            <ActionCard
-              title="Send Money"
-              description="Transfer to phone or email"
-              icon={<Send className="h-5 w-5" />}
-              onClick={() => goAction("send")}
-            />
-          </div>
-        </section>
-      </div>
+      {/* Quick Actions */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold tracking-tight">Quick Services</h2>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+            One-tap Start
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <ActionCard
+            title="Deposit"
+            description="Add money from Bank"
+            icon={<ArrowDownToLine className="h-6 w-6" />}
+            onClick={() => goAction("deposit")}
+          />
+          <ActionCard
+            title="Withdraw"
+            description="Cash out at Agent"
+            icon={<ArrowUpFromLine className="h-6 w-6" />}
+            onClick={() => goAction("withdraw")}
+          />
+          <ActionCard
+            title="Send Money"
+            description="Transfer to any user"
+            icon={<Send className="h-6 w-6" />}
+            onClick={() => goAction("send")}
+          />
+        </div>
+      </section>
 
-      <Separator />
+      {/* Recent Transactions */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold tracking-tight">Recent Activity</h2>
+          <Button
+            variant="ghost"
+            className="rounded-full text-xs font-bold hover:bg-primary/10 hover:text-primary transition-all"
+            size="sm"
+            onClick={() => navigate("/user/transactions-history")}
+          >
+            View Full History
+          </Button>
+        </div>
 
-      <div className="overflow-x-auto">
-        {/* Recent Transactions */}
-        <section className="space-y-3" data-tour="recent">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Recent Transactions</h2>
-            <Button
-              variant="ghost"
-              className="rounded-full"
-              size="sm"
-              onClick={() => navigate("/user/transactions-history")}
-            >
-              View all
-            </Button>
+        {transactionLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-20 w-full rounded-2xl" />
+            ))}
           </div>
-          {transactionLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Card key={i} className="p-4">
-                  <Skeleton className="h-6 w-full" />
-                </Card>
-              ))}
-            </div>
-          ) : transactionData?.data && recentTransactions?.length > 0 ? (
-            <Card>
-              <CardContent className="pt-4">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Type</TableHead>
-                      <TableHead>InitiatedBy</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">
-                        Transaction Date
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentTransactions?.map((tx, idx: any) => (
-                      <TableRow key={idx} className="hover:bg-muted/50">
-                        <TableCell>
+        ) : recentTransactions?.length > 0 ? (
+          <Card className="border-border/50 shadow-xl shadow-black/[0.02] overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-muted/30">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-[200px] font-bold">Type</TableHead>
+                    <TableHead className="font-bold hidden md:table-cell">
+                      Initiated By
+                    </TableHead>
+                    <TableHead className="text-right font-bold">
+                      Amount
+                    </TableHead>
+                    <TableHead className="font-bold">Status</TableHead>
+                    <TableHead className="text-right font-bold hidden lg:table-cell">
+                      Date
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentTransactions?.map((tx, idx: any) => (
+                    <TableRow
+                      key={idx}
+                      className="hover:bg-muted/30 transition-colors group"
+                    >
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-3">
                           <div
-                            className={`inline-flex items-center gap-2 ${
+                            className={`p-2.5 rounded-xl ${
                               typeMeta[tx.type].color
-                            }`}
+                            } bg-current/10 group-hover:scale-110 transition-transform`}
                           >
                             {typeMeta[tx.type].icon}
-                            <span className="font-medium">
-                              {typeMeta[tx.type].label}
-                            </span>
                           </div>
-                        </TableCell>
-
-                        <TableCell className="text-muted-foreground">
-                          {tx.initiatedBy ?? "_"}
-                        </TableCell>
-                        <TableCell
-                          className={`text-right font-semibold ${
-                            tx.amount >= 0
-                              ? "text-emerald-600"
-                              : "text-rose-600"
-                          }`}
-                        >
-                          {tx.amount >= 0
-                            ? `+${formatBDT(tx.amount)}`
-                            : `${formatBDT(tx.amount)}`}
-                        </TableCell>
-                        <TableCell>
-                          <StatusBadge status={tx.status} />
-                        </TableCell>
-                        <TableCell className="text-muted-foreground text-right">
-                          {formatTime(tx.createdAt)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                  <TableCaption className="text-left">
-                    Only the latest activities are shown here.
-                  </TableCaption>
-                </Table>
-              </CardContent>
-            </Card>
-          ) : (
-            <EmptyState />
-          )}
-        </section>
-      </div>
+                          <span className="font-bold text-sm tracking-tight">
+                            {typeMeta[tx.type].label}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground font-medium hidden md:table-cell">
+                        {tx.initiatedBy || "Self"}
+                      </TableCell>
+                      <TableCell
+                        className={`text-right font-black tabular-nums ${
+                          tx.amount >= 0 ? "text-emerald-600" : "text-rose-600"
+                        }`}
+                      >
+                        {tx.amount >= 0
+                          ? `+${formatBDT(tx.amount)}`
+                          : formatBDT(tx.amount)}
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={tx.status} />
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-right text-xs font-medium hidden lg:table-cell">
+                        {formatTime(tx.createdAt)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        ) : (
+          <EmptyState />
+        )}
+      </section>
     </div>
   );
 }
