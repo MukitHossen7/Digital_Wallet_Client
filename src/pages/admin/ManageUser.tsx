@@ -161,7 +161,7 @@ export default function ManageUser() {
             key={idx}
             className="border shadow-sm shadow-black/[0.02] bg-card/60 backdrop-blur-sm rounded-xl overflow-hidden group hover:scale-[1.02] transition-all duration-300"
           >
-            <CardContent className="p-6">
+            <CardContent className="">
               <div className="flex justify-between items-start mb-4">
                 <div
                   className={`p-4 rounded-2xl ${stat.bg} ${stat.color} group-hover:bg-primary group-hover:text-white transition-colors duration-500`}
