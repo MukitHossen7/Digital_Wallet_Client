@@ -5,7 +5,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Outlet } from "react-router";
+import { Link, Outlet } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function DashboardLayout() {
@@ -37,14 +37,15 @@ export default function DashboardLayout() {
                 System Active
               </span>
             </div>
-
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-primary to-primary/60 p-[1px]">
-              <div className="h-full w-full rounded-xl bg-background flex items-center justify-center">
-                <span className="text-xs font-black text-primary italic">
-                  NP
-                </span>
+            <Link to="/">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-primary to-primary/60 p-[1px]">
+                <div className="h-full w-full rounded-xl bg-background flex items-center justify-center">
+                  <span className="text-xs font-black text-primary italic">
+                    NP
+                  </span>
+                </div>
               </div>
-            </div>
+            </Link>
           </div>
         </header>
 
