@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useState } from "react";
 import { useGetALLTransactionQuery } from "@/redux/features/transaction/transaction.api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -13,7 +13,6 @@ import {
 
 import {
   Search,
-  Filter,
   ArrowDownToLine,
   ArrowUpFromLine,
   Send,
@@ -21,6 +20,10 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsRight,
+  Calendar,
+  User,
+  Hash,
+  LayoutGrid,
 } from "lucide-react";
 import {
   Table,
@@ -36,27 +39,44 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import EmptyState from "@/components/modules/user/transaction/EmptyState";
 import { Helmet } from "react-helmet";
+import { motion } from "framer-motion";
 
 export type TxType = "ADD_MONEY" | "WITHDRAW" | "SEND_MONEY";
+
 const typeMeta: Record<
-  TxType,
-  { label: string; color: string; icon: React.ReactNode }
+  string,
+  { label: string; color: string; bgColor: string; icon: React.ReactNode }
 > = {
   ADD_MONEY: {
-    label: "Deposit",
+    label: "Cash In",
     color: "text-emerald-600",
+    bgColor: "bg-emerald-500/10",
     icon: <ArrowDownToLine className="h-4 w-4" />,
   },
   WITHDRAW: {
-    label: "Withdraw",
+    label: "Cash Out",
     color: "text-rose-600",
+    bgColor: "bg-rose-500/10",
     icon: <ArrowUpFromLine className="h-4 w-4" />,
   },
   SEND_MONEY: {
     label: "Send Money",
     color: "text-blue-600",
+    bgColor: "bg-blue-500/10",
     icon: <Send className="h-4 w-4" />,
   },
+};
+
+// Fallback for missing types to prevent crash
+const getMeta = (type: string) => {
+  return (
+    typeMeta[type] || {
+      label: type || "Transaction",
+      color: "text-slate-600",
+      bgColor: "bg-slate-500/10",
+      icon: <Hash className="h-4 w-4" />,
+    }
+  );
 };
 
 const AllTransaction = () => {
@@ -72,7 +92,7 @@ const AllTransaction = () => {
       setDebouncedSearch(search);
     }, 500);
     return () => {
-      clearInterval(handler);
+      clearTimeout(handler);
     };
   }, [search]);
 
@@ -84,7 +104,6 @@ const AllTransaction = () => {
     status,
   });
 
-  // backend  data
   const transactions = useMemo(
     () => transactionData?.data ?? [],
     [transactionData]
@@ -95,55 +114,54 @@ const AllTransaction = () => {
   const end = Math.min(start + pageSize, total);
 
   return (
-    <div className="max-w-6xl container mx-auto px-3 sm:px-4 md:px-6 py-6 md:py-8 space-y-6">
+    <div className="max-w-7xl container mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-8">
       <Helmet>
-        <title>Admin Dashboard - NEOPAY</title>
-        <meta name="description" content="This is Transactions Page" />
+        <title>All Transactions | NEOPAY Admin</title>
       </Helmet>
+
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-2xl lg:text-3xl font-bold">
-          Transaction Management
-        </h1>
-        <p className="text-muted-foreground">
-          Monitor and analyze all system transactions
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-border pb-8">
+        <div className="space-y-1">
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight flex items-center gap-3">
+            <LayoutGrid className="h-8 w-8 text-primary" />
+            Transactions
+          </h1>
+          <p className="text-muted-foreground font-medium">
+            Monitoring all financial flows.
+          </p>
+        </div>
       </div>
 
-      {/* Filters */}
-      <Card className="shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2">
-            <Filter size={18} /> Filter Transactions
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {/* Search */}
-          <div className="flex items-center gap-2 w-full">
-            <Search className="text-muted-foreground" size={18} />
+      {/* Filters Card */}
+      <Card className="border-none shadow-xl bg-card/60 backdrop-blur-md">
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-6">
+          <div className="relative">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              size={16}
+            />
             <Input
-              placeholder="Search by amount, or ID ."
+              placeholder="Search amount or ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 bg-background/50 border-border rounded-xl"
             />
           </div>
 
-          {/* Category */}
           <Select onValueChange={setCategory}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="bg-background/50 rounded-xl">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              <SelectItem value="ADD_MONEY">Add Money</SelectItem>
+              <SelectItem value="ADD_MONEY">Cash In</SelectItem>
               <SelectItem value="SEND_MONEY">Send Money</SelectItem>
               <SelectItem value="WITHDRAW">Cash Out</SelectItem>
             </SelectContent>
           </Select>
 
-          {/* Status */}
           <Select onValueChange={setStatus}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="bg-background/50 rounded-xl">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -152,129 +170,221 @@ const AllTransaction = () => {
               <SelectItem value="FAILED">Failed</SelectItem>
             </SelectContent>
           </Select>
+
+          <Button
+            variant="outline"
+            className="rounded-xl font-bold uppercase text-[10px] tracking-widest border-primary/20"
+          >
+            Apply Filters
+          </Button>
         </CardContent>
       </Card>
 
-      {/* Transaction List */}
-      <div className="w-full overflow-x-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Transaction History</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <Skeleton key={i} className="h-10 w-full" />
-                ))}
-              </div>
-            ) : transactions?.length > 0 ? (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">ID</TableHead>
-                      <TableHead>InitiatedBy</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">
-                        Transaction Date
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transactions.map((tx: any) => (
-                      <TableRow key={tx._id}>
-                        <TableCell className="font-medium">{tx._id}</TableCell>
-                        <TableCell>{tx?.initiatedBy || "N/A"}</TableCell>
+      {/* Transactions Data */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-48 w-full rounded-2xl" />
+          ))}
+        </div>
+      ) : transactions?.length > 0 ? (
+        <div className="space-y-6">
+          {/* ---- CARD VIEW: (SM, MD, LG) ---- */}
+          <div className="xl:hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {transactions.map((tx: any) => {
+              const meta = getMeta(tx.type); // Safe type access
+              return (
+                <motion.div
+                  key={tx._id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="h-full"
+                >
+                  <Card className="overflow-hidden border shadow-lg bg-card group relative h-full rounded-2xl">
+                    <div
+                      className={`absolute left-0 top-0 w-1.5 h-full ${meta.color.replace(
+                        "text",
+                        "bg"
+                      )}`}
+                    />
+                    <CardHeader className="flex flex-row items-center justify-between pb-4">
+                      <div className={`${meta.bgColor} p-2 rounded-lg`}>
+                        {meta.icon}
+                      </div>
+                      <StatusBadge status={tx.status} />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex justify-between items-end">
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                            Amount
+                          </p>
+                          <p className="text-2xl font-black">
+                            <span className="text-xs font-normal text-muted-foreground mr-1">
+                              BDT
+                            </span>
+                            {tx.amount?.toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                            Type
+                          </p>
+                          <p className={`text-xs font-bold ${meta.color}`}>
+                            {meta.label}
+                          </p>
+                        </div>
+                      </div>
+                      <Separator className="opacity-40" />
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-[11px] font-medium">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <User size={12} /> By
+                          </span>
+                          <span className="text-foreground">
+                            {tx.initiatedBy || "N/A"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-[11px] font-medium">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Calendar size={12} /> Date
+                          </span>
+                          <span className="text-foreground">
+                            {new Date(tx.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="bg-muted/50 p-2 rounded-lg text-[10px] font-mono text-center truncate">
+                          ID: {tx._id}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* ---- TABLE VIEW: (XL) ---- */}
+          <div className="hidden xl:block">
+            <Card className="border-none shadow-2xl bg-card/60 backdrop-blur-xl overflow-hidden rounded-2xl border border-border/50">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow>
+                    <TableHead className="py-5 pl-8 font-black uppercase text-[10px] tracking-widest">
+                      Transaction ID
+                    </TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest">
+                      Initiator
+                    </TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest">
+                      Type
+                    </TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest">
+                      Amount
+                    </TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest text-center">
+                      Status
+                    </TableHead>
+                    <TableHead className="text-right pr-8 font-black uppercase text-[10px] tracking-widest">
+                      Date
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transactions.map((tx: any) => {
+                    const meta = getMeta(tx.type);
+                    return (
+                      <TableRow
+                        key={tx._id}
+                        className="hover:bg-primary/[0.03] border-border/40"
+                      >
+                        <TableCell className="font-mono text-[10px] pl-8 font-bold text-primary uppercase tracking-wider">
+                          #{tx._id.slice(-12)}
+                        </TableCell>
+                        <TableCell className="font-bold text-sm">
+                          {tx?.initiatedBy || "N/A"}
+                        </TableCell>
                         <TableCell>
                           <div
-                            className={`inline-flex items-center gap-2 ${
-                              typeMeta[tx.type as TxType].color
-                            }`}
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black gap-2 uppercase ${meta.bgColor} ${meta.color}`}
                           >
-                            {typeMeta[tx.type as TxType].icon}
-                            <span className="font-medium">
-                              {typeMeta[tx.type as TxType].label}
-                            </span>
+                            {meta.icon} {meta.label}
                           </div>
                         </TableCell>
-                        <TableCell className="font-semibold">
-                          BDT {tx?.amount}
+                        <TableCell className="text-base font-black">
+                          BDT {tx?.amount?.toLocaleString()}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="text-center">
                           <StatusBadge status={tx.status} />
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right pr-8 font-bold text-sm text-muted-foreground">
                           {new Date(tx?.createdAt).toLocaleString()}
                         </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
 
-                <Separator className="my-4" />
-                {/* Pagination */}
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="text-sm text-muted-foreground">
-                    Showing <span className="font-medium">{start + 1}</span>–
-                    <span className="font-medium">{end}</span> of{" "}
-                    <span className="font-medium">{total}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 rounded-full"
-                        onClick={() => setPage(1)}
-                        disabled={page === 1}
-                      >
-                        <ChevronsLeft className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 rounded-full"
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <div className="px-3 text-sm">
-                        Page <span className="font-medium">{page}</span> /{" "}
-                        {totalPages}
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 rounded-full"
-                        onClick={() =>
-                          setPage((p) => Math.min(totalPages, p + 1))
-                        }
-                        disabled={page === totalPages}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 rounded-full"
-                        onClick={() => setPage(totalPages)}
-                        disabled={page === totalPages}
-                      >
-                        <ChevronsRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+          {/* Pagination */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4">
+            <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+              Record: {start + 1}-{end} / Total: {total}
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 rounded-xl"
+                onClick={() => setPage(1)}
+                disabled={page === 1}
+              >
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 rounded-xl"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="bg-primary/10 text-primary font-black px-4 py-1.5 rounded-xl text-xs mx-2">
+                PAGE {page} / {totalPages}
               </div>
-            ) : (
-              <EmptyState />
-            )}
-          </CardContent>
-        </Card>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 rounded-xl"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 rounded-xl"
+                onClick={() => setPage(totalPages)}
+                disabled={page === totalPages}
+              >
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <EmptyState />
+      )}
+
+      {/* Footer */}
+      <div className="text-center pt-10 border-t border-border/50">
+        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">
+          Neopay Ecosystem Ledger
+        </p>
       </div>
     </div>
   );

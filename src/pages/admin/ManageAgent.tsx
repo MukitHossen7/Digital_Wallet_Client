@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { Separator } from "@/components/ui/separator";
-
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -25,18 +25,15 @@ import {
   Users,
   UserX,
   ShieldCheck,
-  Mail,
   Phone,
-  Briefcase,
+  TrendingUp,
 } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { FaBan } from "react-icons/fa";
 import { MdCheckCircleOutline } from "react-icons/md";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Skeleton } from "@/components/ui/skeleton";
 
-// Animation Settings
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -46,8 +43,8 @@ const containerVariants = {
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, y: 15 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
 };
 
 const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
@@ -57,9 +54,9 @@ const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
     <Badge
       className={`${
         isActive
-          ? "bg-primary/10 text-primary border-primary/20"
+          ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
           : "bg-destructive/10 text-destructive border-destructive/20"
-      } rounded-full px-3 py-1 font-semibold text-[10px] md:text-xs`}
+      } rounded-full px-3 py-1 font-bold text-[10px] md:text-xs tracking-tight`}
     >
       {isActive ? "● ACTIVE" : `● ${normalized}`}
     </Badge>
@@ -69,14 +66,14 @@ const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
 const ManageAgent = () => {
   const [approveAgent] = useApproveAgentMutation();
   const [suspendAgent] = useSuspendAgentMutation();
-  const { data: agentData = [], isLoading } =
-    useGetAllAgentStatisticsQuery(null);
+  const { data: agentData, isLoading } = useGetAllAgentStatisticsQuery(null);
+
+  const agents = agentData?.data?.data || [];
 
   const handleApproveAgent = async (id: string) => {
-    let toastId: string | number | undefined;
+    const toastId = toast.loading("Processing approval...");
     try {
-      toastId = toast.loading("Processing agent approval...");
-      const res = await approveAgent({ id: id }).unwrap();
+      const res = await approveAgent({ id }).unwrap();
       if (res.success)
         toast.success("Agent approved successfully", { id: toastId });
     } catch (error: any) {
@@ -85,10 +82,9 @@ const ManageAgent = () => {
   };
 
   const handleSuspendAgent = async (id: string) => {
-    let toastId: string | number | undefined;
+    const toastId = toast.loading("Processing suspension...");
     try {
-      toastId = toast.loading("Processing agent suspension...");
-      const res = await suspendAgent({ id: id }).unwrap();
+      const res = await suspendAgent({ id }).unwrap();
       if (res.success)
         toast.success("Agent suspended successfully", { id: toastId });
     } catch (error: any) {
@@ -96,295 +92,197 @@ const ManageAgent = () => {
     }
   };
 
+  // Stats Data Preparation
+  const statsData = [
+    {
+      label: "Total Agents",
+      val: agentData?.data?.totalAgents,
+      icon: Users,
+      color: "text-blue-600",
+      bg: "bg-blue-600/10",
+      border: "border-blue-200 dark:border-blue-900/30",
+      description: "Total registered network",
+    },
+    {
+      label: "Active Network",
+      val: agentData?.data?.activeAgents,
+      icon: UserCheck,
+      color: "text-primary",
+      bg: "bg-primary/10",
+      border: "border-primary/20 dark:border-primary/10",
+      description: "Agents currently online",
+    },
+    {
+      label: "Suspended",
+      val: agentData?.data?.blockAgents,
+      icon: UserX,
+      color: "text-destructive",
+      bg: "bg-destructive/10",
+      border: "border-destructive/20 dark:border-destructive/10",
+      description: "Account access revoked",
+    },
+  ];
+
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-      className="max-w-7xl container mx-auto py-6 space-y-8"
-    >
+    <div className="max-w-7xl container mx-auto py-6 space-y-8 ">
       <Helmet>
         <title>Agent Management | NEOPAY</title>
       </Helmet>
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-border pb-6">
-        <div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-border pb-8">
+        <div className="space-y-1">
           <h1 className="text-2xl md:text-4xl font-bold tracking-tight flex items-center gap-3">
-            <ShieldCheck className="h-6 w-6 text-primary" />
+            <ShieldCheck className="h-7 w-7 text-primary" />
             Agent <span className="text-primary">Directory</span>
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage, Approve and Review all registered agents.
+          <p className="text-muted-foreground font-medium text-sm md:text-base">
+            Securely manage and monitor your financial agent network.
           </p>
-        </div>
-        <div className="flex items-center gap-2 bg-secondary/50 px-4 py-2 rounded-lg border border-border w-fit hidden lg:flex">
-          <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-          <span className="text-xs font-bold uppercase tracking-widest text-primary">
-            Admin Control Panel
-          </span>
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[
-          {
-            title: "Total Agents",
-            value: agentData?.data?.totalAgents,
-            icon: Users,
-            color: "text-blue-500",
-            bg: "bg-blue-500/10",
-            desc: "Full network count",
-          },
-          {
-            title: "Active Agents",
-            value: agentData?.data?.activeAgents,
-            icon: UserCheck,
-            color: "text-primary",
-            bg: "bg-primary/10",
-            desc: "Currently operational",
-          },
-          {
-            title: "Suspended",
-            value: agentData?.data?.blockAgents,
-            icon: UserX,
-            color: "text-destructive",
-            bg: "bg-destructive/10",
-            desc: "Awaiting review/blocked",
-          },
-        ].map((stat, idx) => (
+      {/* --- PROFESSIONAL STATS SECTION --- */}
+      <motion.div
+        variants={containerVariants}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        {statsData.map((item, i) => (
           <motion.div
-            key={idx}
+            key={i}
             variants={itemVariants}
-            whileHover={{ y: -5 }}
-            className="h-full"
+            whileHover={{ y: -5, transition: { duration: 0.2 } }}
+            className="group"
           >
-            <Card className="h-full border shadow-none bg-card/50 backdrop-blur-sm transition-all hover:shadow-primary/5">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                  {stat.title}
-                </CardTitle>
-                <div className={`${stat.bg} p-2 rounded-xl`}>
-                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
+            <Card
+              className={`relative overflow-hidden border ${item.border} bg-card/50 backdrop-blur-xl shadow-sm shadow-black/5 transition-all duration-300 rounded-lg`}
+            >
+              {/* Decorative Background Icon */}
+              <item.icon
+                className={`absolute -right-4 -bottom-4 h-24 w-24 opacity-[0.03] dark:opacity-[0.05] group-hover:scale-110 transition-transform duration-500`}
+              />
+
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <div className="space-y-1">
+                  <CardTitle className="text-[10px] md:text-xs font-black uppercase text-muted-foreground tracking-[0.2em]">
+                    {item.label}
+                  </CardTitle>
+                  <p className="text-[9px] font-medium text-muted-foreground/70 uppercase">
+                    {item.description}
+                  </p>
+                </div>
+                <div
+                  className={`${item.bg} p-3 rounded-2xl ring-1 ring-inset ring-white/10 shadow-inner`}
+                >
+                  <item.icon className={`h-6 w-6 ${item.color}`} />
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-black tracking-tighter">
-                  <NumberTicker
-                    className={`${stat.color}`}
-                    value={stat.value ?? 0}
-                  />
+              <CardContent className="">
+                <div className="flex items-end gap-2">
+                  <div className="text-3xl font-black tracking-tighter  text-foreground">
+                    <NumberTicker value={item.val ?? 0} />
+                  </div>
+                  <div className="pb-1.5 text-xs font-bold text-muted-foreground flex items-center gap-1">
+                    <TrendingUp className="h-3 w-3 text-emerald-500" />
+                    Live
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                  {stat.desc}
-                </p>
               </CardContent>
+
+              {/* Bottom accent line */}
+              <div
+                className={`h-1.5 w-full ${item.color.replace(
+                  "text",
+                  "bg"
+                )} opacity-20`}
+              />
             </Card>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
 
-      {/* Main Content Area */}
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">
-            Network List ({agentData?.data?.totalAgents ?? 0})
-          </h2>
-        </div>
+        <h2 className="text-xl font-bold flex items-center gap-2">
+          Directory List
+          <Badge variant="secondary" className="rounded-md font-mono">
+            {agents.length}
+          </Badge>
+        </h2>
 
         {isLoading ? (
-          <div className="p-8 space-y-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full rounded-2xl" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-64 w-full rounded-2xl" />
             ))}
           </div>
-        ) : agentData?.data?.data?.length > 0 ? (
-          <div>
-            {/* ---- TABLE VIEW (Visible on XL only) ---- */}
-            <div className="hidden xl:block">
-              <Card className="border-none shadow-none overflow-hidden bg-card/60 backdrop-blur-sm">
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader className="bg-muted/40">
-                      <TableRow className="border-b border-border">
-                        <TableHead className="font-bold py-5 px-6">
-                          AGENT PROFILE
-                        </TableHead>
-                        <TableHead className="font-bold">
-                          CONTACT INFO
-                        </TableHead>
-                        <TableHead className="font-bold">LOCATION</TableHead>
-                        <TableHead className="font-bold">ROLE</TableHead>
-                        <TableHead className="font-bold">STATUS</TableHead>
-                        <TableHead className="font-bold text-right px-8">
-                          ACTIONS
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {agentData?.data?.data?.map((user: any) => (
-                        <TableRow
-                          key={user?._id}
-                          className="hover:bg-primary/5 transition-colors border-b border-border"
-                        >
-                          <TableCell className="px-6 py-4">
-                            <div className="flex items-center gap-4">
-                              <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
-                                <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                                  {user?.name
-                                    ?.split(" ")
-                                    ?.map((n: any) => n[0])
-                                    ?.join("")}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="font-bold text-base text-foreground">
-                                  {user?.name}
-                                </p>
-                                <p className="text-[10px] font-mono text-muted-foreground tracking-widest uppercase">
-                                  {user?._id}
-                                </p>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1">
-                              <span className="text-sm font-semibold flex items-center gap-2">
-                                <Phone className="h-3 w-3 text-primary" />
-                                {user?.phone ?? "No Phone"}
-                              </span>
-                              <span className="text-xs text-muted-foreground flex items-center gap-2">
-                                <Mail className="h-3 w-3" />
-                                {user?.email}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-sm text-muted-foreground flex items-center gap-2">
-                              <MapPin className="h-3.5 w-3.5 text-primary/60" />
-                              {user?.address || "Bangladesh"}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className="capitalize border-primary/30 text-primary bg-primary/5 font-bold"
-                            >
-                              {user?.role}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <StatusBadge status={user?.isActive} />
-                          </TableCell>
-                          <TableCell className="text-right px-8">
-                            {user?.isActive === "ACTIVE" ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleSuspendAgent(user?._id)}
-                                className="border-destructive/30 text-destructive hover:bg-destructive hover:text-white rounded-lg transition-all"
-                              >
-                                <FaBan className="h-4 w-4" />
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleApproveAgent(user?._id)}
-                                className="border-primary/30 text-primary hover:bg-primary hover:text-white rounded-lg transition-all"
-                              >
-                                <MdCheckCircleOutline className="h-5 w-5" />
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </div>
-            {/* ---- CARD VIEW (Visible on SM, MD, LG) ---- */}
-            <div className="xl:hidden grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {agentData?.data?.data?.map((user: any) => (
-                <motion.div
-                  key={user?._id}
-                  variants={itemVariants}
-                  whileHover={{ y: -5 }}
-                >
-                  <Card className="overflow-hidden border-none shadow-sm bg-card/50 backdrop-blur-sm relative group">
+        ) : agents.length > 0 ? (
+          <div className="w-full">
+            {/* ---- MOBILE & TABLET VIEW (Visible on SM, MD, LG) ---- */}
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={containerVariants}
+              className="grid grid-cols-1  lg:grid-cols-2 gap-6 xl:hidden"
+            >
+              {agents.map((user: any) => (
+                <motion.div key={user?._id} variants={itemVariants}>
+                  <Card className="border-none border-border/50 shadow-sm bg-card relative overflow-hidden h-full">
                     <div className="absolute top-4 right-4">
                       <StatusBadge status={user?.isActive} />
                     </div>
                     <CardHeader className="pb-4">
                       <div className="flex items-center gap-4">
-                        <Avatar className="h-14 w-14 border-2 border-primary/20 p-0.5">
-                          <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                            {user?.name
-                              ?.split(" ")
-                              ?.map((n: any) => n[0])
-                              ?.join("")}
+                        <Avatar className="h-12 w-12 border border-primary/10">
+                          <AvatarFallback className="bg-primary/5 text-primary font-bold">
+                            {user?.name?.slice(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors">
+                        <div className="min-w-0 pr-10">
+                          <CardTitle className="text-base font-bold truncate">
                             {user?.name}
                           </CardTitle>
-                          <p className="text-[10px] font-mono text-muted-foreground">
-                            ID: {user?._id?.slice(-10)}
+                          <p className="text-[10px] font-mono text-muted-foreground truncate uppercase">
+                            ID: {user?._id?.slice(-8)}
                           </p>
                         </div>
                       </div>
                     </CardHeader>
                     <Separator className="opacity-50" />
                     <CardContent className="pt-5 space-y-4">
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div className="space-y-1">
-                          <p className="text-[10px] uppercase font-bold text-muted-foreground">
-                            Contact
-                          </p>
-                          <div className="flex items-center gap-1.5">
-                            <Phone className="h-3 w-3 text-primary" />
-                            {user?.phone ?? "No Phone"}
-                          </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Phone className="h-3 w-3" /> Phone
+                          </span>
+                          <span className="font-semibold">
+                            {user?.phone || "N/A"}
+                          </span>
                         </div>
-                        <div className="space-y-1">
-                          <p className="text-[10px] uppercase font-bold text-muted-foreground">
-                            Rank
-                          </p>
-                          <div className="flex items-center gap-1.5">
-                            <Briefcase className="h-3 w-3 text-primary" />
-                            {user?.role}
-                          </div>
-                        </div>
-                        <div className="col-span-2 space-y-1">
-                          <p className="text-[10px] uppercase font-bold text-muted-foreground">
-                            Address
-                          </p>
-                          <div className="flex items-center gap-1.5">
-                            <MapPin className="h-3 w-3 text-primary" />
-                            {user?.address || "Dhaka, Bangladesh"}
-                          </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <MapPin className="h-3 w-3" /> Region
+                          </span>
+                          <span className="font-semibold truncate max-w-[150px]">
+                            {user?.address || "N/A"}
+                          </span>
                         </div>
                       </div>
-
                       <div className="pt-2">
                         {user?.isActive === "ACTIVE" ? (
                           <Button
                             onClick={() => handleSuspendAgent(user?._id)}
                             variant="destructive"
-                            className="w-full rounded-xl font-bold shadow-none shadow-destructive/20"
+                            className="w-full rounded-lg font-bold"
                           >
-                            <FaBan className="mr-2 h-4 w-4" /> Suspend Agent
+                            <FaBan className="mr-2 h-4 w-4" /> Suspend
                           </Button>
                         ) : (
                           <Button
                             onClick={() => handleApproveAgent(user?._id)}
-                            className="w-full bg-primary hover:bg-primary/90 rounded-xl font-bold shadow-none shadow-primary/20"
+                            className="w-full bg-primary hover:bg-primary/90 rounded-lg font-bold"
                           >
                             <MdCheckCircleOutline className="mr-2 h-5 w-5" />{" "}
-                            Approve Agent
+                            Approve
                           </Button>
                         )}
                       </div>
@@ -392,28 +290,92 @@ const ManageAgent = () => {
                   </Card>
                 </motion.div>
               ))}
+            </motion.div>
+
+            {/* ---- TABLE VIEW (Visible on XL only) ---- */}
+            <div className="hidden xl:block overflow-hidden rounded-lg border-none border-border">
+              <Table>
+                <TableHeader className="bg-muted/30">
+                  <TableRow>
+                    <TableHead className="font-bold py-4 px-6">
+                      AGENT IDENTITY
+                    </TableHead>
+                    <TableHead className="font-bold">CONTACT</TableHead>
+                    <TableHead className="font-bold">REGION</TableHead>
+                    <TableHead className="font-bold">STATUS</TableHead>
+                    <TableHead className="text-right px-8">ACTIONS</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {agents.map((user: any) => (
+                    <TableRow
+                      key={user?._id}
+                      className="hover:bg-muted/10 transition-colors"
+                    >
+                      <TableCell className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-9 w-9">
+                            <AvatarFallback>
+                              {user?.name?.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <span className="font-bold">{user?.name}</span>
+                            <span className="text-[10px] text-muted-foreground">
+                              ID: {user?._id}
+                            </span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm font-medium">{user?.phone}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {user?.email}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {user?.address || "N/A"}
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={user?.isActive} />
+                      </TableCell>
+                      <TableCell className="text-right px-8">
+                        {user?.isActive === "ACTIVE" ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSuspendAgent(user?._id)}
+                            className="text-destructive border-destructive/20 hover:bg-destructive hover:text-white"
+                          >
+                            <FaBan className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleApproveAgent(user?._id)}
+                            className="text-primary border-primary/20 hover:bg-primary hover:text-white"
+                          >
+                            <MdCheckCircleOutline className="h-5 w-5" />
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </div>
         ) : (
-          <div className="text-center py-20 bg-muted/20 rounded-3xl border-2 border-dashed border-border">
-            <Users className="h-16 w-16 mx-auto text-muted-foreground opacity-20 mb-4" />
-            <h3 className="text-xl font-bold">No Agents Found</h3>
-            <p className="text-muted-foreground">
-              Your network directory is empty.
-            </p>
+          <div className="text-center py-20 bg-muted/5 rounded-3xl border-2 border-dashed border-border">
+            <Users className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-foreground">
+              No Agents Found
+            </h3>
           </div>
         )}
       </div>
-
-      {/* Footer Branding */}
-      <div className="pt-4 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] ">
-        <p>© {new Date().getFullYear()} Neopay Digital Ecosystem</p>
-        <div className="flex gap-6">
-          <span>Security Protocols Active</span>
-          <span className="text-primary">Admin Terminal</span>
-        </div>
-      </div>
-    </motion.div>
+    </div>
   );
 };
 

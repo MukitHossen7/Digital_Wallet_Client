@@ -303,7 +303,7 @@ export default function ManageUser() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleBlockUser(user?._id)}
-                                className="h-10 w-10 rounded-xl text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-none border border-rose-500/10"
+                                className="h-10 w-10 rounded-lg text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-none border border-rose-500/10"
                                 title="Restrict Access"
                               >
                                 <MdBlockFlipped className="h-5 w-5" />
@@ -313,7 +313,7 @@ export default function ManageUser() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleUnblockUser(user?._id)}
-                                className="h-10 w-10 rounded-xl text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all shadow-none border border-emerald-500/10"
+                                className="h-10 w-10 rounded-lg text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all shadow-none border border-emerald-500/10"
                                 title="Grant Access"
                               >
                                 <ShieldMinus className="h-5 w-5" />
@@ -391,7 +391,7 @@ export default function ManageUser() {
                               onClick={() => handleBlockUser(user?._id)}
                               size="sm"
                               variant="destructive"
-                              className="rounded-xl h-6 px-4 font-bold text-[10px] uppercase shadow-sm"
+                              className="rounded-lg h-6 px-4 font-bold text-[10px] uppercase shadow-sm"
                             >
                               <MdBlockFlipped className="mr-1.5 h-3 w-3" />{" "}
                               Block
@@ -400,7 +400,7 @@ export default function ManageUser() {
                             <Button
                               onClick={() => handleUnblockUser(user?._id)}
                               size="sm"
-                              className="rounded-xl h-6 px-4 font-bold text-[10px] uppercase bg-emerald-500 hover:bg-emerald-600 shadow-sm"
+                              className="rounded-lg h-6 px-4 font-bold text-[10px] uppercase bg-emerald-500 hover:bg-emerald-600 shadow-sm"
                             >
                               <ShieldMinus className="mr-1.5 h-3 w-3" /> Unblock
                             </Button>
