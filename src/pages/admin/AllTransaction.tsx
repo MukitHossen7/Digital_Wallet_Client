@@ -114,7 +114,7 @@ const AllTransaction = () => {
   const end = Math.min(start + pageSize, total);
 
   return (
-    <div className="max-w-7xl container mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-8">
+    <div className="max-w-7xl container mx-auto py-6 space-y-8">
       <Helmet>
         <title>All Transactions | NEOPAY Admin</title>
       </Helmet>
@@ -122,8 +122,8 @@ const AllTransaction = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-border pb-8">
         <div className="space-y-1">
-          <h1 className="text-3xl md:text-4xl font-black tracking-tight flex items-center gap-3">
-            <LayoutGrid className="h-8 w-8 text-primary" />
+          <h1 className="text-2xl md:text-4xl font-bold tracking-tight flex items-center gap-3">
+            <LayoutGrid className="h-6 w-6 text-primary" />
             Transactions
           </h1>
           <p className="text-muted-foreground font-medium">
@@ -133,8 +133,8 @@ const AllTransaction = () => {
       </div>
 
       {/* Filters Card */}
-      <Card className="border-none shadow-xl bg-card/60 backdrop-blur-md">
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-6">
+      <Card className="border-none shadow-none bg-card/60 backdrop-blur-md">
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="relative">
             <Search
               className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -144,12 +144,12 @@ const AllTransaction = () => {
               placeholder="Search amount or ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 bg-background/50 border-border rounded-xl"
+              className="pl-10 bg-background/50 border-border rounded-xl w-full"
             />
           </div>
 
           <Select onValueChange={setCategory}>
-            <SelectTrigger className="bg-background/50 rounded-xl">
+            <SelectTrigger className="bg-background/50 rounded-xl w-full">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
@@ -161,7 +161,7 @@ const AllTransaction = () => {
           </Select>
 
           <Select onValueChange={setStatus}>
-            <SelectTrigger className="bg-background/50 rounded-xl">
+            <SelectTrigger className="bg-background/50 rounded-xl w-full">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -182,15 +182,15 @@ const AllTransaction = () => {
 
       {/* Transactions Data */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="p-8 space-y-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-48 w-full rounded-2xl" />
+            <Skeleton key={i} className="h-14 w-full rounded-2xl" />
           ))}
         </div>
       ) : transactions?.length > 0 ? (
         <div className="space-y-6">
           {/* ---- CARD VIEW: (SM, MD, LG) ---- */}
-          <div className="xl:hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="xl:hidden grid grid-cols-1  lg:grid-cols-2 gap-5">
             {transactions.map((tx: any) => {
               const meta = getMeta(tx.type); // Safe type access
               return (
@@ -200,7 +200,7 @@ const AllTransaction = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className="h-full"
                 >
-                  <Card className="overflow-hidden border shadow-lg bg-card group relative h-full rounded-2xl">
+                  <Card className="overflow-hidden border shadow-none bg-card group relative h-full rounded-lg">
                     <div
                       className={`absolute left-0 top-0 w-1.5 h-full ${meta.color.replace(
                         "text",
@@ -219,7 +219,7 @@ const AllTransaction = () => {
                           <p className="text-[10px] font-bold text-muted-foreground uppercase">
                             Amount
                           </p>
-                          <p className="text-2xl font-black">
+                          <p className="text-2xl font-bold">
                             <span className="text-xs font-normal text-muted-foreground mr-1">
                               BDT
                             </span>
@@ -266,7 +266,7 @@ const AllTransaction = () => {
 
           {/* ---- TABLE VIEW: (XL) ---- */}
           <div className="hidden xl:block">
-            <Card className="border-none shadow-2xl bg-card/60 backdrop-blur-xl overflow-hidden rounded-2xl border border-border/50">
+            <Card className="border-none shadow-none bg-card/60 backdrop-blur-xl overflow-hidden rounded-2xl border border-border/50">
               <Table>
                 <TableHeader className="bg-muted/50">
                   <TableRow>
@@ -311,7 +311,7 @@ const AllTransaction = () => {
                             {meta.icon} {meta.label}
                           </div>
                         </TableCell>
-                        <TableCell className="text-base font-black">
+                        <TableCell className="text-base font-bold">
                           BDT {tx?.amount?.toLocaleString()}
                         </TableCell>
                         <TableCell className="text-center">
@@ -329,7 +329,7 @@ const AllTransaction = () => {
           </div>
 
           {/* Pagination */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 pt-4">
             <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
               Record: {start + 1}-{end} / Total: {total}
             </div>
@@ -337,7 +337,7 @@ const AllTransaction = () => {
               <Button
                 variant="outline"
                 size="icon"
-                className="h-9 w-9 rounded-xl"
+                className="h-9 w-9 rounded-full"
                 onClick={() => setPage(1)}
                 disabled={page === 1}
               >
@@ -346,7 +346,7 @@ const AllTransaction = () => {
               <Button
                 variant="outline"
                 size="icon"
-                className="h-9 w-9 rounded-xl"
+                className="h-9 w-9 rounded-full"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
               >
@@ -358,7 +358,7 @@ const AllTransaction = () => {
               <Button
                 variant="outline"
                 size="icon"
-                className="h-9 w-9 rounded-xl"
+                className="h-9 w-9 rounded-full"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
               >
@@ -367,7 +367,7 @@ const AllTransaction = () => {
               <Button
                 variant="outline"
                 size="icon"
-                className="h-9 w-9 rounded-xl"
+                className="h-9 w-9 rounded-full"
                 onClick={() => setPage(totalPages)}
                 disabled={page === totalPages}
               >
@@ -381,7 +381,7 @@ const AllTransaction = () => {
       )}
 
       {/* Footer */}
-      <div className="text-center pt-10 border-t border-border/50">
+      <div className="text-center pt-5 border-t border-border/50">
         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">
           Neopay Ecosystem Ledger
         </p>
