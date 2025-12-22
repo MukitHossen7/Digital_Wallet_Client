@@ -46,13 +46,13 @@ const ContactUs = () => {
                 {
                   icon: <PhoneCall />,
                   title: "Call Center",
-                  detail: "+880 1326 153447",
+                  detail: "+880 123 456 789",
                   sub: "Available 24/7",
                 },
                 {
                   icon: <Mail />,
                   title: "Support Email",
-                  detail: "hossenmukit7@gmail.com",
+                  detail: "support@neopay.com",
                   sub: "Response within 2 hours",
                 },
                 {

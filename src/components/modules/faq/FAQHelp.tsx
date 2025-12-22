@@ -58,7 +58,7 @@ const FAQHelp = () => {
                     Phone
                   </p>
                   <p className="text-sm font-bold text-foreground">
-                    +8801326153447
+                    +880 123 456 789
                   </p>
                 </div>
               </div>
@@ -71,7 +71,7 @@ const FAQHelp = () => {
                     Email
                   </p>
                   <p className="text-sm font-bold text-foreground">
-                    hossenmukit7@gmail.com
+                    support@neopay.com
                   </p>
                 </div>
               </div>

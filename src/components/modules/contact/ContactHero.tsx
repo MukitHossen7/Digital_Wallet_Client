@@ -89,7 +89,7 @@ const ContactHero = () => {
               {
                 icon: <PhoneCall />,
                 label: "Call Now",
-                value: "+1 (555) 000-1234",
+                value: "+880 123 456 789",
               },
             ].map((item, index) => (
               <div
